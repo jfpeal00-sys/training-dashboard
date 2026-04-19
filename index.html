@@ -221,6 +221,26 @@ function fcZone(hr){
   if(!hr)return null;
   return FC_ZONES.find(z=>hr>=z.min&&hr<=z.max)||FC_ZONES[FC_ZONES.length-1];
 }
+function fatBurnPct(hr){
+  if(!hr)return null;
+  const pctFCMax=hr/185;
+  if(pctFCMax<0.60)return 85;
+  if(pctFCMax<0.70)return 65;
+  if(pctFCMax<0.80)return 50;
+  if(pctFCMax<0.90)return 35;
+  return 15;
+}
+function fatBurnData(s){
+  const pct=fatBurnPct(s.hrAvg);
+  if(!pct||!s.calories)return null;
+  const calW=calAdj(s);
+  const calT=s.totalCalories||0;
+  const fatCalW=Math.round(calW*(pct/100));
+  const fatGW=Math.round(fatCalW/9);
+  const fatCalT=calT?Math.round(calT*(pct/100)):null;
+  const fatGT=fatCalT?Math.round(fatCalT/9):null;
+  return{pct,fatCalW,fatGW,fatCalT,fatGT};
+}
 function calAdj(s){
   if(!s.calories)return s.calories;
   if(!s.incline||s.incline===0)return s.calories;
@@ -387,16 +407,27 @@ function rSCard(s){
   const p=pace(s.duration,s.distance),w=wForDate(s.date),ext=isExt(s);
   if(delId===s.id)return`<div class="sc"><div class="cfd"><p>¿Eliminar esta sesión?</p><div class="cfdb"><button class="bda" onclick="confDel('${s.id}')">Eliminar</button><button class="bca" onclick="cancelDel()">Cancelar</button></div></div></div>`;
   const dailyS=DAILY_STEPS.find(d=>d.date===s.date);
-  const st=[
-    {l:hasAdj(s)?'Cal. c/inclin.':'Cal. workout',v:hasAdj(s)?calAdj(s):s.calories,u:'kcal',c:'var(--a4)'},{l:'Cal. totales',v:s.totalCalories?.toLocaleString(),u:'kcal',c:'var(--a4)'},hasAdj(s)?{l:'Cal. reloj',v:s.calories,u:'kcal',c:'var(--muted)'}:null,
+  const fb=fatBurnData(s);
+  // Subsección 1 — datos del workout
+  const stWorkout=[
+    {l:hasAdj(s)?'Cal. workout (c/inclin.)':'Cal. workout',v:hasAdj(s)?calAdj(s):s.calories,u:'kcal',c:'var(--a4)'},
+    hasAdj(s)?{l:'Cal. workout (reloj)',v:s.calories,u:'kcal',c:'var(--muted)'}:null,
+    {l:'Cal. totales día',v:s.totalCalories?.toLocaleString(),u:'kcal',c:'var(--a4)'},
     {l:'Pasos ejercicio',v:s.steps?.toLocaleString(),u:'',c:'var(--a3)'},
     dailyS?{l:'Pasos totales día',v:dailyS.steps.toLocaleString(),u:'',c:dailyS.steps>=STEPS_GOAL?'var(--a3)':'var(--a2)'}:null,
     {l:'FC prom',v:s.hrAvg,u:'bpm',c:'var(--a2)'},
-    {l:'FC máx',v:s.hrMax,u:'bpm',c:'var(--a2)'},{l:'Vel. prom',v:s.speedAvg,u:'km/h',c:'var(--a1)'},
+    {l:'FC máx',v:s.hrMax,u:'bpm',c:'var(--a2)'},
+    {l:'Vel. prom',v:s.speedAvg,u:'km/h',c:'var(--a1)'},
     {l:'Vel. máx',v:s.speedMax,u:'km/h',c:'var(--a1)'},
     s.incline!=null?{l:'Inclinación',v:`${s.incline}%`,u:'',c:'var(--a5)'}:null,
     s.elevGain!=null?{l:'Gan. elev.',v:`${s.elevGain}m`,u:'',c:'var(--a3)'}:null,
   ].filter(x=>x&&x.v!==null&&x.v!==undefined);
+  // Subsección 2 — análisis de grasa
+  const stFat=fb?[
+    {l:'% Grasa quemada',v:fb.pct+'%',u:'',c:'#f472b6'},
+    {l:'Grasa — workout',v:fb.fatGW+'g',u:'('+fb.fatCalW+' kcal)',c:'#f472b6'},
+    fb.fatGT?{l:'Grasa — día total',v:fb.fatGT+'g',u:'('+fb.fatCalT+' kcal)',c:'#ec4899'}:null,
+  ].filter(Boolean):[];
   return`<div class="sc">
     <div class="sh"><div><div class="sd">${ext?'🚶 ':'🎚️ '}${fdate(s.date)}</div><div class="sm">${fd(s.duration)} · ${s.distance} km${s.note?' · '+s.note:''}</div></div>
     <div class="ab"><button class="ib" onclick="startEdit('${s.id}')" style="color:var(--a3)">✏️</button><button class="ib" onclick="startDel('${s.id}')" style="color:var(--a2)">🗑️</button></div></div>
@@ -419,7 +450,10 @@ function rSCard(s){
       </div>`:'';
       return `<div><span class="badge" style="background:${z.color}18;border:1px solid ${z.color}44;cursor:pointer" onclick="expZone=expZone==='${zid}'?null:'${zid}';rContent()"><span>${z.icon}</span><span class="bv" style="color:${z.color};font-size:12px">${z.label}</span><span style="color:${z.color};font-size:10px;margin-left:4px">${isOpen?'▲':'▼'}</span></span>${popup}</div>`;
     })()}
-    <div class="g3" style="margin-top:6px">${st.map(x=>`<div class="sm2"><div class="sl2">${x.l}</div><div class="sv" style="color:${x.c}">${x.v} <span style="color:var(--muted);font-size:9px;font-weight:400">${x.u}</span></div></div>`).join('')}</div>
+    <div class="sl" style="margin-top:8px">📊 Datos del workout</div>
+    <div class="g3">${stWorkout.map(x=>`<div class="sm2"><div class="sl2">${x.l}</div><div class="sv" style="color:${x.c}">${x.v} <span style="color:var(--muted);font-size:9px;font-weight:400">${x.u}</span></div></div>`).join('')}</div>
+    ${stFat.length?`<div class="sl" style="margin-top:8px;border-color:rgba(244,114,182,.2)">🔥 Análisis de grasa quemada</div>
+    <div class="g3">${stFat.map(x=>`<div class="sm2"><div class="sl2">${x.l}</div><div class="sv" style="color:${x.c}">${x.v} <span style="color:var(--muted);font-size:9px;font-weight:400">${x.u}</span></div></div>`).join('')}</div>`:''}
   </div>`;
 }
 
@@ -892,6 +926,11 @@ function rTots(){
       ${SC('🎚️','Sesiones',t.n,'','var(--a1)')}${SC('⏱️','Tiempo total',fd(t.dur),'','var(--a3)')}
       ${SC('📍','Distancia total',t.dist.toFixed(2),'km','var(--a1)')}${SC('👟','Pasos totales',t.steps.toLocaleString(),'','var(--a3)')}
       ${SC('🔥','Calorías',t.cal.toLocaleString(),'kcal','var(--a4)')}${SC('🕐','Pace promedio',t.ap,'min/km','var(--a5)')}
+      ${(()=>{
+        const totalFatGW=sessions.reduce((a,s)=>{const fb=fatBurnData(s);return a+(fb?fb.fatGW:0);},0);
+        const totalFatCalW=sessions.reduce((a,s)=>{const fb=fatBurnData(s);return a+(fb?fb.fatCalW:0);},0);
+        return SC('🫀','Grasa quemada (workout)',totalFatGW.toLocaleString(),'g','#f472b6')+SC('💧','Cal. grasa (workout)',totalFatCalW.toLocaleString(),'kcal','#f472b6');
+      })()}
       ${SC('⚡','Vel. promedio',t.as,'km/h','var(--a1)')}${SC('❤️','FC promedio',t.ah,'bpm','var(--a2)')}
     </div>
     <div style="color:var(--muted);font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-top:8px;margin-bottom:2px">Promedios por sesión</div>
