@@ -408,13 +408,7 @@ function rSCard(s){
       if(!z)return '';
       const zid=s.id+'-zone';
       const isOpen=expZone===zid;
-      const zones=[
-        {label:'Reposo',color:'#60a5fa',icon:'😴',min:0,max:99},
-        {label:'Quema grasa',color:'#39ff6e',icon:'🟢',min:100,max:114},
-        {label:'Cardio suave',color:'#ffa020',icon:'🟡',min:115,max:129},
-        {label:'Cardio',color:'#ff6b1a',icon:'🟠',min:130,max:144},
-        {label:'Pico',color:'#ff2020',icon:'🔴',min:145,max:999},
-      ];
+      const zones=FC_ZONES;
       const popup=isOpen?`<div style="background:rgba(0,0,0,.85);border:1px solid ${z.color}44;border-radius:10px;padding:10px 12px;margin-top:6px;display:flex;flex-direction:column;gap:5px">
         <div style="color:var(--muted);font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Zonas de FC</div>
         ${zones.map(zn=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;border-radius:6px;background:${zn.label===z.label?zn.color+'22':'transparent'};border:1px solid ${zn.label===z.label?zn.color+'66':'transparent'}">
