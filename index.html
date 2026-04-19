@@ -464,14 +464,14 @@ function rCharts(){
   if(data.length<2){cc.innerHTML='<div class="empty">Necesitas al menos 2 sesiones.</div>';return;}
   const lbl=data.map(s=>s.date.slice(5));
   const defs=[
-    {id:'c1',label:'Distancia por sesión (km)',data:data.map(s=>s.distance),type:'bar',color:'#ff6b1a'},
-    {id:'c2',label:'Velocidad promedio (km/h)',data:data.map(s=>s.speedAvg),type:'line',color:'#39ff6e',trendline:true},
-    {id:'c3',label:'Pace promedio (min/km)',data:data.map(s=>s.duration&&s.distance?parseFloat(((s.duration*60)/s.distance/60).toFixed(2)):null),type:'line',color:'#ff4500'},
-    {id:'c4',label:'Pasos por sesión',data:data.map(s=>s.steps),type:'bar',color:'#39ff6e'},
-    {id:'c5',label:'Calorías (kcal) · 🟠 sin inclinación · 🔵 con inclinación',data:data.map(s=>calAdj(s)),type:'bar',color:'#ffa020',colorFn:s=>s.incline&&s.incline>0?'#00e5ff':'#ffa020'},
-    {id:'c6',label:'FC promedio (bpm)',data:data.map(s=>s.hrAvg),type:'line',color:'#ff2020',yMin:90,yMax:160},
-    {id:'c7',label:'Duración por sesión (min)',data:data.map(s=>s.duration),type:'line',color:'#60a5fa'},
-    ...(pSub==='Treadmill'?[{id:'c8',label:'Inclinación (%)',data:data.map(s=>s.incline),type:'bar',color:'#ff4500',yMin:0,yMax:5}]:[]),
+    {id:'c1',label:'Distancia por sesión (km) · ↑ mejor',data:data.map(s=>s.distance),type:'bar',color:'#ff6b1a'},
+    {id:'c2',label:'Velocidad promedio (km/h) · ↑ mejor',data:data.map(s=>s.speedAvg),type:'line',color:'#39ff6e',trendline:true},
+    {id:'c3',label:'Pace promedio (min/km) · ↓ mejor',data:data.map(s=>s.duration&&s.distance?parseFloat(((s.duration*60)/s.distance/60).toFixed(2)):null),type:'line',color:'#ff4500'},
+    {id:'c4',label:'Pasos por sesión · ↑ mejor',data:data.map(s=>s.steps),type:'bar',color:'#39ff6e'},
+    {id:'c5',label:'Calorías (kcal) · ↑ mejor · 🟠 sin inclin. · 🔵 con inclin.',data:data.map(s=>calAdj(s)),type:'bar',color:'#ffa020',colorFn:s=>s.incline&&s.incline>0?'#00e5ff':'#ffa020'},
+    {id:'c6',label:'FC promedio (bpm) · ↓ mejor',data:data.map(s=>s.hrAvg),type:'line',color:'#ff2020',yMin:90,yMax:160},
+    {id:'c7',label:'Duración por sesión (min) · ↑ mejor',data:data.map(s=>s.duration),type:'line',color:'#60a5fa'},
+    ...(pSub==='Treadmill'?[{id:'c8',label:'Inclinación (%) · contexto',data:data.map(s=>s.incline),type:'bar',color:'#ff4500',yMin:0,yMax:5}]:[]),
   ];
   cc.innerHTML=defs.map(d=>`<div class="cw"><div class="cl">${d.label}</div><div style="position:relative;height:150px"><canvas id="${d.id}"></canvas></div></div>`).join('');
   Chart.defaults.color='#8a9bb0';Chart.defaults.font.family="'DM Mono'";Chart.defaults.font.size=9;
@@ -564,8 +564,8 @@ function rPeso(){
       </div>
     </div>`:''}
 
-    <div><div class="sl">Evolución del peso (kg)</div><div style="position:relative;height:200px"><canvas id="wch"></canvas></div></div>
-    <div><div class="sl">📊 Evolución del IMC</div><div style="position:relative;height:200px"><canvas id="imcch"></canvas></div></div>
+    <div><div class="sl">Evolución del peso (kg) · ↓ mejor</div><div style="position:relative;height:200px"><canvas id="wch"></canvas></div></div>
+    <div><div class="sl">📊 Evolución del IMC · ↓ mejor</div><div style="position:relative;height:200px"><canvas id="imcch"></canvas></div></div>
     <div>
       <div class="sl">Mediciones registradas</div>
       ${[...weights].reverse().map(w=>`<div class="card" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -805,10 +805,10 @@ function rEnd(){
 
     <div style="margin-top:8px">
       <div style="color:#a855f7;font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-weight:700">📈 Desempeño día a día</div>
-      <div style="margin-bottom:14px"><div style="color:var(--muted);font-family:var(--fm);font-size:9px;margin-bottom:6px">Distancia (km)</div><div style="position:relative;height:140px"><canvas id="ec1"></canvas></div></div>
-      <div style="margin-bottom:14px"><div style="color:var(--muted);font-family:var(--fm);font-size:9px;margin-bottom:6px">Velocidad promedio (km/h)</div><div style="position:relative;height:140px"><canvas id="ec2"></canvas></div></div>
-      <div style="margin-bottom:14px"><div style="color:var(--muted);font-family:var(--fm);font-size:9px;margin-bottom:6px">FC promedio (bpm)</div><div style="position:relative;height:140px"><canvas id="ec3"></canvas></div></div>
-      <div style="margin-bottom:14px"><div style="color:var(--muted);font-family:var(--fm);font-size:9px;margin-bottom:6px">Duración (min)</div><div style="position:relative;height:140px"><canvas id="ec4"></canvas></div></div>
+      <div style="margin-bottom:14px"><div style="color:var(--muted);font-family:var(--fm);font-size:9px;margin-bottom:6px">Distancia (km) · ↑ mejor</div><div style="position:relative;height:140px"><canvas id="ec1"></canvas></div></div>
+      <div style="margin-bottom:14px"><div style="color:var(--muted);font-family:var(--fm);font-size:9px;margin-bottom:6px">Velocidad promedio (km/h) · ↑ mejor</div><div style="position:relative;height:140px"><canvas id="ec2"></canvas></div></div>
+      <div style="margin-bottom:14px"><div style="color:var(--muted);font-family:var(--fm);font-size:9px;margin-bottom:6px">FC promedio (bpm) · ↓ mejor</div><div style="position:relative;height:140px"><canvas id="ec3"></canvas></div></div>
+      <div style="margin-bottom:14px"><div style="color:var(--muted);font-family:var(--fm);font-size:9px;margin-bottom:6px">Duración (min) · ↑ mejor</div><div style="position:relative;height:140px"><canvas id="ec4"></canvas></div></div>
     </div>
   </div>`;
 }
