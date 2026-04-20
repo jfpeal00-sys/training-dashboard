@@ -594,7 +594,8 @@ function rCharts(){
     ...(pSub==='Treadmill'?[{id:'c8',label:'Inclinación (%) · contexto',data:data.map(s=>s.incline),type:'bar',color:'#ff4500',yMin:0,yMax:5}]:[]),
     {id:'c9',label:'Calorías consumidas por día (kcal) · ↓ mejor',data:data.map(s=>{var r=kcalDbGet()[s.date];return r?r.kcal:null;}),type:'bar',color:'#c084fc',colorFn:null},
   ];
-  cc.innerHTML=defs.map(d=>`<div class="cw"><div class="cl">${d.label}</div><div style="position:relative;height:150px"><canvas id="${d.id}"></canvas></div></div>`).join('');
+  cc.innerHTML=defs.map(d=>`<div class="cw"><div class="cl">${d.label}</div><div style="position:relative;height:150px"><canvas id="${d.id}"></canvas></div></div>`).join('')
+    +'<div id="fczone-heatmap-wrap"></div>';
   Chart.defaults.color='#8a9bb0';Chart.defaults.font.family="'DM Mono'";Chart.defaults.font.size=9;
   defs.forEach(d=>{
     const ctx=document.getElementById(d.id);if(!ctx)return;
@@ -616,6 +617,111 @@ function rCharts(){
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#0a0a0a',borderColor:d.color+'44',borderWidth:1}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{maxRotation:45}},y:{grid:{color:'rgba(255,255,255,.05)'},min:d.yMin??undefined,max:d.yMax??undefined}}},
     });
   });
+  renderFCHeatmap();
+}
+
+// ─── FC ZONE HEATMAP ───────────────────────────────────────────────
+var fcHmYear=new Date().getFullYear(),fcHmMonth=new Date().getMonth(),fcHmSelDay=null;
+
+function fcHmClickDay(day){
+  fcHmSelDay=fcHmSelDay===day?null:day;
+  renderFCHeatmap();
+}
+
+function renderFCHeatmap(){
+  const wrap=document.getElementById('fczone-heatmap-wrap');
+  if(!wrap)return;
+  const MN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const dim=new Date(fcHmYear,fcHmMonth+1,0).getDate();
+  const mSess=sessions.filter(s=>{
+    const d=new Date(s.date+'T12:00:00');
+    return d.getFullYear()===fcHmYear&&d.getMonth()===fcHmMonth;
+  });
+  const dayMap={};
+  mSess.forEach(s=>{const day=parseInt(s.date.split('-')[2]);if(!dayMap[day])dayMap[day]=[];dayMap[day].push(s);});
+  const days=Array.from({length:dim},(_,i)=>i+1);
+  const zones=[...FC_ZONES].reverse();
+
+  const dateLabels=days.map(d=>{
+    const sel=fcHmSelDay===d&&dayMap[d];
+    return`<div style="flex:1;text-align:center;font-family:var(--fm);font-size:6px;color:${dayMap[d]?'var(--a1)':'#2d3748'};font-weight:${sel?'700':'400'};text-decoration:${sel?'underline':'none'}">${d}</div>`;
+  }).join('');
+
+  const gridRows=zones.map(({label,icon,color,min,max})=>{
+    const cells=days.map(day=>{
+      const ss=(dayMap[day]||[]).filter(s=>fcZone(s.hrAvg)&&fcZone(s.hrAvg).label===label);
+      const isSel=fcHmSelDay===day&&dayMap[day];
+      if(!ss.length){
+        const hasAny=!!(dayMap[day]&&dayMap[day].length);
+        return`<div style="flex:1;height:26px;border-radius:5px;background:${hasAny?'rgba(255,255,255,.04)':'rgba(255,255,255,.02)'};border:1px solid ${isSel?'rgba(255,107,26,.4)':'rgba(255,255,255,.04)'}"></div>`;
+      }
+      const hr=Math.round(ss.reduce((a,s)=>a+s.hrAvg,0)/ss.length);
+      const range=max===999?40:max-min;
+      const op=Math.min(0.95,0.35+(hr-min)/range*0.6).toFixed(2);
+      const hexOp=Math.round(op*255).toString(16).padStart(2,'0');
+      return`<div onclick="fcHmClickDay(${day})" style="flex:1;height:26px;border-radius:5px;background:${color}${hexOp};border:2px solid ${isSel?'#fff':color+'66'};display:flex;align-items:center;justify-content:center;cursor:pointer;transform:${isSel?'scale(1.1)':'scale(1)'};transition:all .15s">
+        <span style="font-family:var(--fm);font-size:7px;font-weight:700;color:#000;opacity:.9">${hr}</span>
+      </div>`;
+    }).join('');
+    return`<div style="display:flex;align-items:center;gap:3px;margin-bottom:3px">
+      <div style="font-family:var(--fm);font-size:7px;color:${color};width:74px;text-align:right;flex-shrink:0;white-space:nowrap">${icon} ${label}</div>
+      <div style="display:flex;gap:2px;flex:1">${cells}</div>
+    </div>`;
+  }).join('');
+
+  // Session detail popup
+  let detailHtml='';
+  if(fcHmSelDay&&dayMap[fcHmSelDay]){
+    const daySess=dayMap[fcHmSelDay];
+    const dl=new Date(fcHmYear+'-'+String(fcHmMonth+1).padStart(2,'0')+'-'+String(fcHmSelDay).padStart(2,'0')+'T12:00:00')
+      .toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
+    detailHtml=`<div style="margin-top:12px;border-top:1px solid rgba(255,255,255,.06);padding-top:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-family:var(--fh);font-weight:700;font-size:14px;color:var(--a1);text-transform:capitalize">📅 ${dl}</div>
+        <button onclick="fcHmSelDay=null;renderFCHeatmap()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px">✕</button>
+      </div>
+      ${daySess.map(s=>{
+        const z=fcZone(s.hrAvg);
+        const p=pace(s.duration,s.distance);
+        const fb=fatBurnData(s);
+        const ext=isExt(s);
+        return`<div style="background:rgba(255,255,255,.03);border:1px solid ${z?z.color+'33':'rgba(255,255,255,.08)'};border-radius:12px;padding:10px 12px;margin-bottom:6px">
+          <div style="font-family:var(--fh);font-weight:700;font-size:15px;color:${z?z.color:'var(--a1)'};margin-bottom:6px">${ext?'🚶':'🎚️'} ${fd(s.duration)} · ${s.distance} km${s.incline!=null?' · 📐'+s.incline+'%':''}</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px">
+            <div style="text-align:center"><div style="font-family:var(--fh);font-weight:700;font-size:16px;color:var(--a1)">${s.speedAvg}</div><div style="font-family:var(--fm);font-size:7px;color:var(--muted)">km/h prom</div></div>
+            <div style="text-align:center"><div style="font-family:var(--fh);font-weight:700;font-size:16px;color:var(--a2)">${s.hrAvg}</div><div style="font-family:var(--fm);font-size:7px;color:var(--muted)">bpm avg</div></div>
+            <div style="text-align:center"><div style="font-family:var(--fh);font-weight:700;font-size:16px;color:var(--a3)">${s.steps?.toLocaleString()}</div><div style="font-family:var(--fm);font-size:7px;color:var(--muted)">pasos</div></div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            ${z?`<span style="background:${z.color}18;border:1px solid ${z.color}44;border-radius:20px;padding:2px 8px;font-family:var(--fm);font-size:8px;color:${z.color}">${z.icon} ${z.label}</span>`:''}
+            ${p?`<span style="background:rgba(255,69,0,.08);border:1px solid rgba(255,69,0,.2);border-radius:20px;padding:2px 8px;font-family:var(--fm);font-size:8px;color:var(--a5)">🕐 ${p} min/km</span>`:''}
+            <span style="background:rgba(255,160,32,.08);border:1px solid rgba(255,160,32,.2);border-radius:20px;padding:2px 8px;font-family:var(--fm);font-size:8px;color:var(--a4)">🔥 ${hasAdj(s)?calAdj(s):s.calories} kcal</span>
+            ${fb?`<span style="background:rgba(244,114,182,.08);border:1px solid rgba(244,114,182,.2);border-radius:20px;padding:2px 8px;font-family:var(--fm);font-size:8px;color:#f472b6">🫀 ${fb.pct}% grasa · ${fb.fatGW}g</span>`:''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
+  wrap.innerHTML=`<div class="cw">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="cl" style="margin-bottom:0">❤️ Zona FC por día</div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button onclick="fcHmMonth--;if(fcHmMonth<0){fcHmMonth=11;fcHmYear--;} fcHmSelDay=null;renderFCHeatmap()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:var(--text);width:28px;height:28px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;line-height:1">‹</button>
+        <span style="font-family:var(--fh);font-size:15px;font-weight:700;color:var(--a1);min-width:110px;text-align:center">${MN[fcHmMonth]} ${fcHmYear}</span>
+        <button onclick="fcHmMonth++;if(fcHmMonth>11){fcHmMonth=0;fcHmYear++;} fcHmSelDay=null;renderFCHeatmap()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:var(--text);width:28px;height:28px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;line-height:1">›</button>
+      </div>
+    </div>
+    ${!mSess.length?'<div style="text-align:center;color:var(--muted);font-family:var(--fm);font-size:9px;padding:24px 0">Sin sesiones en este mes</div>':`
+      <div style="display:flex;gap:2px;margin-bottom:4px;margin-left:78px">${dateLabels}</div>
+      ${gridRows}
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        ${[...FC_ZONES].map(z=>`<div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:${z.color}aa;border:1px solid ${z.color}55"></div><span style="font-family:var(--fm);font-size:8px;color:var(--muted)">${z.icon} ${z.label}</span></div>`).join('')}
+      </div>
+      <div style="margin-top:4px;font-family:var(--fm);font-size:8px;color:var(--muted)">${mSess.length} sesión${mSess.length!==1?'es':''} · toca una celda para ver el resumen</div>
+      ${detailHtml}
+    `}
+  </div>`;
 }
 
 // PESO
