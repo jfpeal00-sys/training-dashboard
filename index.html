@@ -138,6 +138,7 @@ const SS=[
   {id:"s21",date:"2026-04-16",duration:90,distance:5.11,calories:504,totalCalories:2498,steps:7149,hrAvg:119,hrMax:125,speedAvg:3.4,speedMax:3.4,incline:0},
   {id:"s22",date:"2026-04-17",duration:52,distance:3.00,calories:290,totalCalories:2424,steps:4183,hrAvg:127,hrMax:132,speedAvg:3.4,speedMax:3.4,incline:0},
   {id:"s23",date:"2026-04-18",duration:63,distance:3.80,calories:350,totalCalories:2441,steps:5380,hrAvg:114,hrMax:126,speedAvg:3.7,speedMax:3.7,incline:0},
+  {id:"s24",date:"2026-04-19",duration:97,distance:5.79,calories:549,totalCalories:2538,steps:7854,hrAvg:105,hrMax:115,speedAvg:3.6,speedMax:3.6,incline:1},
 ];
 const SW=[
   {date:"2026-03-20",weight:102.15},{date:"2026-04-03",weight:99.65},
@@ -146,6 +147,17 @@ const SW=[
   {date:"2026-04-15",weight:97.25},
   {date:"2026-04-16",weight:97.20},
 ];
+// Calorías consumidas por día — actualizado manualmente
+const KCAL_RECORDS={
+  "2026-04-19":{kcal:812,prot:129,carbs:19,fat:19,selections:[
+    {emoji:'🍚',name:'Arroz integral 50g',qty:1,kcal:60,prot:1,carbs:13,fat:0},
+    {emoji:'🍗',name:'Pechuga de pollo 110g',qty:3,kcal:510,prot:102,carbs:0,fat:9},
+    {emoji:'🍟',name:'Papas Rústicas 5uds',qty:1,kcal:32,prot:1,carbs:5,fat:1},
+    {emoji:'🥩',name:'Filete de Res',qty:1,kcal:210,prot:28,carbs:0,fat:7},
+  ]},
+};
+function kcalDbGet(){return KCAL_RECORDS;}
+
 const STEPS_GOAL=6000;
 const DAILY_STEPS=[
   {date:"2026-03-20",steps:5562},{date:"2026-03-22",steps:5322},
@@ -161,6 +173,7 @@ const DAILY_STEPS=[
   {date:"2026-04-14",steps:6675},{date:"2026-04-15",steps:5628},
   {date:"2026-04-16",steps:8260},{date:"2026-04-17",steps:7890},
   {date:"2026-04-18",steps:7661},
+  {date:"2026-04-19",steps:9382},
 ];
 
 // STATE
@@ -306,7 +319,7 @@ function weightTrend(){
   const kgPerDay=(recent[n-1].weight-recent[0].weight)/days;
   return kgPerDay;
 }
-const TABS=['Registrar','Historial','Progreso','Peso','Calendario','Endurance','Records','Totales'];
+const TABS=['Registrar','Historial','Progreso','Peso','Comida','Calendario','Endurance','Records','Totales'];
 function rTabs(){document.getElementById('tabs').innerHTML=TABS.map(t=>`<button class="tb${t===tab?' on':''}" style="${t==='Endurance'&&tab==='Endurance'?'color:#a855f7;border-bottom-color:#a855f7':t==='Endurance'?'color:#a855f7':''}" onclick="switchTab('${t}')">${t}</button>`).join('');}
 
 function switchTab(t){tab=t;selDay=null;selEndDay=null;expRec=null;expEnd=null;Object.keys(charts).forEach(destroyChart);render();}
@@ -317,6 +330,7 @@ function rContent(){
   else if(tab==='Historial')c.innerHTML=rHist();
   else if(tab==='Progreso')c.innerHTML=rProg();
   else if(tab==='Peso')c.innerHTML=rPeso();
+  else if(tab==='Comida'){c.innerHTML=rComida();setTimeout(rComidaCharts,100);}
   else if(tab==='Calendario')c.innerHTML=rCal();
   else if(tab==='Endurance')c.innerHTML=rEnd();
   else if(tab==='Records')c.innerHTML=rRecs();
@@ -408,54 +422,116 @@ function rSCard(s){
   if(delId===s.id)return`<div class="sc"><div class="cfd"><p>¿Eliminar esta sesión?</p><div class="cfdb"><button class="bda" onclick="confDel('${s.id}')">Eliminar</button><button class="bca" onclick="cancelDel()">Cancelar</button></div></div></div>`;
   const dailyS=DAILY_STEPS.find(d=>d.date===s.date);
   const fb=fatBurnData(s);
-  // Subsección 1 — datos del workout
-  const stWorkout=[
-    {l:hasAdj(s)?'Cal. workout (c/inclin.)':'Cal. workout',v:hasAdj(s)?calAdj(s):s.calories,u:'kcal',c:'var(--a4)'},
-    hasAdj(s)?{l:'Cal. workout (reloj)',v:s.calories,u:'kcal',c:'var(--muted)'}:null,
-    {l:'Cal. totales día',v:s.totalCalories?.toLocaleString(),u:'kcal',c:'var(--a4)'},
-    {l:'Pasos ejercicio',v:s.steps?.toLocaleString(),u:'',c:'var(--a3)'},
-    dailyS?{l:'Pasos totales día',v:dailyS.steps.toLocaleString(),u:'',c:dailyS.steps>=STEPS_GOAL?'var(--a3)':'var(--a2)'}:null,
-    {l:'FC prom',v:s.hrAvg,u:'bpm',c:'var(--a2)'},
-    {l:'FC máx',v:s.hrMax,u:'bpm',c:'var(--a2)'},
-    {l:'Vel. prom',v:s.speedAvg,u:'km/h',c:'var(--a1)'},
-    {l:'Vel. máx',v:s.speedMax,u:'km/h',c:'var(--a1)'},
-    s.incline!=null?{l:'Inclinación',v:`${s.incline}%`,u:'',c:'var(--a5)'}:null,
-    s.elevGain!=null?{l:'Gan. elev.',v:`${s.elevGain}m`,u:'',c:'var(--a3)'}:null,
-  ].filter(x=>x&&x.v!==null&&x.v!==undefined);
-  // Subsección 2 — análisis de grasa
-  const stFat=fb?[
-    {l:'% Grasa quemada',v:fb.pct+'%',u:'',c:'#f472b6'},
-    {l:'Grasa — workout',v:fb.fatGW+'g',u:'('+fb.fatCalW+' kcal)',c:'#f472b6'},
-    fb.fatGT?{l:'Grasa — día total',v:fb.fatGT+'g',u:'('+fb.fatCalT+' kcal)',c:'#ec4899'}:null,
-  ].filter(Boolean):[];
-  return`<div class="sc">
-    <div class="sh"><div><div class="sd">${ext?'🚶 ':'🎚️ '}${fdate(s.date)}</div><div class="sm">${fd(s.duration)} · ${s.distance} km${s.note?' · '+s.note:''}</div></div>
-    <div class="ab"><button class="ib" onclick="startEdit('${s.id}')" style="color:var(--a3)">✏️</button><button class="ib" onclick="startDel('${s.id}')" style="color:var(--a2)">🗑️</button></div></div>
-    ${w?`<span class="badge" style="background:rgba(212,130,10,.12);border:1px solid rgba(212,130,10,.25)"><span>⚖️</span><span class="bv" style="color:var(--wt)">${w}</span><span class="bu">kg</span></span>`:''}
-    ${p?`<span class="badge" style="background:rgba(255,69,0,.12);border:1px solid rgba(255,69,0,.25)"><span>🕐</span><span class="bv" style="color:var(--a5)">${p}</span><span class="bu">min/km</span></span>`:''}
-    ${ENDURANCE_IDS.has(s.id)?`<span class="badge" style="background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.25)"><span>🏎️</span><span class="bv" style="color:#a855f7;font-size:13px">Endurance</span></span>`:''}
-    ${(()=>{
-      const z=fcZone(s.hrAvg);
-      if(!z)return '';
-      const zid=s.id+'-zone';
-      const isOpen=expZone===zid;
-      const zones=FC_ZONES;
-      const popup=isOpen?`<div style="background:rgba(0,0,0,.85);border:1px solid ${z.color}44;border-radius:10px;padding:10px 12px;margin-top:6px;display:flex;flex-direction:column;gap:5px">
-        <div style="color:var(--muted);font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Zonas de FC</div>
-        ${zones.map(zn=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;border-radius:6px;background:${zn.label===z.label?zn.color+'22':'transparent'};border:1px solid ${zn.label===z.label?zn.color+'66':'transparent'}">
-          <div style="display:flex;align-items:center;gap:6px"><span>${zn.icon}</span><span style="font-family:var(--fh);font-size:13px;color:${zn.color}">${zn.label}</span></div>
-          <span style="font-family:var(--fm);font-size:10px;color:var(--muted)">${zn.min===0?'< 111 bpm':zn.max===999?'≥ 167 bpm':zn.min+' – '+zn.max+' bpm'} <span style="color:${zn.color};opacity:0.7">${zn.pct}</span></span>
-        </div>`).join('')}
-        <div style="color:var(--muted);font-family:var(--fm);font-size:9px;margin-top:4px;text-align:center">Tu FC promedio: <span style="color:${z.color}">${s.hrAvg} bpm</span></div>
-      </div>`:'';
-      return `<div><span class="badge" style="background:${z.color}18;border:1px solid ${z.color}44;cursor:pointer" onclick="expZone=expZone==='${zid}'?null:'${zid}';rContent()"><span>${z.icon}</span><span class="bv" style="color:${z.color};font-size:12px">${z.label}</span><span style="color:${z.color};font-size:10px;margin-left:4px">${isOpen?'▲':'▼'}</span></span>${popup}</div>`;
-    })()}
-    <div class="sl" style="margin-top:8px">📊 Datos del workout</div>
-    <div class="g3">${stWorkout.map(x=>`<div class="sm2"><div class="sl2">${x.l}</div><div class="sv" style="color:${x.c}">${x.v} <span style="color:var(--muted);font-size:9px;font-weight:400">${x.u}</span></div></div>`).join('')}</div>
-    ${stFat.length?`<div class="sl" style="margin-top:8px;border-color:rgba(244,114,182,.2)">🔥 Análisis de grasa quemada</div>
-    <div class="g3">${stFat.map(x=>`<div class="sm2"><div class="sl2">${x.l}</div><div class="sv" style="color:${x.c}">${x.v} <span style="color:var(--muted);font-size:9px;font-weight:400">${x.u}</span></div></div>`).join('')}</div>`:''}
+  const kcalDay=KCAL_RECORDS[s.date];
+  const z=fcZone(s.hrAvg);
+  const zid=s.id+'-zone';
+  const isZOpen=expZone===zid;
+  const zPopup=isZOpen?`<div style="background:rgba(0,0,0,.9);border:1px solid ${z?z.color+'33':'#333'};border-radius:10px;padding:10px 12px;margin-top:6px;display:flex;flex-direction:column;gap:5px">
+    <div style="color:var(--muted);font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Zonas de FC · FC máx estimada: 185 bpm</div>
+    ${FC_ZONES.map(zn=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;border-radius:6px;background:${z&&zn.label===z.label?zn.color+'22':'transparent'};border:1px solid ${z&&zn.label===z.label?zn.color+'55':'transparent'}">
+      <div style="display:flex;align-items:center;gap:6px"><span>${zn.icon}</span><span style="font-family:var(--fh);font-size:13px;color:${zn.color}">${zn.label}</span></div>
+      <span style="font-family:var(--fm);font-size:10px;color:var(--muted)">${zn.min===0?'< 111 bpm':zn.max===999?'≥ 167 bpm':zn.min+' – '+zn.max+' bpm'} <span style="color:${zn.color};opacity:.7">${zn.pct}</span></span>
+    </div>`).join('')}
+    <div style="color:var(--muted);font-family:var(--fm);font-size:9px;margin-top:4px;text-align:center">Tu FC promedio: <span style="color:${z?z.color:'#fff'}">${s.hrAvg} bpm</span></div>
+  </div>`:'';
+
+  return`<div style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:20px;overflow:hidden;margin-bottom:12px">
+
+    <!-- BANNER -->
+    <div style="background:linear-gradient(135deg,rgba(255,107,26,.14),rgba(255,69,0,.05));padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.05)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div style="flex:1;min-width:0">
+          <div style="font-family:var(--fh);font-weight:800;font-size:22px;color:var(--a1);line-height:1.1">${ext?'🚶':'🎚️'} ${fdate(s.date)}</div>
+          <div style="margin-top:6px;font-family:var(--fh);font-size:15px;color:var(--text);display:flex;flex-wrap:wrap;gap:8px;line-height:1.3">
+            <span>⏱ ${fd(s.duration)}</span>
+            <span style="color:rgba(255,255,255,.3)">·</span>
+            <span>📍 ${s.distance} km</span>
+            <span style="color:rgba(255,255,255,.3)">·</span>
+            <span>${ext?'🚶 Exterior':'🎚️ Treadmill'}</span>
+            ${s.incline!=null?`<span style="color:rgba(255,255,255,.3)">·</span><span>📐 Inclinación: ${s.incline}%</span>`:''}
+            ${s.elevGain!=null?`<span style="color:rgba(255,255,255,.3)">·</span><span>⛰️ +${s.elevGain}m desnivel</span>`:''}
+            ${s.note?`<span style="color:var(--muted);font-size:13px">· ${s.note}</span>`:''}
+          </div>
+          <div style="margin-top:8px;display:flex;gap:5px;flex-wrap:wrap">
+            ${ENDURANCE_IDS.has(s.id)?`<span style="display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:3px 9px;font-family:var(--fm);font-size:9px;border:1px solid rgba(168,85,247,.3);background:rgba(168,85,247,.08);color:#a855f7">🏎️ Endurance</span>`:''}
+            ${z?`<span style="display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:3px 9px;font-family:var(--fm);font-size:9px;border:1px solid ${z.color}44;background:${z.color}12;color:${z.color};cursor:pointer" onclick="expZone=expZone==='${zid}'?null:'${zid}';rContent()">${z.icon} ${z.label} ${isZOpen?'▲':'▼'}</span>`:''}
+          </div>
+          ${zPopup}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
+          ${w?`<div style="background:rgba(212,130,10,.12);border:1px solid rgba(212,130,10,.3);border-radius:10px;padding:6px 10px;text-align:center">
+            <div style="font-family:var(--fh);font-weight:800;font-size:22px;line-height:1;color:var(--wt)">${w}</div>
+            <div style="font-family:var(--fm);font-size:8px;color:var(--muted);margin-top:1px">kg</div>
+          </div>`:''}
+          <div style="display:flex;gap:4px">
+            <button onclick="startEdit('${s.id}')" style="background:rgba(57,255,110,.08);border:1px solid rgba(57,255,110,.2);border-radius:8px;cursor:pointer;font-size:13px;padding:5px 7px;color:var(--a3)">✏️</button>
+            <button onclick="startDel('${s.id}')" style="background:rgba(255,32,32,.08);border:1px solid rgba(255,32,32,.2);border-radius:8px;cursor:pointer;font-size:13px;padding:5px 7px;color:var(--a2)">🗑️</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIONES 2x2 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr">
+
+      <!-- ⚡ Velocidad -->
+      <div style="padding:12px 14px;border-right:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04)">
+        <div style="font-family:var(--fm);font-size:8px;color:var(--a1);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;opacity:.8">⚡ Velocidad</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Promedio</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a1)">${s.speedAvg} <span style="font-size:10px;color:var(--muted)">km/h</span></span></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Máxima</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a1)">${s.speedMax} <span style="font-size:10px;color:var(--muted)">km/h</span></span></div>
+        ${p?`<div style="display:flex;justify-content:space-between"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Pace</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a5)">${p} <span style="font-size:10px;color:var(--muted)">min/km</span></span></div>`:''}
+      </div>
+
+      <!-- ❤️ Frecuencia cardíaca -->
+      <div style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.04)">
+        <div style="font-family:var(--fm);font-size:8px;color:var(--a2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;opacity:.8">❤️ Frecuencia cardíaca</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Promedio</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a2)">${s.hrAvg} <span style="font-size:10px;color:var(--muted)">bpm</span></span></div>
+        <div style="display:flex;justify-content:space-between"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Máxima</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a2)">${s.hrMax} <span style="font-size:10px;color:var(--muted)">bpm</span></span></div>
+      </div>
+
+      <!-- 👟 Pasos -->
+      <div style="padding:12px 14px;border-right:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04)">
+        <div style="font-family:var(--fm);font-size:8px;color:var(--a3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;opacity:.8">👟 Pasos</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Workout</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a3)">${s.steps?.toLocaleString()}</span></div>
+        ${dailyS?`<div style="display:flex;justify-content:space-between"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Día total</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:${dailyS.steps>=STEPS_GOAL?'var(--a3)':'var(--a2)'};">${dailyS.steps.toLocaleString()} ${dailyS.steps>=STEPS_GOAL?'✅':'❌'}</span></div>`:''}
+      </div>
+
+      <!-- 🔥 Calorías -->
+      <div style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.04)">
+        <div style="font-family:var(--fm);font-size:8px;color:var(--a4);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;opacity:.8">🔥 Calorías</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Quemadas en el workout</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a4)">${hasAdj(s)?calAdj(s):s.calories} <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>
+        ${hasAdj(s)?`<div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Workout (reloj, sin inclin.)</span><span style="font-family:var(--fh);font-weight:700;font-size:13px;color:var(--muted)">${s.calories} <span style="font-size:10px">kcal</span></span></div>`:''}
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Total quemadas en el día</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a4)">${s.totalCalories?.toLocaleString()} <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>
+        ${kcalDay?`<div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Consumidas (comida)</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#c084fc">${kcalDay.kcal} <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>
+        <div style="display:flex;justify-content:space-between"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Balance del día</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:${(s.totalCalories-kcalDay.kcal)>=0?'var(--a3)':'var(--a2)'};">${(s.totalCalories-kcalDay.kcal)>0?'+':''}${s.totalCalories-kcalDay.kcal} <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>`:''}
+      </div>
+
+      <!-- 🫀 Grasa quemada (full width) -->
+      ${fb?`<div style="padding:12px 14px;grid-column:1/-1">
+        <div style="font-family:var(--fm);font-size:8px;color:#f472b6;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;opacity:.8">🫀 Grasa quemada</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">
+          <div style="background:rgba(244,114,182,.06);border:1px solid rgba(244,114,182,.15);border-radius:10px;padding:9px;text-align:center">
+            <div style="font-family:var(--fh);font-weight:800;font-size:22px;color:#f472b6;line-height:1">${fb.pct}%</div>
+            <div style="font-family:var(--fm);font-size:8px;color:var(--muted);margin-top:2px">del total</div>
+          </div>
+          <div style="background:rgba(244,114,182,.06);border:1px solid rgba(244,114,182,.15);border-radius:10px;padding:9px;text-align:center">
+            <div style="font-family:var(--fh);font-weight:800;font-size:22px;color:#f472b6;line-height:1">${fb.fatGW}g</div>
+            <div style="font-family:var(--fm);font-size:8px;color:var(--muted);margin-top:2px">workout (${fb.fatCalW} kcal)</div>
+          </div>
+          ${fb.fatGT?`<div style="background:rgba(236,72,153,.06);border:1px solid rgba(236,72,153,.15);border-radius:10px;padding:9px;text-align:center">
+            <div style="font-family:var(--fh);font-weight:800;font-size:22px;color:#ec4899;line-height:1">${fb.fatGT}g</div>
+            <div style="font-family:var(--fm);font-size:8px;color:var(--muted);margin-top:2px">día total (${fb.fatCalT} kcal)</div>
+          </div>`:'<div></div>'}
+        </div>
+        <div style="height:4px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden">
+          <div style="width:${fb.pct}%;height:100%;background:linear-gradient(90deg,#f472b6,#ec4899);border-radius:99px"></div>
+        </div>
+      </div>`:''}
+
+    </div>
   </div>`;
 }
+
 
 // PROGRESO
 function rStepsMeta(){
@@ -506,6 +582,7 @@ function rCharts(){
     {id:'c6',label:'FC promedio (bpm) · ↓ mejor',data:data.map(s=>s.hrAvg),type:'line',color:'#ff2020',yMin:90,yMax:160},
     {id:'c7',label:'Duración por sesión (min) · ↑ mejor',data:data.map(s=>s.duration),type:'line',color:'#60a5fa'},
     ...(pSub==='Treadmill'?[{id:'c8',label:'Inclinación (%) · contexto',data:data.map(s=>s.incline),type:'bar',color:'#ff4500',yMin:0,yMax:5}]:[]),
+    {id:'c9',label:'Calorías consumidas por día (kcal) · ↓ mejor',data:data.map(s=>{var r=kcalDbGet()[s.date];return r?r.kcal:null;}),type:'bar',color:'#c084fc',colorFn:null},
   ];
   cc.innerHTML=defs.map(d=>`<div class="cw"><div class="cl">${d.label}</div><div style="position:relative;height:150px"><canvas id="${d.id}"></canvas></div></div>`).join('');
   Chart.defaults.color='#8a9bb0';Chart.defaults.font.family="'DM Mono'";Chart.defaults.font.size=9;
@@ -953,7 +1030,141 @@ function rTots(){
   </div>`;
 }
 
+
+// ─────────────────────────────────────────────
+// COMIDA — Visualización de datos (actualizado manualmente)
+// ─────────────────────────────────────────────
+var kcalCalY=new Date().getFullYear(),kcalCalM=new Date().getMonth(),selFoodDay=null;
+
+function rComida(){
+  var goal=2000;
+  var recs=KCAL_RECORDS;
+  var MN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var DN=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  var fd2=new Date(kcalCalY,kcalCalM,1).getDay();
+  var dim=new Date(kcalCalY,kcalCalM+1,0).getDate();
+  var todayStr=new Date().toISOString().split('T')[0];
+  var cells=[];for(var i=0;i<fd2;i++)cells.push(0);for(var d=1;d<=dim;d++)cells.push(d);
+
+  var calRows=cells.map(function(day){
+    if(!day)return '<div></div>';
+    var ds=kcalCalY+'-'+String(kcalCalM+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+    var rec=recs[ds];
+    var isToday=ds===todayStr;
+    var isSel=selFoodDay===ds;
+    var over=rec&&rec.kcal>goal;
+    var bg=isSel?'rgba(192,132,252,.2)':isToday?'rgba(255,107,26,.08)':'rgba(255,255,255,.02)';
+    var bdr=isSel?'#c084fc':isToday?'rgba(255,107,26,.4)':rec?'rgba(192,132,252,.3)':'rgba(255,255,255,.04)';
+    var clr=rec?'#e8f0fe':isToday?'var(--a1)':'#4a5568';
+    var fw=rec?700:400;
+    var kcalDiv=rec?'<div style="font-family:var(--fm);font-size:7px;color:'+(over?'var(--a2)':'var(--a3)')+'">'+rec.kcal+' kcal</div>':'';
+    var html='<div style="border:1px solid '+bdr+';border-radius:10px;padding:5px 3px;text-align:center;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;background:'+bg+';cursor:'+(rec?'pointer':'default')+'"'+(rec?' onclick="kcalSelDay(\'' + ds + '\')"':'')+'>'+
+      '<div style="font-family:var(--fh);font-size:14px;line-height:1;color:'+clr+';font-weight:'+fw+'">'+day+'</div>'+
+      kcalDiv+
+      '</div>';
+    return html;
+  }).join('');
+
+  // Day detail
+  var det='';
+  if(selFoodDay&&recs[selFoodDay]){
+    var r=recs[selFoodDay];
+    var pct=Math.min(100,Math.round((r.kcal/goal)*100));
+    var dl=new Date(selFoodDay+'T12:00:00').toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
+    var items=(r.selections||[]).map(function(s){
+      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)">'+
+        '<span style="font-size:16px">'+s.emoji+'</span>'+
+        '<div style="flex:1"><div style="font-family:var(--fh);font-size:13px">'+s.name+(s.qty>1?' ×'+s.qty:'')+'</div>'+
+        '<div style="font-family:var(--fm);font-size:9px;color:var(--muted)">P:'+s.prot+'g C:'+s.carbs+'g G:'+s.fat+'g</div></div>'+
+        '<div style="font-family:var(--fh);font-weight:700;font-size:16px;color:#c084fc">'+s.kcal+' kcal</div>'+
+        '</div>';
+    }).join('');
+    det='<div style="background:rgba(192,132,252,.06);border:1px solid rgba(192,132,252,.3);border-radius:14px;padding:14px;margin-top:10px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+      '<div style="font-family:var(--fh);font-weight:700;font-size:15px;color:#c084fc;text-transform:capitalize">🍽️ '+dl+'</div>'+
+      '<button onclick="selFoodDay=null;rContent()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px">✕</button></div>'+
+      '<div class="g3" style="margin-bottom:10px">'+
+      '<div class="sm2"><div class="sl2">Calorías</div><div class="sv" style="color:#c084fc">'+r.kcal+' kcal</div></div>'+
+      '<div class="sm2"><div class="sl2">Proteína</div><div class="sv" style="color:#5bc4ff">'+r.prot+'g</div></div>'+
+      '<div class="sm2"><div class="sl2">Carbs</div><div class="sv" style="color:var(--a3)">'+r.carbs+'g</div></div>'+
+      '<div class="sm2"><div class="sl2">Grasa</div><div class="sv" style="color:var(--a4)">'+r.fat+'g</div></div>'+
+      '<div class="sm2"><div class="sl2">% meta</div><div class="sv" style="color:'+(r.kcal>goal?'var(--a2)':'var(--a3)')+'">'+pct+'%</div></div>'+
+      '</div>'+
+      '<div class="hb-bg"><div class="hb-f" style="width:'+pct+'%;background:'+(r.kcal>goal?'var(--a2)':'#c084fc')+'"></div></div>'+
+      (items?'<div style="margin-top:10px">'+items+'</div>':'')+'</div>';
+  }
+
+  // Summary stats
+  var allRecs=Object.values(recs);
+  var avgKcal=allRecs.length?Math.round(allRecs.reduce(function(a,r){return a+r.kcal;},0)/allRecs.length):0;
+  var avgProt=allRecs.length?Math.round(allRecs.reduce(function(a,r){return a+r.prot;},0)/allRecs.length):0;
+  var avgCarbs=allRecs.length?Math.round(allRecs.reduce(function(a,r){return a+r.carbs;},0)/allRecs.length):0;
+  var avgFat=allRecs.length?Math.round(allRecs.reduce(function(a,r){return a+r.fat;},0)/allRecs.length):0;
+
+  return '<div style="display:flex;flex-direction:column;gap:14px">'+
+    '<div style="color:#c084fc;font-family:var(--fh);font-size:17px;font-weight:700;letter-spacing:1px;text-transform:uppercase">🍽️ Registro de comidas</div>'+
+
+    // Summary cards
+    (allRecs.length?
+    '<div class="g3">'+
+    '<div class="sm2"><div class="sl2">Prom. kcal/día</div><div class="sv" style="color:#c084fc">'+avgKcal+' kcal</div></div>'+
+    '<div class="sm2"><div class="sl2">Prom. proteína</div><div class="sv" style="color:#5bc4ff">'+avgProt+'g</div></div>'+
+    '<div class="sm2"><div class="sl2">Prom. carbs</div><div class="sv" style="color:var(--a3)">'+avgCarbs+'g</div></div>'+
+    '<div class="sm2"><div class="sl2">Prom. grasa</div><div class="sv" style="color:var(--a4)">'+avgFat+'g</div></div>'+
+    '<div class="sm2"><div class="sl2">Días registrados</div><div class="sv" style="color:var(--text)">'+allRecs.length+'</div></div>'+
+    '</div>':'<div class="empty">Sin registros aún</div>')+
+
+    // Calendar
+    '<div class="sl">📅 Calendario</div>'+
+    '<div class="cal-h">'+
+    '<button class="cal-n" onclick="kcalCalPrev()">‹</button>'+
+    '<div class="cal-t" style="color:#c084fc">'+MN[kcalCalM]+' '+kcalCalY+'</div>'+
+    '<button class="cal-n" onclick="kcalCalNext()">›</button>'+
+    '</div>'+
+    '<div class="cal-g">'+DN.map(function(d){return'<div class="cal-dn">'+d+'</div>';}).join('')+calRows+'</div>'+
+    det+
+
+    // Charts
+    '<div class="sl">📊 Histórico · Calorías (kcal) · ↓ mejor</div>'+
+    '<div class="card"><div style="position:relative;height:150px"><canvas id="fc-kcal"></canvas></div></div>'+
+    '<div class="sl">📊 Histórico · Proteína (g) · ↑ mejor</div>'+
+    '<div class="card"><div style="position:relative;height:150px"><canvas id="fc-prot"></canvas></div></div>'+
+    '<div class="sl">📊 Histórico · Carbs (g)</div>'+
+    '<div class="card"><div style="position:relative;height:150px"><canvas id="fc-carbs"></canvas></div></div>'+
+    '<div class="sl">📊 Histórico · Grasa (g)</div>'+
+    '<div class="card"><div style="position:relative;height:150px"><canvas id="fc-fat"></canvas></div></div>'+
+    '</div>';
+}
+
+function rComidaCharts(){
+  var recs=KCAL_RECORDS;
+  var keys=Object.keys(recs).sort().slice(-20);
+  if(!keys.length)return;
+  var lbl=keys.map(function(k){return k.slice(5);});
+  var goal=2000;
+  var defs=[
+    {id:'fc-kcal',data:keys.map(function(k){return recs[k].kcal;}),color:'#c084fc',goal:goal},
+    {id:'fc-prot',data:keys.map(function(k){return recs[k].prot;}),color:'#5bc4ff'},
+    {id:'fc-carbs',data:keys.map(function(k){return recs[k].carbs;}),color:'#39ff6e'},
+    {id:'fc-fat',data:keys.map(function(k){return recs[k].fat;}),color:'#ffa020'},
+  ];
+  Chart.defaults.color='#8a9bb0';Chart.defaults.font.family="'DM Mono'";Chart.defaults.font.size=9;
+  defs.forEach(function(d){
+    var ctx=document.getElementById(d.id);if(!ctx)return;
+    destroyChart(d.id);
+    var datasets=[{data:d.data,backgroundColor:d.color+'88',borderColor:d.color,borderWidth:1,borderRadius:4,type:'bar'}];
+    if(d.goal)datasets.push({data:Array(lbl.length).fill(d.goal),borderColor:d.color+'66',borderWidth:1,borderDash:[4,4],type:'line',pointRadius:0,fill:false});
+    charts[d.id]=new Chart(ctx,{
+      type:'bar',
+      data:{labels:lbl,datasets:datasets},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#0a0a0a',borderColor:d.color+'44',borderWidth:1}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{maxRotation:45}},y:{grid:{color:'rgba(255,255,255,.05)'}}}}
+    });
+  });
+}
+
+function kcalSelDay(ds){selFoodDay=selFoodDay===ds?null:ds;rContent();}
+function kcalCalPrev(){var d=new Date(kcalCalY,kcalCalM-1,1);kcalCalY=d.getFullYear();kcalCalM=d.getMonth();selFoodDay=null;rContent();}
+function kcalCalNext(){var d=new Date(kcalCalY,kcalCalM+1,1);kcalCalY=d.getFullYear();kcalCalM=d.getMonth();selFoodDay=null;rContent();}
+
 render();
 </script>
-</body>
-</html>
