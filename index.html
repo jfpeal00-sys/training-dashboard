@@ -149,11 +149,12 @@ const SW=[
 ];
 // Calorías consumidas por día — actualizado manualmente
 const KCAL_RECORDS={
-  "2026-04-19":{kcal:812,prot:129,carbs:19,fat:19,selections:[
+  "2026-04-19":{kcal:826,prot:114,carbs:27,fat:27,selections:[
     {emoji:'🍚',name:'Arroz integral 50g',qty:1,kcal:60,prot:1,carbs:13,fat:0},
-    {emoji:'🍗',name:'Pechuga de pollo 110g',qty:3,kcal:510,prot:102,carbs:0,fat:9},
-    {emoji:'🍟',name:'Papas Rústicas 5uds',qty:1,kcal:32,prot:1,carbs:5,fat:1},
+    {emoji:'🍟',name:'Papas Rústicas (5 uds)',qty:1,kcal:32,prot:1,carbs:5,fat:1},
+    {emoji:'🍄',name:'Pollo en Salsa de Champiñones',qty:1,kcal:500,prot:84,carbs:8,fat:19},
     {emoji:'🥩',name:'Filete de Res',qty:1,kcal:210,prot:28,carbs:0,fat:7},
+    {emoji:'🥓',name:'Jamón Sánduche Zenú',qty:1,kcal:24,prot:4,carbs:1,fat:1},
   ]},
 };
 function kcalDbGet(){return KCAL_RECORDS;}
@@ -236,11 +237,14 @@ function fcZone(hr){
 }
 function fatBurnPct(hr){
   if(!hr)return null;
-  const pctFCMax=hr/185;
-  if(pctFCMax<0.60)return 85;
-  if(pctFCMax<0.70)return 65;
-  if(pctFCMax<0.80)return 50;
-  if(pctFCMax<0.90)return 35;
+  const p=hr/185; // % of FC max
+  // Interpolate linearly within each zone for more precise estimation
+  if(p<0.50)return 90;
+  if(p<0.60)return Math.round(90-(p-0.50)/0.10*5);   // 90→85
+  if(p<0.70)return Math.round(85-(p-0.60)/0.10*20);  // 85→65
+  if(p<0.80)return Math.round(65-(p-0.70)/0.10*15);  // 65→50
+  if(p<0.90)return Math.round(50-(p-0.80)/0.10*15);  // 50→35
+  if(p<1.00)return Math.round(35-(p-0.90)/0.10*20);  // 35→15
   return 15;
 }
 function fatBurnData(s){
@@ -281,7 +285,7 @@ function rHeader(){
   ].filter(Boolean);
   document.getElementById('hstats').innerHTML=stats.map(s=>`<div class="hs"><div class="hs-v" style="color:${s.c}">${s.v}</div><div class="hs-l">${s.l}</div></div>`).join('');
 }
-const ENDURANCE_IDS=new Set(['s21','s17','s15','s10','s5b','s2']);
+const ENDURANCE_IDS=new Set(['s24','s21','s17','s15','s10','s5b','s2']);
 function getStreaks(){
   const dates=[...new Set(sessions.map(s=>s.date))].sort();
   if(!dates.length)return{cur:0,max:0,lastDate:null};
@@ -319,7 +323,7 @@ function weightTrend(){
   const kgPerDay=(recent[n-1].weight-recent[0].weight)/days;
   return kgPerDay;
 }
-const TABS=['Registrar','Historial','Progreso','Peso','Comida','Calendario','Endurance','Records','Totales'];
+const TABS=['Registrar','Historial','Progreso','Calendario','Peso','Comida','Endurance','Records','Totales'];
 function rTabs(){document.getElementById('tabs').innerHTML=TABS.map(t=>`<button class="tb${t===tab?' on':''}" style="${t==='Endurance'&&tab==='Endurance'?'color:#a855f7;border-bottom-color:#a855f7':t==='Endurance'?'color:#a855f7':''}" onclick="switchTab('${t}')">${t}</button>`).join('');}
 
 function switchTab(t){tab=t;selDay=null;selEndDay=null;expRec=null;expEnd=null;Object.keys(charts).forEach(destroyChart);render();}
@@ -442,21 +446,20 @@ function rSCard(s){
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
         <div style="flex:1;min-width:0">
           <div style="font-family:var(--fh);font-weight:800;font-size:22px;color:var(--a1);line-height:1.1">${ext?'🚶':'🎚️'} ${fdate(s.date)}</div>
-          <div style="margin-top:6px;font-family:var(--fh);font-size:15px;color:var(--text);display:flex;flex-wrap:wrap;gap:8px;line-height:1.3">
-            <span>⏱ ${fd(s.duration)}</span>
-            <span style="color:rgba(255,255,255,.3)">·</span>
-            <span>📍 ${s.distance} km</span>
-            <span style="color:rgba(255,255,255,.3)">·</span>
+          <div style="margin-top:5px;font-family:var(--fm);font-size:10px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+            <span style="color:var(--text)">⏱ ${fd(s.duration)}</span>
+            <span>·</span>
+            <span style="color:var(--text)">📍 ${s.distance} km</span>
+            <span>·</span>
             <span>${ext?'🚶 Exterior':'🎚️ Treadmill'}</span>
-            ${s.incline!=null?`<span style="color:rgba(255,255,255,.3)">·</span><span>📐 Inclinación: ${s.incline}%</span>`:''}
-            ${s.elevGain!=null?`<span style="color:rgba(255,255,255,.3)">·</span><span>⛰️ +${s.elevGain}m desnivel</span>`:''}
-            ${s.note?`<span style="color:var(--muted);font-size:13px">· ${s.note}</span>`:''}
+            ${s.incline!=null?`<span>·</span><span>📐 ${s.incline}% inclinación</span>`:''}
+            ${s.elevGain!=null?`<span>·</span><span>⛰️ +${s.elevGain}m</span>`:''}
+            ${s.note?`<span>·</span><span style="font-style:italic">${s.note}</span>`:''}
           </div>
-          <div style="margin-top:8px;display:flex;gap:5px;flex-wrap:wrap">
-            ${ENDURANCE_IDS.has(s.id)?`<span style="display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:3px 9px;font-family:var(--fm);font-size:9px;border:1px solid rgba(168,85,247,.3);background:rgba(168,85,247,.08);color:#a855f7">🏎️ Endurance</span>`:''}
-            ${z?`<span style="display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:3px 9px;font-family:var(--fm);font-size:9px;border:1px solid ${z.color}44;background:${z.color}12;color:${z.color};cursor:pointer" onclick="expZone=expZone==='${zid}'?null:'${zid}';rContent()">${z.icon} ${z.label} ${isZOpen?'▲':'▼'}</span>`:''}
+          <div style="margin-top:6px;display:flex;gap:5px;flex-wrap:wrap">
+            ${ENDURANCE_IDS.has(s.id)?`<span style="display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 8px;font-family:var(--fm);font-size:8px;border:1px solid rgba(168,85,247,.3);background:rgba(168,85,247,.08);color:#a855f7">🏎️ Endurance</span>`:''}
+
           </div>
-          ${zPopup}
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
           ${w?`<div style="background:rgba(212,130,10,.12);border:1px solid rgba(212,130,10,.3);border-radius:10px;padding:6px 10px;text-align:center">
@@ -484,7 +487,14 @@ function rSCard(s){
 
       <!-- ❤️ Frecuencia cardíaca -->
       <div style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.04)">
-        <div style="font-family:var(--fm);font-size:8px;color:var(--a2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;opacity:.8">❤️ Frecuencia cardíaca</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-family:var(--fm);font-size:8px;color:var(--a2);text-transform:uppercase;letter-spacing:1.5px;opacity:.8">❤️ Frecuencia cardíaca</div>
+        </div>
+        ${z?`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:5px 8px;border-radius:8px;background:${z.color}10;border:1px solid ${z.color}33;cursor:pointer" onclick="expZone=expZone==='${zid}'?null:'${zid}';rContent()">
+          <div style="display:flex;align-items:center;gap:6px"><span>${z.icon}</span><span style="font-family:var(--fh);font-size:13px;color:${z.color}">${z.label}</span></div>
+          <span style="font-family:var(--fm);font-size:9px;color:${z.color}">${isZOpen?'▲':'▼'}</span>
+        </div>`:''}
+        ${zPopup}
         <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Promedio</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a2)">${s.hrAvg} <span style="font-size:10px;color:var(--muted)">bpm</span></span></div>
         <div style="display:flex;justify-content:space-between"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Máxima</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a2)">${s.hrMax} <span style="font-size:10px;color:var(--muted)">bpm</span></span></div>
       </div>
@@ -493,7 +503,7 @@ function rSCard(s){
       <div style="padding:12px 14px;border-right:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04)">
         <div style="font-family:var(--fm);font-size:8px;color:var(--a3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;opacity:.8">👟 Pasos</div>
         <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Workout</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a3)">${s.steps?.toLocaleString()}</span></div>
-        ${dailyS?`<div style="display:flex;justify-content:space-between"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Día total</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:${dailyS.steps>=STEPS_GOAL?'var(--a3)':'var(--a2)'};">${dailyS.steps.toLocaleString()} ${dailyS.steps>=STEPS_GOAL?'✅':'❌'}</span></div>`:''}
+        ${dailyS?`<div style="display:flex;justify-content:space-between"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Día total</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:${dailyS.steps>=STEPS_GOAL?'var(--a3)':'var(--a2)'};">${dailyS.steps.toLocaleString()}</span></div>`:''}
       </div>
 
       <!-- 🔥 Calorías -->
@@ -646,24 +656,38 @@ function rPeso(){
     </div>`:''}
     <div style="display:flex;flex-direction:column;gap:10px">
       <div class="sl">🏁 Hitos de pérdida de peso</div>
-      ${hitos.map(h=>{
-        const cur=l?l.weight:f.weight,start=f.weight;
-        const tl=start-h.target,lost=start-cur;
-        const pct=Math.min(100,Math.max(0,tl>0?(lost/tl)*100:0));
-        const reached=cur<=h.target,rem=Math.max(0,cur-h.target).toFixed(2);
-        const achievedEntry=weights.find(w=>w.weight<=h.target);
-        const achievedDate=achievedEntry?new Date(achievedEntry.date+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'}):null;
-        return`<div class="card" style="border-color:${reached?'var(--a3)':'rgba(255,255,255,.08)'}">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-            <div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">${reached?'✅':h.icon}</span>
-            <div><div style="font-family:var(--fh);font-weight:700;font-size:15px;color:${reached?'var(--a3)':'var(--a1)'}"> ${h.label} — ${h.target} kg</div>
-            <div style="font-family:var(--fm);font-size:9px;color:var(--muted)">${reached?'¡COMPLETADO!':'Faltan '+rem+' kg'}</div>
-            ${reached&&achievedDate?`<div style="font-family:var(--fm);font-size:9px;color:var(--a3);margin-top:2px">📅 ${achievedDate}</div>`:''}</div></div>
-            <div style="font-family:var(--fh);font-weight:800;font-size:22px;color:${reached?'var(--a3)':'var(--a1)'}">${pct.toFixed(0)}<span style="font-size:12px;color:var(--muted)">%</span></div>
-          </div>
-          <div class="hb-bg"><div class="hb-f" style="width:${pct}%;background:${reached?'var(--a3)':'linear-gradient(90deg,var(--a1),var(--a4))'}"></div></div>
-        </div>`;
-      }).join('')}
+      ${(()=>{
+        // Pre-compute achieved entries for all hitos to calculate inter-hito days
+        const achievedEntries=hitos.map(h=>weights.find(w=>w.weight<=h.target));
+        const startDate=new Date(f.date+'T12:00:00');
+        return hitos.map((h,idx)=>{
+          const cur=l?l.weight:f.weight,start=f.weight;
+          const tl=start-h.target,lost=start-cur;
+          const pct=Math.min(100,Math.max(0,tl>0?(lost/tl)*100:0));
+          const reached=cur<=h.target,rem=Math.max(0,cur-h.target).toFixed(2);
+          const achievedEntry=achievedEntries[idx];
+          const achievedDate=achievedEntry?new Date(achievedEntry.date+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'}):null;
+          const daysFromStart=achievedEntry?Math.round((new Date(achievedEntry.date+'T12:00:00')-startDate)/(1000*60*60*24)):null;
+          // Days from previous hito (for hitos 2 and 3)
+          const prevEntry=idx>0?achievedEntries[idx-1]:null;
+          const prevLabel=idx>0?hitos[idx-1].target+' kg':null;
+          const daysFromPrev=achievedEntry&&prevEntry?Math.round((new Date(achievedEntry.date+'T12:00:00')-new Date(prevEntry.date+'T12:00:00'))/(1000*60*60*24)):null;
+          return`<div class="card" style="border-color:${reached?'var(--a3)':'rgba(255,255,255,.08)'}">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">${reached?'✅':h.icon}</span>
+              <div>
+                <div style="font-family:var(--fh);font-weight:700;font-size:15px;color:${reached?'var(--a3)':'var(--a1)'}"> ${h.label} — ${h.target} kg</div>
+                <div style="font-family:var(--fm);font-size:9px;color:var(--muted)">${reached?'¡COMPLETADO!':'Faltan '+rem+' kg'}</div>
+                ${reached&&achievedDate?`<div style="font-family:var(--fm);font-size:9px;color:var(--a3);margin-top:3px">📅 ${achievedDate}</div>
+                <div style="font-family:var(--fm);font-size:9px;color:var(--muted);margin-top:2px">⏱ Desde 20 mar: <span style="color:var(--a3)">${daysFromStart} días</span>${daysFromPrev!==null?` · Desde ${prevLabel}: <span style="color:var(--a1)">${daysFromPrev} días</span>`:''}</div>`:''
+                }
+              </div></div>
+              <div style="font-family:var(--fh);font-weight:800;font-size:22px;color:${reached?'var(--a3)':'var(--a1)'}">${pct.toFixed(0)}<span style="font-size:12px;color:var(--muted)">%</span></div>
+            </div>
+            <div class="hb-bg"><div class="hb-f" style="width:${pct}%;background:${reached?'var(--a3)':'linear-gradient(90deg,var(--a1),var(--a4))'}"></div></div>
+          </div>`;
+        }).join('');
+      })()}
     </div>
     ${l&&l.weight>85?`<div class="card" style="border-color:rgba(57,255,110,.2);background:rgba(57,255,110,.04)">
       <div style="color:var(--a3);font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;gap:6px"><span style="font-size:14px">📈</span>Proyecciones para llegar a 85 kg</div>
