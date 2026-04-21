@@ -139,6 +139,7 @@ const SS=[
   {id:"s22",date:"2026-04-17",duration:52,distance:3.00,calories:290,totalCalories:2424,steps:4183,hrAvg:127,hrMax:132,speedAvg:3.4,speedMax:3.4,incline:0},
   {id:"s23",date:"2026-04-18",duration:63,distance:3.80,calories:350,totalCalories:2441,steps:5380,hrAvg:114,hrMax:126,speedAvg:3.7,speedMax:3.7,incline:0},
   {id:"s24",date:"2026-04-19",duration:97,distance:5.79,calories:549,totalCalories:2538,steps:7854,hrAvg:105,hrMax:115,speedAvg:3.6,speedMax:3.6,incline:1},
+  {id:"s25",date:"2026-04-20",duration:62,distance:3.61,calories:358,totalCalories:2388,steps:5175,hrAvg:119,hrMax:130,speedAvg:3.6,speedMax:3.6,incline:1},
 ];
 const SW=[
   {date:"2026-03-20",weight:102.15},{date:"2026-04-03",weight:99.65},
@@ -146,9 +147,18 @@ const SW=[
   {date:"2026-04-13",weight:98.35},{date:"2026-04-14",weight:97.65},
   {date:"2026-04-15",weight:97.25},
   {date:"2026-04-16",weight:97.20},
+  {date:"2026-04-20",weight:96.80},
 ];
 // Calorías consumidas por día — actualizado manualmente
 const KCAL_RECORDS={
+  "2026-04-20":{kcal:1153,prot:107,carbs:72,fat:46,selections:[
+    {emoji:'🍟',name:'Papas Rústicas (5 uds)',qty:1,kcal:32,prot:1,carbs:5,fat:1},
+    {emoji:'🍄',name:'Pollo en Salsa de Champiñones',qty:1,kcal:500,prot:85,carbs:8,fat:18},
+    {emoji:'🍳',name:'Huevo revuelto con guiso',qty:3,kcal:300,prot:21,carbs:6,fat:21},
+    {emoji:'🌭',name:'Salchicha Ranchera',qty:1,kcal:84,prot:4,carbs:2,fat:7},
+    {emoji:'🫓',name:'Arepa',qty:1,kcal:177,prot:4,carbs:36,fat:2},
+    {emoji:'🥝',name:'Kiwi',qty:1,kcal:60,prot:1,carbs:15,fat:0},
+  ]},
   "2026-04-19":{kcal:826,prot:114,carbs:27,fat:27,selections:[
     {emoji:'🍚',name:'Arroz integral 50g',qty:1,kcal:60,prot:1,carbs:13,fat:0},
     {emoji:'🍟',name:'Papas Rústicas (5 uds)',qty:1,kcal:32,prot:1,carbs:5,fat:1},
@@ -175,6 +185,7 @@ const DAILY_STEPS=[
   {date:"2026-04-16",steps:8260},{date:"2026-04-17",steps:7890},
   {date:"2026-04-18",steps:7661},
   {date:"2026-04-19",steps:9382},
+  {date:"2026-04-20",steps:6401},
 ];
 
 // STATE
