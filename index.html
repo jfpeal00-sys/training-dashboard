@@ -143,6 +143,7 @@ const SS=[
   {id:"s26",date:"2026-04-21",duration:61,distance:3.64,calories:340,totalCalories:2371,steps:4864,hrAvg:124,hrMax:135,speedAvg:3.6,speedMax:3.6,incline:1},
   {id:"s27",date:"2026-04-22",duration:61,distance:3.67,calories:341,totalCalories:2498,steps:4791,hrAvg:125,hrMax:136,speedAvg:3.6,speedMax:3.6,incline:1},
   {id:"s28",date:"2026-04-23",duration:62,distance:3.68,calories:344,totalCalories:2536,steps:4834,hrAvg:119,hrMax:130,speedAvg:3.6,speedMax:3.6,incline:1},
+  {id:"s29",date:"2026-04-24",duration:93,distance:5.60,calories:522,totalCalories:2596,steps:7379,hrAvg:115,hrMax:126,speedAvg:3.6,speedMax:3.6,incline:1,note:"Ruta del Pan"},
 ];
 const SW=[
   {date:"2026-03-20",weight:102.15},{date:"2026-04-03",weight:99.65},
@@ -154,9 +155,19 @@ const SW=[
   {date:"2026-04-21",weight:96.45},
   {date:"2026-04-22",weight:96.15},
   {date:"2026-04-23",weight:96.05},
+  {date:"2026-04-24",weight:95.85},
 ];
 // Calorías consumidas por día — actualizado manualmente
 const KCAL_RECORDS={
+  "2026-04-24":{kcal:1321,prot:88,carbs:57,fat:77,selections:[
+    {emoji:'🍚',name:'Arroz integral 50g',qty:2,kcal:120,prot:2,carbs:26,fat:0},
+    {emoji:'🍟',name:'Papa Rústica',qty:5,kcal:30,prot:1,carbs:5,fat:1},
+    {emoji:'🥩',name:'Filete Carne Molida (~120g)',qty:3,kcal:714,prot:63,carbs:0,fat:51},
+    {emoji:'🍳',name:'Huevo revuelto con guiso',qty:3,kcal:300,prot:21,carbs:6,fat:21},
+    {emoji:'🌭',name:'Salchicha Ranchera',qty:1,kcal:84,prot:4,carbs:2,fat:7},
+    {emoji:'🥝',name:'Kiwi',qty:1,kcal:60,prot:1,carbs:15,fat:0},
+    {emoji:'🍋',name:'Clight',qty:13,kcal:13,prot:0,carbs:0,fat:0},
+  ]},
   "2026-04-23":{kcal:1586,prot:102,carbs:191,fat:60,selections:[
     {emoji:'🍗',name:'Pechuga Apanada Friko',qty:1,kcal:324,prot:29,carbs:38,fat:12},
     {emoji:'🍚',name:'Arroz integral 50g',qty:3,kcal:180,prot:3,carbs:39,fat:0},
@@ -222,6 +233,7 @@ const DAILY_STEPS=[
   {date:"2026-04-21",steps:5944},
   {date:"2026-04-22",steps:9597},
   {date:"2026-04-23",steps:9036},
+  {date:"2026-04-24",steps:10730},
 ];
 
 // STATE
@@ -332,7 +344,7 @@ function rHeader(){
   ].filter(Boolean);
   document.getElementById('hstats').innerHTML=stats.map(s=>`<div class="hs"><div class="hs-v" style="color:${s.c}">${s.v}</div><div class="hs-l">${s.l}</div></div>`).join('');
 }
-const ENDURANCE_IDS=new Set(['s24','s21','s17','s15','s10','s5b','s2']);
+const ENDURANCE_IDS=new Set(['s29','s24','s21','s17','s15','s10','s5b','s2']);
 function getStreaks(){
   const dates=[...new Set(sessions.map(s=>s.date))].sort();
   if(!dates.length)return{cur:0,max:0,lastDate:null};
