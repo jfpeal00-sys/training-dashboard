@@ -144,7 +144,9 @@ const SS=[
   {id:"s27",date:"2026-04-22",duration:61,distance:3.67,calories:341,totalCalories:2498,steps:4791,hrAvg:125,hrMax:136,speedAvg:3.6,speedMax:3.6,incline:1},
   {id:"s28",date:"2026-04-23",duration:62,distance:3.68,calories:344,totalCalories:2536,steps:4834,hrAvg:119,hrMax:130,speedAvg:3.6,speedMax:3.6,incline:1},
   {id:"s29",date:"2026-04-24",duration:93,distance:5.60,calories:522,totalCalories:2596,steps:7379,hrAvg:115,hrMax:126,speedAvg:3.6,speedMax:3.6,incline:1,note:"Ruta del Pan"},
-  {id:"s30",date:"2026-04-25",duration:91,distance:5.40,calories:511,totalCalories:2512,steps:7360,hrAvg:119,hrMax:130,speedAvg:3.6,speedMax:3.6,incline:1,note:"Boyacá Ave Up North"},
+  {id:"s30",date:"2026-04-25",duration:91,distance:5.40,calories:511,totalCalories:2512,steps:7360,hrAvg:119,hrMax:130,speedAvg:3.6,speedMax:3.6,incline:1,note:"Boyaca Ave Up North"},
+  {id:"s31",date:"2026-04-26",duration:63,distance:3.81,calories:357,totalCalories:2748,steps:5043,hrAvg:121,hrMax:132,speedAvg:3.6,speedMax:3.6,incline:2,note:"Infantry",inclineProfile:[{from:0,to:1.75,pct:1},{from:1.75,to:3.81,pct:2}]},
+  {id:"s32",date:"2026-04-26",duration:81,distance:4.94,calories:405,totalCalories:2748,steps:8152,hrAvg:115,hrMax:126,speedAvg:3.9,speedMax:4.3,elevGain:21.6,note:"exterior"},
 ];
 const SW=[
   {date:"2026-03-20",weight:102.15},{date:"2026-04-03",weight:99.65},
@@ -161,23 +163,8 @@ const SW=[
 ];
 // Calorías consumidas por día — actualizado manualmente
 const KCAL_RECORDS={
-  "2026-04-25":{kcal:1346,prot:79,carbs:125,fat:56,selections:[
-    {emoji:'🍚',name:'Arroz integral 50g',qty:1,kcal:60,prot:1,carbs:13,fat:0},
-    {emoji:'🍟',name:'Papa Rústica',qty:8,kcal:48,prot:2,carbs:8,fat:1},
-    {emoji:'🥩',name:'Filete Carne Molida (~120g)',qty:2,kcal:476,prot:42,carbs:0,fat:34},
-    {emoji:'🥪',name:'Sánduche',qty:3,kcal:690,prot:36,carbs:87,fat:21},
-    {emoji:'🥝',name:'Kiwi',qty:1,kcal:60,prot:1,carbs:15,fat:0},
-    {emoji:'🍋',name:'Clight',qty:12,kcal:12,prot:0,carbs:0,fat:0},
-  ]},
-  "2026-04-24":{kcal:1321,prot:88,carbs:57,fat:77,selections:[
-    {emoji:'🍚',name:'Arroz integral 50g',qty:2,kcal:120,prot:2,carbs:26,fat:0},
-    {emoji:'🍟',name:'Papa Rústica',qty:5,kcal:30,prot:1,carbs:5,fat:1},
-    {emoji:'🥩',name:'Filete Carne Molida (~120g)',qty:3,kcal:714,prot:63,carbs:0,fat:51},
-    {emoji:'🍳',name:'Huevo revuelto con guiso',qty:3,kcal:300,prot:21,carbs:6,fat:21},
-    {emoji:'🌭',name:'Salchicha Ranchera',qty:1,kcal:84,prot:4,carbs:2,fat:7},
-    {emoji:'🥝',name:'Kiwi',qty:1,kcal:60,prot:1,carbs:15,fat:0},
-    {emoji:'🍋',name:'Clight',qty:13,kcal:13,prot:0,carbs:0,fat:0},
-  ]},
+  "2026-04-25":{kcal:1346,prot:79,carbs:125,fat:56,selections:[{emoji:"x",name:"Arroz 50g",qty:1,kcal:60,prot:1,carbs:13,fat:0}]},
+  "2026-04-24":{kcal:1321,prot:88,carbs:57,fat:77,selections:[{emoji:"x",name:"Arroz 50g",qty:2,kcal:120,prot:2,carbs:26,fat:0}]},
   "2026-04-23":{kcal:1586,prot:102,carbs:191,fat:60,selections:[
     {emoji:'🍗',name:'Pechuga Apanada Friko',qty:1,kcal:324,prot:29,carbs:38,fat:12},
     {emoji:'🍚',name:'Arroz integral 50g',qty:3,kcal:180,prot:3,carbs:39,fat:0},
@@ -245,12 +232,13 @@ const DAILY_STEPS=[
   {date:"2026-04-23",steps:9036},
   {date:"2026-04-24",steps:10730},
   {date:"2026-04-25",steps:8816},
+  {date:"2026-04-26",steps:15039},
 ];
 
 // STATE
 let sessions=loadS(),weights=loadW(),tab='Historial',pSub='Treadmill',hSub='General';
 const nd=new Date();
-let cY=nd.getFullYear(),cM=nd.getMonth(),selDay=null,selEndDay=null,editId=null,delId=null,expRec=null,expEnd=null,expZone=null;
+let cY=nd.getFullYear(),cM=nd.getMonth(),selDay=null,selEndDay=null,selSimDay=null,editId=null,delId=null,expRec=null,expEnd=null,expSim=null,expZone=null;
 const charts={};
 
 function loadS(){
@@ -356,6 +344,7 @@ function rHeader(){
   document.getElementById('hstats').innerHTML=stats.map(s=>`<div class="hs"><div class="hs-v" style="color:${s.c}">${s.v}</div><div class="hs-l">${s.l}</div></div>`).join('');
 }
 const ENDURANCE_IDS=new Set(['s30','s29','s24','s21','s17','s15','s10','s5b','s2']);
+const SIMULATION_IDS=new Set(['s31']);
 function getStreaks(){
   const dates=[...new Set(sessions.map(s=>s.date))].sort();
   if(!dates.length)return{cur:0,max:0,lastDate:null};
@@ -393,7 +382,7 @@ function weightTrend(){
   const kgPerDay=(recent[n-1].weight-recent[0].weight)/days;
   return kgPerDay;
 }
-const TABS=['Registrar','Historial','Progreso','Calendario','Peso','Comida','Endurance','Records','Totales'];
+const TABS=['Registrar','Historial','Progreso','Calendario','Peso','Comida','Endurance','Simulacion','Records','Totales'];
 function rTabs(){document.getElementById('tabs').innerHTML=TABS.map(t=>`<button class="tb${t===tab?' on':''}" style="${t==='Endurance'&&tab==='Endurance'?'color:#a855f7;border-bottom-color:#a855f7':t==='Endurance'?'color:#a855f7':''}" onclick="switchTab('${t}')">${t}</button>`).join('');}
 
 function switchTab(t){tab=t;selDay=null;selEndDay=null;expRec=null;expEnd=null;Object.keys(charts).forEach(destroyChart);render();}
@@ -407,6 +396,7 @@ function rContent(){
   else if(tab==='Comida'){c.innerHTML=rComida();setTimeout(rComidaCharts,100);}
   else if(tab==='Calendario')c.innerHTML=rCal();
   else if(tab==='Endurance')c.innerHTML=rEnd();
+  else if(tab==='Simulacion'){c.innerHTML=rSim();setTimeout(rSimCharts,300);}
   else if(tab==='Records')c.innerHTML=rRecs();
   else if(tab==='Totales')c.innerHTML=rTots();
   if(tab==='Progreso')rCharts();
@@ -522,14 +512,16 @@ function rSCard(s){
             <span style="color:var(--text)">📍 ${s.distance} km</span>
             <span>·</span>
             <span>${ext?'🚶 Exterior':'🎚️ Treadmill'}</span>
-            ${s.incline!=null?`<span>·</span><span>📐 ${s.incline}% inclinación</span>`:''}
+            ${(function(){if(s.inclineProfile){var avg=Math.round(s.inclineProfile.reduce(function(a,t){return a+(t.pct*(t.to-t.from));},0)/s.distance*10)/10;return'<span>·</span><span style="cursor:pointer;color:var(--a5)" onclick="event.stopPropagation();var e=document.getElementById(\'ip-'+s.id+'\');e.style.display=e.style.display==\'flex\'?\'none\':\'flex\'">Simulacion ~'+avg+'% �</span>';}if(s.incline!=null)return'<span>·</span><span>'+s.incline+'% inclinacion</span>';return'';})()}
             ${s.elevGain!=null?`<span>·</span><span>⛰️ +${s.elevGain}m</span>`:''}
             ${s.note?`<span>·</span><span style="font-style:italic">${s.note}</span>`:''}
           </div>
           <div style="margin-top:6px;display:flex;gap:5px;flex-wrap:wrap">
             ${ENDURANCE_IDS.has(s.id)?`<span style="display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 8px;font-family:var(--fm);font-size:8px;border:1px solid rgba(168,85,247,.3);background:rgba(168,85,247,.08);color:#a855f7">🏎️ Endurance</span>`:''}
+            ${SIMULATION_IDS.has(s.id)?'<span style="display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 8px;font-family:var(--fm);font-size:8px;border:1px solid rgba(251,146,60,.3);background:rgba(251,146,60,.08);color:#fb923c">Simulacion</span>':''}
 
           </div>
+          ${s.inclineProfile?(function(){var rw=s.inclineProfile.map(function(t){return'<div style="display:flex;justify-content:space-between;padding:5px 8px;border-radius:6px;background:rgba(255,255,255,.04);margin-bottom:3px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">'+t.from+'-'+t.to+' km</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a5)">'+t.pct+'%</span></div>';}).join('');return'<div id="ip-'+s.id+'" style="display:none;flex-direction:column;margin-top:4px;background:rgba(0,0,0,.85);border:1px solid rgba(255,107,26,.3);border-radius:10px;padding:10px 12px"><div style="font-family:var(--fm);font-size:9px;color:var(--a1);letter-spacing:1px;margin-bottom:6px">Perfil inclinacion</div>'+rw+'</div>';})():''}
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
           ${w?`<div style="background:rgba(212,130,10,.12);border:1px solid rgba(212,130,10,.3);border-radius:10px;padding:6px 10px;text-align:center">
@@ -808,6 +800,8 @@ function renderFCHeatmap(){
       <div style="margin-top:4px;font-family:var(--fm);font-size:8px;color:var(--muted)">${mSess.length} sesión${mSess.length!==1?'es':''} · toca una celda para ver el resumen</div>
       ${detailHtml}
     `}
+  
+    <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;padding:4px 0"><div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:var(--a5)"></div><span style="font-family:var(--fm);font-size:8px;color:var(--muted)">Treadmill</span></div><div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:var(--a3)"></div><span style="font-family:var(--fm);font-size:8px;color:var(--muted)">Exterior</span></div><div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:2px;background:#fb923c;border-radius:2px"></div><span style="font-family:var(--fm);font-size:8px;color:var(--muted)">Simulacion</span></div><div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:#a855f7"></div><span style="font-family:var(--fm);font-size:8px;color:var(--muted)">Endurance</span></div><div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:var(--wt)"></div><span style="font-family:var(--fm);font-size:8px;color:var(--muted)">Peso</span></div></div>
   </div>`;
 }
 
@@ -952,8 +946,9 @@ function rCal(){
   const mn=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   const dn=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
   const fd2=new Date(cY,cM,1).getDay(),dim=new Date(cY,cM+1,0).getDate();
-  const smap={};sessions.forEach(s=>{if(!smap[s.date])smap[s.date]=[];smap[s.date].push(isExt(s)?'e':'t');});
+  const smap={};sessions.forEach(s=>{if(!smap[s.date])smap[s.date]=[];smap[s.date].push(SIMULATION_IDS.has(s.id)?'sim':isExt(s)?'e':'t');});
   const eset=new Set(sessions.filter(s=>ENDURANCE_IDS.has(s.id)).map(s=>s.date));
+  const simset=new Set(sessions.filter(s=>SIMULATION_IDS.has(s.id)).map(s=>s.date));
   const wset=new Set(weights.map(w=>w.date));
   const today=new Date();
   const cells=[];for(let i=0;i<fd2;i++)cells.push('');for(let d=1;d<=dim;d++)cells.push(d);
@@ -961,13 +956,14 @@ function rCal(){
   const calRows=cells.map((day,i)=>{
     if(!day)return'<div></div>';
     const ds=`${cY}-${String(cM+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-    const types=smap[ds]||[];const hasTm=types.includes('t'),hasE=types.includes('e'),hasW=wset.has(ds),hasEnd=eset.has(ds);
+    const types=smap[ds]||[];const hasTm=types.includes('t'),hasE=types.includes('e'),hasSim=simset.has(ds),hasW=wset.has(ds),hasEnd=eset.has(ds);
     const isTod=today.getFullYear()===cY&&today.getMonth()===cM&&today.getDate()===day;
-    const isSel=selDay===ds;const hasAny=types.length||hasW||hasEnd;
+    const isSel=selDay===ds;const hasAny=types.length||hasW||hasEnd||hasSim;
     return`<div class="cal-c${hasAny?' hs2':''}${isSel?' sel':''}" style="${isTod&&!isSel?'border-color:rgba(255,107,26,.4);background:rgba(255,107,26,.08);':''}" onclick="${hasAny?`tDay('${ds}')`:''}" >
       <div class="cal-dots">
         ${hasTm?`<div style="width:8px;height:8px;border-radius:50%;background:var(--a5)"></div>`:''}
         ${hasE?`<div style="width:8px;height:8px;border-radius:50%;background:var(--a3)"></div>`:''}
+        ${hasSim?`<div style="width:9px;height:9px;border-radius:2px;background:#fb923c;outline:1px solid #fb923c"></div>`:''}
         ${hasW?`<div style="width:8px;height:8px;border-radius:50%;background:var(--wt)"></div>`:''}
         ${hasEnd?`<div style="width:8px;height:8px;border-radius:50%;background:#a855f7"></div>`:''}
       </div>
@@ -1384,4 +1380,69 @@ function kcalCalPrev(){var d=new Date(kcalCalY,kcalCalM-1,1);kcalCalY=d.getFullY
 function kcalCalNext(){var d=new Date(kcalCalY,kcalCalM+1,1);kcalCalY=d.getFullYear();kcalCalM=d.getMonth();selFoodDay=null;rContent();}
 
 render();
+function tSimDay(ds){selSimDay=selSimDay===ds?null:ds;rContent();}
+function prevSimM(){var d=new Date(cY,cM-1,1);cY=d.getFullYear();cM=d.getMonth();selSimDay=null;rContent();}
+function nextSimM(){var d=new Date(cY,cM+1,1);cY=d.getFullYear();cM=d.getMonth();selSimDay=null;rContent();}
+function rSim(){
+  var simArr=sessions.filter(function(s){return SIMULATION_IDS.has(s.id);}).sort(function(a,b){return a.date.localeCompare(b.date);});
+  var MN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var DN=['Dom','Lun','Mar','Mie','Jue','Vie','Sab'];
+  var fd2=new Date(cY,cM,1).getDay(),dim=new Date(cY,cM+1,0).getDate();
+  var smap={};simArr.forEach(function(s){smap[s.date]=s;});
+  var today=new Date();
+  var cells=[];for(var ci=0;ci<fd2;ci++)cells.push('');for(var di=1;di<=dim;di++)cells.push(di);
+  var calRows=cells.map(function(day){
+    if(!day)return'<div></div>';
+    var ds=cY+'-'+String(cM+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+    var sv=smap[ds],isTod=today.getFullYear()===cY&&today.getMonth()===cM&&today.getDate()===day,isSel=selSimDay===ds;
+    return'<div class="cal-c'+(sv?' hs2':'')+(isSel?' sel':'')+'" style="'+(isTod&&!isSel?'border-color:rgba(251,146,60,.4);background:rgba(251,146,60,.08);':'')+'"'+(sv?' onclick="tSimDay(\''+ds+'\')"':'')+'>'+
+      '<div class="cal-dots">'+(sv?'<div style="width:8px;height:8px;border-radius:50%;background:#fb923c"></div>':'')+'</div>'+
+      '<div class="cal-num" style="color:'+(sv?'#e8f0fe':'#4a5568')+';font-weight:'+(sv?700:400)+'">'+day+'</div></div>';
+  }).join('');
+  var det='';
+  if(selSimDay&&smap[selSimDay]){
+    var sv2=smap[selSimDay],p2=pace(sv2.duration,sv2.distance);
+    var dl=new Date(selSimDay+'T12:00:00').toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
+    var ph=sv2.inclineProfile?sv2.inclineProfile.map(function(t){return'<div><span>'+t.from+'-'+t.to+'km</span><span>'+t.pct+'%</span></div>';}).join(''):'';
+    var sta=[{l:'Distancia',v:sv2.distance+' km',c:'var(--a1)'},{l:'Duracion',v:fd(sv2.duration),c:'var(--a3)'},{l:'FC prom',v:(sv2.hrAvg||'--')+' bpm',c:'var(--a2)'},{l:'Velocidad',v:sv2.speedAvg+' km/h',c:'var(--a1)'},sv2.note?{l:'Ruta',v:sv2.note,c:'var(--muted)'}:null].filter(function(x){return x&&x.v!=null;});
+    det='<div style="border:1px solid rgba(251,146,60,.3);border-radius:14px;padding:14px;margin-top:12px">'+
+      '<div style="display:flex;justify-content:space-between;margin-bottom:10px"><div style="color:#fb923c;font-weight:700">'+dl+'</div>'+
+      '<button onclick="selSimDay=null;rContent()" style="background:none;border:none;color:var(--muted);cursor:pointer">x</button></div>'+
+      '<div class="g3">'+sta.map(function(x){return'<div class="sm2"><div class="sl2">'+x.l+'</div><div class="sv" style="color:'+x.c+'">'+x.v+'</div></div>';}).join('')+'</div>'+
+      (ph?'<div style="margin-top:8px">'+ph+'</div>':'')+'</div>';
+  }
+  var t10d=[].concat(simArr).sort(function(a,b){return b.distance-a.distance;}).slice(0,10);
+  var t10v=[].concat(simArr).sort(function(a,b){return b.speedAvg-a.speedAvg;}).slice(0,10);
+  function tRows(rows,vfn){
+    if(!rows.length)return'<div class="empty">Sin simulaciones aun</div>';
+    return rows.map(function(sv3,ii){
+      var rk='sim'+ii+sv3.id,isSel2=expSim===rk;
+      return'<div><div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:'+(isSel2?'rgba(251,146,60,.2)':ii===0?'rgba(251,146,60,.15)':'rgba(255,255,255,.02)')+';border-radius:8px;margin-bottom:3px;cursor:pointer" onclick="expSim=expSim===\''+rk+'\'?null:\''+rk+'\';rContent()">'+
+        '<span>'+String(ii+1)+'.</span>'+
+        '<div style="flex:1"><div style="font-family:var(--fh);font-weight:700;font-size:16px;color:'+(ii===0||isSel2?'#fb923c':'var(--text)')+'">'+vfn(sv3)+'</div>'+
+        '<div style="font-family:var(--fm);font-size:9px;color:var(--muted)">'+new Date(sv3.date+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short'})+(sv3.note?' - '+sv3.note:'')+'</div></div></div></div>';
+    }).join('');
+  }
+  return'<div>'+
+    '<div style="color:#fb923c;font-family:var(--fh);font-size:17px;font-weight:800;margin-bottom:4px">Simulacion</div>'+
+    '<div style="color:var(--muted);font-family:var(--fm);font-size:9px;margin-bottom:14px">'+simArr.length+' simulaciones registradas</div>'+
+    '<div class="cal-h"><button class="cal-n" onclick="prevSimM()">&#8249;</button><div class="cal-t" style="color:#fb923c">'+MN[cM]+' '+cY+'</div><button class="cal-n" onclick="nextSimM()">&#8250;</button></div>'+
+    '<div class="cal-g" style="margin-bottom:8px">'+DN.map(function(dn2){return'<div class="cal-dn">'+dn2+'</div>';}).join('')+calRows+'</div>'+
+    det+
+    '<div style="margin-top:12px"><div style="font-family:var(--fm);font-size:9px;color:#fb923c;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Top Distancia</div>'+tRows(t10d,function(sv3){return sv3.distance+' km';})+'</div>'+
+    '<div style="margin-top:8px"><div style="font-family:var(--fm);font-size:9px;color:#fb923c;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Top Velocidad</div>'+tRows(t10v,function(sv3){return sv3.speedAvg+' km/h';})+'</div>'+
+    '<div style="margin-top:12px"><canvas id="sc1" style="height:120px"></canvas><canvas id="sc2" style="height:120px"></canvas></div>'+
+    '</div>';
+}
+function rSimCharts(){
+  if(typeof Chart==='undefined')return;
+  var simArr=sessions.filter(function(s){return SIMULATION_IDS.has(s.id);}).sort(function(a,b){return a.date.localeCompare(b.date);});
+  if(!simArr.length)return;
+  var lbl=simArr.map(function(s){return s.date.slice(5);}),col='#fb923c';
+  Chart.defaults.color='#8a9bb0';
+  [{id:'sc1',d:simArr.map(function(s){return s.distance;})},{id:'sc2',d:simArr.map(function(s){return s.speedAvg;})},{id:'sc3',d:simArr.map(function(s){return s.hrAvg;})},{id:'sc4',d:simArr.map(function(s){return s.duration;})}].forEach(function(x){
+    var ctx=document.getElementById(x.id);if(!ctx)return;destroyChart(x.id);
+    charts[x.id]=new Chart(ctx,{type:'line',data:{labels:lbl,datasets:[{data:x.d,borderColor:col,backgroundColor:col+'18',borderWidth:2,pointRadius:4,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'}},y:{grid:{color:'rgba(255,255,255,.05)'}}}}});
+  });
+}
 </script>
