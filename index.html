@@ -147,6 +147,7 @@ const SS=[
   {id:"s30",date:"2026-04-25",duration:91,distance:5.40,calories:511,totalCalories:2512,steps:7360,hrAvg:119,hrMax:130,speedAvg:3.6,speedMax:3.6,incline:1,note:"Boyaca Ave Up North"},
   {id:"s31",date:"2026-04-26",duration:63,distance:3.81,calories:357,totalCalories:2748,steps:5043,hrAvg:121,hrMax:132,speedAvg:3.6,speedMax:3.6,incline:2,note:"Infantry",inclineProfile:[{from:0,to:1.75,pct:1},{from:1.75,to:3.81,pct:2}]},
   {id:"s32",date:"2026-04-26",duration:81,distance:4.94,calories:405,totalCalories:2748,steps:8152,hrAvg:115,hrMax:126,speedAvg:3.9,speedMax:4.3,elevGain:21.6,note:"exterior"},
+  {id:"s33",date:"2026-04-27",duration:63,distance:3.60,calories:372,totalCalories:2431,steps:4862,hrAvg:115,hrMax:130,speedAvg:3.6,speedMax:3.6,incline:2,note:"Infantry",inclineProfile:[{from:0,to:1.75,pct:1},{from:1.75,to:3.60,pct:2}]},
 ];
 const SW=[
   {date:"2026-03-20",weight:102.15},{date:"2026-04-03",weight:99.65},
@@ -160,9 +161,12 @@ const SW=[
   {date:"2026-04-23",weight:96.05},
   {date:"2026-04-24",weight:95.85},
   {date:"2026-04-25",weight:95.35},
+  {date:"2026-04-27",weight:95.15},
 ];
 // Calorías consumidas por día — actualizado manualmente
 const KCAL_RECORDS={
+  "2026-04-27":{kcal:1062,prot:85,carbs:73,fat:44,selections:[{emoji:"x",name:"Arroz 50g",qty:2,kcal:120},{emoji:"x",name:"Papa Rustica",qty:6,kcal:36},{emoji:"x",name:"Filete Carne",qty:2,kcal:476},{emoji:"x",name:"Arroz 50g",qty:1,kcal:60},{emoji:"x",name:"Kiwi",qty:1,kcal:60},{emoji:"x",name:"Estofado 50g",qty:7,kcal:294},{emoji:"x",name:"Clight",qty:16,kcal:16}]},
+  "2026-04-26":{kcal:1284,prot:94,carbs:59,fat:78,selections:[{emoji:"x",name:"Arroz 50g",qty:1,kcal:60},{emoji:"x",name:"Papa Rustica",qty:8,kcal:48},{emoji:"x",name:"Filete Carne Molida",qty:2,kcal:476},{emoji:"x",name:"Huevo revuelto",qty:4,kcal:400},{emoji:"x",name:"Salchicha Ranchera",qty:2,kcal:168},{emoji:"x",name:"Jamon Sanduche Zenu",qty:3,kcal:72},{emoji:"x",name:"Kiwi",qty:1,kcal:60}]},
   "2026-04-25":{kcal:1346,prot:79,carbs:125,fat:56,selections:[{emoji:"x",name:"Arroz 50g",qty:1,kcal:60,prot:1,carbs:13,fat:0}]},
   "2026-04-24":{kcal:1321,prot:88,carbs:57,fat:77,selections:[{emoji:"x",name:"Arroz 50g",qty:2,kcal:120,prot:2,carbs:26,fat:0}]},
   "2026-04-23":{kcal:1586,prot:102,carbs:191,fat:60,selections:[
@@ -233,12 +237,13 @@ const DAILY_STEPS=[
   {date:"2026-04-24",steps:10730},
   {date:"2026-04-25",steps:8816},
   {date:"2026-04-26",steps:15039},
+  {date:"2026-04-27",steps:8236},
 ];
 
 // STATE
-let sessions=loadS(),weights=loadW(),tab='Historial',pSub='Treadmill',hSub='General';
+window.sessions=loadS();window.weights=loadW();window.tab='Historial';window.pSub='Treadmill';window.hSub='General';
 const nd=new Date();
-let cY=nd.getFullYear(),cM=nd.getMonth(),selDay=null,selEndDay=null,selSimDay=null,editId=null,delId=null,expRec=null,expEnd=null,expSim=null,expZone=null;
+window.cY=nd.getFullYear();window.cM=nd.getMonth();window.selDay=null;window.selEndDay=null;window.selSimDay=null;window.editId=null;window.delId=null;window.expRec=null;window.expEnd=null;window.expSim=null;window.expZone=null;window.expHito=null;
 const charts={};
 
 function loadS(){
@@ -344,7 +349,7 @@ function rHeader(){
   document.getElementById('hstats').innerHTML=stats.map(s=>`<div class="hs"><div class="hs-v" style="color:${s.c}">${s.v}</div><div class="hs-l">${s.l}</div></div>`).join('');
 }
 const ENDURANCE_IDS=new Set(['s30','s29','s24','s21','s17','s15','s10','s5b','s2']);
-const SIMULATION_IDS=new Set(['s31']);
+const SIMULATION_IDS=new Set(['s31','s33']);
 function getStreaks(){
   const dates=[...new Set(sessions.map(s=>s.date))].sort();
   if(!dates.length)return{cur:0,max:0,lastDate:null};
@@ -382,7 +387,7 @@ function weightTrend(){
   const kgPerDay=(recent[n-1].weight-recent[0].weight)/days;
   return kgPerDay;
 }
-const TABS=['Registrar','Historial','Progreso','Calendario','Peso','Comida','Endurance','Simulacion','Records','Totales'];
+const TABS=['Registrar','Historial','Progreso','Calendario','Peso','Comida','Endurance','Records','Totales'];
 function rTabs(){document.getElementById('tabs').innerHTML=TABS.map(t=>`<button class="tb${t===tab?' on':''}" style="${t==='Endurance'&&tab==='Endurance'?'color:#a855f7;border-bottom-color:#a855f7':t==='Endurance'?'color:#a855f7':''}" onclick="switchTab('${t}')">${t}</button>`).join('');}
 
 function switchTab(t){tab=t;selDay=null;selEndDay=null;expRec=null;expEnd=null;Object.keys(charts).forEach(destroyChart);render();}
@@ -396,7 +401,7 @@ function rContent(){
   else if(tab==='Comida'){c.innerHTML=rComida();setTimeout(rComidaCharts,100);}
   else if(tab==='Calendario')c.innerHTML=rCal();
   else if(tab==='Endurance')c.innerHTML=rEnd();
-  else if(tab==='Simulacion'){c.innerHTML=rSim();setTimeout(rSimCharts,300);}
+  else if(tab==='Simulacion'){c.innerHTML=rSim();setTimeout(rSimCharts,100);}
   else if(tab==='Records')c.innerHTML=rRecs();
   else if(tab==='Totales')c.innerHTML=rTots();
   if(tab==='Progreso')rCharts();
@@ -512,7 +517,7 @@ function rSCard(s){
             <span style="color:var(--text)">📍 ${s.distance} km</span>
             <span>·</span>
             <span>${ext?'🚶 Exterior':'🎚️ Treadmill'}</span>
-            ${(function(){if(s.inclineProfile){var avg=Math.round(s.inclineProfile.reduce(function(a,t){return a+(t.pct*(t.to-t.from));},0)/s.distance*10)/10;return'<span>·</span><span style="cursor:pointer;color:var(--a5)" onclick="event.stopPropagation();var e=document.getElementById(\'ip-'+s.id+'\');e.style.display=e.style.display==\'flex\'?\'none\':\'flex\'">Simulacion ~'+avg+'% �</span>';}if(s.incline!=null)return'<span>·</span><span>'+s.incline+'% inclinacion</span>';return'';})()}
+            ${(function(){if(s.inclineProfile){var avg=Math.round(s.inclineProfile.reduce(function(a,t){return a+(t.pct*(t.to-t.from));},0)/s.distance*10)/10;return'<span>·</span><span style="cursor:pointer;color:var(--a5)" onclick="event.stopPropagation();var e=document.getElementById(\'ip-'+s.id+'\');e.style.display=e.style.display==\'flex\'?\'none\':\'flex\'">Sim ~'+avg+'% &#9662;</span>';}if(s.incline!=null)return'<span>·</span><span>'+s.incline+'% inclinacion</span>';return'';})()}
             ${s.elevGain!=null?`<span>·</span><span>⛰️ +${s.elevGain}m</span>`:''}
             ${s.note?`<span>·</span><span style="font-style:italic">${s.note}</span>`:''}
           </div>
@@ -635,13 +640,13 @@ function rStepsMeta(){
 }
 function rProg(){
   return`<div style="display:flex;flex-direction:column;gap:18px">
-    <div class="stabs">${['General','Treadmill','Exterior'].map(t=>`<button class="stb${pSub===t?' on':''}" onclick="pSub='${t}';rContent()">${t==='Treadmill'?'🎚️ Treadmill':t==='Exterior'?'🚶 Exterior':'📊 General'}</button>`).join('')}</div>
+    <div class="stabs">${['General','Treadmill','Exterior','Endurance','Simulacion'].map(t=>`<button class="stb${pSub===t?' on':''}" onclick="pSub='${t}';rContent()">${t==='Treadmill'?'🎚️ Treadmill':t==='Exterior'?'🚶 Exterior':t==='Endurance'?'Endurance':t==='Simulacion'?'Simulacion':'📊 General'}</button>`).join('')}</div>
     ${rStepsMeta()}
     <div id="ccon"></div>
   </div>`;
 }
 function rCharts(){
-  const data=pSub==='Treadmill'?sessions.filter(s=>!isExt(s)):pSub==='Exterior'?sessions.filter(s=>isExt(s)):sessions;
+  const data=pSub==='Treadmill'?sessions.filter(s=>!isExt(s)&&!SIMULATION_IDS.has(s.id)):pSub==='Exterior'?sessions.filter(s=>isExt(s)):pSub==='Endurance'?sessions.filter(s=>ENDURANCE_IDS.has(s.id)):pSub==='Simulacion'?sessions.filter(s=>SIMULATION_IDS.has(s.id)):sessions;
   const cc=document.getElementById('ccon');if(!cc)return;
   if(data.length<2){cc.innerHTML='<div class="empty">Necesitas al menos 2 sesiones.</div>';return;}
   const lbl=data.map(s=>s.date.slice(5));
@@ -801,10 +806,75 @@ function renderFCHeatmap(){
       ${detailHtml}
     `}
   
-    <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;padding:4px 0"><div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:var(--a5)"></div><span style="font-family:var(--fm);font-size:8px;color:var(--muted)">Treadmill</span></div><div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:var(--a3)"></div><span style="font-family:var(--fm);font-size:8px;color:var(--muted)">Exterior</span></div><div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:2px;background:#fb923c;border-radius:2px"></div><span style="font-family:var(--fm);font-size:8px;color:var(--muted)">Simulacion</span></div><div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:#a855f7"></div><span style="font-family:var(--fm);font-size:8px;color:var(--muted)">Endurance</span></div><div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:var(--wt)"></div><span style="font-family:var(--fm);font-size:8px;color:var(--muted)">Peso</span></div></div>
+    <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:var(--a5)"></div><span style="font-family:var(--fm);font-size:8px;color:var(--muted)">Treadmill</span></div><div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:var(--a3)"></div><span style="font-family:var(--fm);font-size:8px;color:var(--muted)">Exterior</span></div><div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:2px;background:#fff;outline:2px solid #fb923c"></div><span style="font-family:var(--fm);font-size:8px;color:var(--muted)">Simulacion</span></div><div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:#a855f7"></div><span style="font-family:var(--fm);font-size:8px;color:var(--muted)">Endurance</span></div><div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:var(--wt)"></div><span style="font-family:var(--fm);font-size:8px;color:var(--muted)">Peso</span></div></div>
   </div>`;
 }
 
+function rHitoStats(fromDate,toDate){
+  const ss=sessions.filter(s=>s.date>=fromDate&&(!toDate||s.date<=toDate));
+  if(!ss.length)return null;
+  const km=ss.reduce((a,s)=>a+s.distance,0).toFixed(2);
+  const mins=ss.reduce((a,s)=>a+s.duration,0);
+  const h2=Math.floor(mins/60),m2=mins%60;
+  const dur=(h2>0?h2+'h ':'')+m2+'m';
+  const avgSpd=(ss.reduce((a,s)=>a+s.speedAvg,0)/ss.length).toFixed(1);
+  const incSs=ss.filter(s=>s.incline!=null);
+  const avgInc=incSs.length?(incSs.reduce((a,s)=>a+(s.incline||0),0)/incSs.length).toFixed(1):'--';
+  return {km,dur,avgSpd,avgInc,n:ss.length};
+}
+function rHitoStatsBlock(s,label){
+  if(!s)return'';
+  return '<div style="margin-top:8px;background:rgba(255,255,255,.04);border-radius:10px;padding:10px 12px;border-left:3px solid var(--a3)">'+
+    '<div style="font-family:var(--fm);font-size:9px;color:var(--a3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">'+label+'</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'+
+    '<div class="sm2"><div class="sl2">Sesiones</div><div class="sv" style="color:var(--a1)">'+s.n+'</div></div>'+
+    '<div class="sm2"><div class="sl2">Distancia</div><div class="sv" style="color:var(--a1)">'+s.km+' km</div></div>'+
+    '<div class="sm2"><div class="sl2">Tiempo total</div><div class="sv" style="color:var(--a3)">'+s.dur+'</div></div>'+
+    '<div class="sm2"><div class="sl2">Vel. prom.</div><div class="sv" style="color:var(--a5)">'+s.avgSpd+' km/h</div></div>'+
+    '<div class="sm2"><div class="sl2">Inclin. prom.</div><div class="sv" style="color:var(--a4)">'+s.avgInc+'%</div></div>'+
+    '</div></div>';
+}
+function rHitosHTML(){
+  const hitos=[{label:'Hito 1',target:95,icon:'&#127919;'},{label:'Hito 2',target:90,icon:'&#128293;'},{label:'Hito 3',target:85,icon:'&#128165;'}];
+  const f=weights[0],l=weights[weights.length-1];
+  if(!f||!l)return'';
+  const achievedEntries=hitos.map(h=>weights.find(w=>w.weight<=h.target));
+  const startDate=new Date(f.date+'T12:00:00');
+  return hitos.map((h,idx)=>{
+    const cur=l.weight,start=f.weight;
+    const tl=start-h.target,lost=start-cur;
+    const pct=Math.min(100,Math.max(0,tl>0?(lost/tl)*100:0));
+    const reached=cur<=h.target,rem=Math.max(0,cur-h.target).toFixed(2);
+    const ae=achievedEntries[idx];
+    const aDate=ae?new Date(ae.date+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'}):null;
+    const dfs=ae?Math.round((new Date(ae.date+'T12:00:00')-startDate)/(864e5)):null;
+    const pe=idx>0?achievedEntries[idx-1]:null;
+    const pLabel=idx>0?hitos[idx-1].target+' kg':null;
+    const dfp=ae&&pe?Math.round((new Date(ae.date+'T12:00:00')-new Date(pe.date+'T12:00:00'))/(864e5)):null;
+    const toDate=ae?ae.date:null;
+    const sAll=reached?rHitoStats('2026-03-20',toDate):null;
+    const sPrev=reached&&idx>0&&pe?rHitoStats(pe.date,toDate):null;
+    const hid='hito-'+idx;
+    const isOpen=expHito===hid;
+    return '<div class="card" style="border-color:'+(reached?'var(--a3)':'rgba(255,255,255,.08)')+'">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;cursor:pointer" onclick="expHito=expHito===\''+hid+'\'?null:\''+hid+'\';rContent()">'+
+        '<div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">'+(reached?'&#9989;':h.icon)+'</span>'+
+        '<div>'+
+          '<div style="font-family:var(--fh);font-weight:700;font-size:15px;color:'+(reached?'var(--a3)':'var(--a1)')+'"> '+h.label+' &mdash; '+h.target+' kg</div>'+
+          '<div style="font-family:var(--fm);font-size:9px;color:var(--muted)">'+(reached?'&#161;COMPLETADO!':'Faltan '+rem+' kg')+'</div>'+
+          (reached&&aDate?
+            '<div style="font-family:var(--fm);font-size:9px;color:var(--a3);margin-top:3px">&#128197; '+aDate+'</div>'+
+            '<div style="font-family:var(--fm);font-size:9px;color:var(--muted);margin-top:2px">Desde 20 mar: <span style="color:var(--a3)">'+dfs+' dias</span>'+(dfp!==null?' &middot; Desde '+pLabel+': <span style="color:var(--a1)">'+dfp+' dias</span>':'')+'</div>'+
+            '<div style="font-family:var(--fm);font-size:9px;color:var(--a5);margin-top:2px">'+(isOpen?'&#9650;':'&#9660;')+' Estadisticas</div>'
+          :'')+
+        '</div></div>'+
+        '<div style="font-family:var(--fh);font-weight:800;font-size:22px;color:'+(reached?'var(--a3)':'var(--a1)')+'">'+pct.toFixed(0)+'<span style="font-size:12px;color:var(--muted)">%</span></div>'+
+      '</div>'+
+      (reached&&isOpen?rHitoStatsBlock(sAll,'Desde 20 mar hasta este hito')+(idx>0?rHitoStatsBlock(sPrev,'Desde hito anterior'):''):'')+
+      '<div class="hb-bg"><div class="hb-f" style="width:'+pct+'%;background:'+(reached?'var(--a3)':'linear-gradient(90deg,var(--a1),var(--a4))')+'"></div></div>'+
+    '</div>';
+  }).join('');
+}
 // PESO
 function rPeso(){
   const f=weights[0],l=weights[weights.length-1];
@@ -843,38 +913,7 @@ function rPeso(){
     </div>`:''}
     <div style="display:flex;flex-direction:column;gap:10px">
       <div class="sl">🏁 Hitos de pérdida de peso</div>
-      ${(()=>{
-        // Pre-compute achieved entries for all hitos to calculate inter-hito days
-        const achievedEntries=hitos.map(h=>weights.find(w=>w.weight<=h.target));
-        const startDate=new Date(f.date+'T12:00:00');
-        return hitos.map((h,idx)=>{
-          const cur=l?l.weight:f.weight,start=f.weight;
-          const tl=start-h.target,lost=start-cur;
-          const pct=Math.min(100,Math.max(0,tl>0?(lost/tl)*100:0));
-          const reached=cur<=h.target,rem=Math.max(0,cur-h.target).toFixed(2);
-          const achievedEntry=achievedEntries[idx];
-          const achievedDate=achievedEntry?new Date(achievedEntry.date+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'}):null;
-          const daysFromStart=achievedEntry?Math.round((new Date(achievedEntry.date+'T12:00:00')-startDate)/(1000*60*60*24)):null;
-          // Days from previous hito (for hitos 2 and 3)
-          const prevEntry=idx>0?achievedEntries[idx-1]:null;
-          const prevLabel=idx>0?hitos[idx-1].target+' kg':null;
-          const daysFromPrev=achievedEntry&&prevEntry?Math.round((new Date(achievedEntry.date+'T12:00:00')-new Date(prevEntry.date+'T12:00:00'))/(1000*60*60*24)):null;
-          return`<div class="card" style="border-color:${reached?'var(--a3)':'rgba(255,255,255,.08)'}">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-              <div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">${reached?'✅':h.icon}</span>
-              <div>
-                <div style="font-family:var(--fh);font-weight:700;font-size:15px;color:${reached?'var(--a3)':'var(--a1)'}"> ${h.label} — ${h.target} kg</div>
-                <div style="font-family:var(--fm);font-size:9px;color:var(--muted)">${reached?'¡COMPLETADO!':'Faltan '+rem+' kg'}</div>
-                ${reached&&achievedDate?`<div style="font-family:var(--fm);font-size:9px;color:var(--a3);margin-top:3px">📅 ${achievedDate}</div>
-                <div style="font-family:var(--fm);font-size:9px;color:var(--muted);margin-top:2px">⏱ Desde 20 mar: <span style="color:var(--a3)">${daysFromStart} días</span>${daysFromPrev!==null?` · Desde ${prevLabel}: <span style="color:var(--a1)">${daysFromPrev} días</span>`:''}</div>`:''
-                }
-              </div></div>
-              <div style="font-family:var(--fh);font-weight:800;font-size:22px;color:${reached?'var(--a3)':'var(--a1)'}">${pct.toFixed(0)}<span style="font-size:12px;color:var(--muted)">%</span></div>
-            </div>
-            <div class="hb-bg"><div class="hb-f" style="width:${pct}%;background:${reached?'var(--a3)':'linear-gradient(90deg,var(--a1),var(--a4))'}"></div></div>
-          </div>`;
-        }).join('');
-      })()}
+      ${rHitosHTML()}
     </div>
     ${l&&l.weight>85?`<div class="card" style="border-color:rgba(57,255,110,.2);background:rgba(57,255,110,.04)">
       <div style="color:var(--a3);font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;gap:6px"><span style="font-size:14px">📈</span>Proyecciones para llegar a 85 kg</div>
@@ -963,7 +1002,7 @@ function rCal(){
       <div class="cal-dots">
         ${hasTm?`<div style="width:8px;height:8px;border-radius:50%;background:var(--a5)"></div>`:''}
         ${hasE?`<div style="width:8px;height:8px;border-radius:50%;background:var(--a3)"></div>`:''}
-        ${hasSim?`<div style="width:9px;height:9px;border-radius:2px;background:#fb923c;outline:1px solid #fb923c"></div>`:''}
+        ${hasSim?`<div style="width:8px;height:8px;border-radius:2px;background:#fff;outline:2px solid #fb923c"></div>`:''}
         ${hasW?`<div style="width:8px;height:8px;border-radius:50%;background:var(--wt)"></div>`:''}
         ${hasEnd?`<div style="width:8px;height:8px;border-radius:50%;background:#a855f7"></div>`:''}
       </div>
@@ -1435,12 +1474,10 @@ function rSim(){
     '</div>';
 }
 function rSimCharts(){
-  if(typeof Chart==='undefined')return;
   var simArr=sessions.filter(function(s){return SIMULATION_IDS.has(s.id);}).sort(function(a,b){return a.date.localeCompare(b.date);});
   if(!simArr.length)return;
   var lbl=simArr.map(function(s){return s.date.slice(5);}),col='#fb923c';
-  Chart.defaults.color='#8a9bb0';
-  [{id:'sc1',d:simArr.map(function(s){return s.distance;})},{id:'sc2',d:simArr.map(function(s){return s.speedAvg;})},{id:'sc3',d:simArr.map(function(s){return s.hrAvg;})},{id:'sc4',d:simArr.map(function(s){return s.duration;})}].forEach(function(x){
+  [{id:'sc1',d:simArr.map(function(s){return s.distance;})},{id:'sc2',d:simArr.map(function(s){return s.speedAvg;})}].forEach(function(x){
     var ctx=document.getElementById(x.id);if(!ctx)return;destroyChart(x.id);
     charts[x.id]=new Chart(ctx,{type:'line',data:{labels:lbl,datasets:[{data:x.d,borderColor:col,backgroundColor:col+'18',borderWidth:2,pointRadius:4,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'}},y:{grid:{color:'rgba(255,255,255,.05)'}}}}});
   });
