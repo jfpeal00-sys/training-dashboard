@@ -148,7 +148,7 @@ const SS=[
   {id:"s31",date:"2026-04-26",duration:63,distance:3.81,calories:357,totalCalories:2748,steps:5043,hrAvg:121,hrMax:132,speedAvg:3.6,speedMax:3.6,incline:2,note:"Infantry",inclineProfile:[{from:0,to:1.75,pct:1},{from:1.75,to:3.81,pct:2}]},
   {id:"s32",date:"2026-04-26",duration:81,distance:4.94,calories:405,totalCalories:2748,steps:8152,hrAvg:115,hrMax:126,speedAvg:3.9,speedMax:4.3,elevGain:21.6,note:"exterior"},
   {id:"s33",date:"2026-04-27",duration:63,distance:3.60,calories:372,totalCalories:2431,steps:4862,hrAvg:115,hrMax:130,speedAvg:3.6,speedMax:3.6,incline:2,note:"Infantry",inclineProfile:[{from:0,to:1.75,pct:1},{from:1.75,to:3.60,pct:2}]},
-  {id:"s34",date:"2026-04-28",duration:61,distance:3.61,calories:348,speedAvg:3.6,speedMax:3.6,hrAvg:131,hrMax:null,steps:4769,incline:2,note:"Infantry",inclineProfile:[{from:0,to:1.75,pct:1},{from:1.75,to:3.61,pct:2}],rower:{duration:17,calories:152,hrAvg:123,resistance:4}},
+  {id:"s34",date:"2026-04-28",duration:61,distance:3.61,calories:348,totalCalories:2523,speedAvg:3.6,speedMax:3.6,hrAvg:131,hrMax:null,steps:4769,incline:2,note:"Infantry",inclineProfile:[{from:0,to:1.75,pct:1},{from:1.75,to:3.61,pct:2}],rower:{duration:17,calories:152,hrAvg:123,resistance:4}},
 ];
 const SW=[
   {date:"2026-03-20",weight:102.15},{date:"2026-04-03",weight:99.65},
@@ -163,6 +163,7 @@ const SW=[
   {date:"2026-04-24",weight:95.85},
   {date:"2026-04-25",weight:95.35},
   {date:"2026-04-27",weight:95.15},
+  {date:"2026-04-28",weight:94.80}
 ];
 // Calorías consumidas por día — actualizado manualmente
 const KCAL_RECORDS={
@@ -240,6 +241,7 @@ const DAILY_STEPS=[
   {date:"2026-04-25",steps:8816},
   {date:"2026-04-26",steps:15039},
   {date:"2026-04-27",steps:8236},
+  {date:"2026-04-28",steps:7593}
 ];
 
 // STATE
@@ -502,15 +504,15 @@ function rSCard(s){
   if(isZOpen){
     var zRows=FC_ZONES.map(function(zn){
       var isA=z&&zn.label===z.label;
-      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;border-radius:6px;background:'+(isA?zn.color+'22':'transparent')+';border:1px solid '+(isA?zn.color+'55':'transparent')+'">'
-        +'<div style="display:flex;align-items:center;gap:6px"><span>'+zn.icon+'</span><span style="font-family:var(--fh);font-size:13px;color:'+zn.color+'">'+zn.label+'</span></div>'
-        +'<span style="font-family:var(--fm);font-size:10px;color:var(--muted)">'+(zn.min===0?'< 111 bpm':zn.max===999?'\u2265 167 bpm':zn.min+' \u2013 '+zn.max+' bpm')+' <span style="color:'+zn.color+';opacity:.7">'+zn.pct+'</span></span>'
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:3px 6px;border-radius:5px;background:'+(isA?zn.color+'22':'transparent')+';border:1px solid '+(isA?zn.color+'55':'transparent')+'">'
+        +'<div style="display:flex;align-items:center;gap:6px"><span>'+zn.icon+'</span><span style="font-family:var(--fh);font-size:11px;color:'+zn.color+'">'+zn.label+'</span></div>'
+        +'<span style="font-family:var(--fm);font-size:8px;color:var(--muted)">'+(zn.min===0?'< 111 bpm':zn.max===999?'\u2265 167 bpm':zn.min+' \u2013 '+zn.max+' bpm')+' <span style="color:'+zn.color+';opacity:.7">'+zn.pct+'</span></span>'
         +'</div>';
     }).join('');
-    zPopup='<div style="background:rgba(0,0,0,.9);border:1px solid '+(z?z.color+'33':'#333')+';border-radius:10px;padding:10px 12px;margin-top:6px;display:flex;flex-direction:column;gap:5px">'
-      +'<div style="color:var(--muted);font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Zonas de FC \xb7 FC m\xe1x estimada: 185 bpm</div>'
+    zPopup='<div style="background:rgba(0,0,0,.9);border:1px solid '+(z?z.color+'33':'#333')+';border-radius:10px;padding:7px 10px;margin-top:6px;display:flex;flex-direction:column;gap:3px">'
+      +'<div style="color:var(--muted);font-family:var(--fm);font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Zonas de FC \xb7 FC m\xe1x estimada: 185 bpm</div>'
       +zRows
-      +'<div style="color:var(--muted);font-family:var(--fm);font-size:9px;margin-top:4px;text-align:center">Tu FC promedio: <span style="color:'+(z?z.color:'#fff')+'">'+s.hrAvg+' bpm</span></div>'
+      +'<div style="color:var(--muted);font-family:var(--fm);font-size:8px;margin-top:3px;text-align:center">Tu FC promedio: <span style="color:'+(z?z.color:'#fff')+'">'+s.hrAvg+' bpm</span></div>'
       +'</div>';
   }
   var inclineBlock='';
@@ -530,7 +532,7 @@ function rSCard(s){
       +'</div>'
       +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">'
         +'<span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Inclin. promedio</span>'
-        +'<span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a5)">~'+avg+' <span style="font-size:10px;color:var(--muted)">%</span></span>'
+        +'<span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a5)">~'+avg+' <span style="font-size:8px;color:var(--muted)">%</span></span>'
       +'</div>'
       +'<div style="font-family:var(--fm);font-size:9px;color:var(--a5);cursor:pointer;margin-bottom:4px" onclick="event.stopPropagation();var e=document.getElementById(\'ip-'+s.id+'\');e.style.display=e.style.display==\'none\'?\'block\':\'none\'">'
         +'&#x1F5FA; Perfil de inclinaci\xf3n &#9662;'
@@ -1647,4 +1649,6 @@ function rSimCharts(){
     charts[x.id]=new Chart(ctx,{type:'line',data:{labels:lbl,datasets:[{data:x.d,borderColor:col,backgroundColor:col+'18',borderWidth:2,pointRadius:4,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'}},y:{grid:{color:'rgba(255,255,255,.05)'}}}}});
   });
 }
-</script>
+</script></script>
+</body>
+</html>
