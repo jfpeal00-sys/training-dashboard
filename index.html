@@ -148,7 +148,7 @@ const SS=[
   {id:"s31",date:"2026-04-26",duration:63,distance:3.81,calories:357,totalCalories:2748,steps:5043,hrAvg:121,hrMax:132,speedAvg:3.6,speedMax:3.6,incline:2,note:"Infantry",inclineProfile:[{from:0,to:1.75,pct:1},{from:1.75,to:3.81,pct:2}]},
   {id:"s32",date:"2026-04-26",duration:81,distance:4.94,calories:405,totalCalories:2748,steps:8152,hrAvg:115,hrMax:126,speedAvg:3.9,speedMax:4.3,elevGain:21.6,note:"exterior"},
   {id:"s33",date:"2026-04-27",duration:63,distance:3.60,calories:372,totalCalories:2431,steps:4862,hrAvg:115,hrMax:130,speedAvg:3.6,speedMax:3.6,incline:2,note:"Infantry",inclineProfile:[{from:0,to:1.75,pct:1},{from:1.75,to:3.60,pct:2}]},
-  {id:"s34",date:"2026-04-28",duration:61,distance:3.61,calories:348,totalCalories:2523,speedAvg:3.6,speedMax:3.6,hrAvg:131,hrMax:null,steps:4769,incline:2,note:"Infantry",inclineProfile:[{from:0,to:1.75,pct:1},{from:1.75,to:3.61,pct:2}],rower:{duration:17,calories:152,hrAvg:123,resistance:4}},
+  {id:"s34",date:"2026-04-28",duration:61,distance:3.61,calories:348,totalCalories:2523,speedAvg:3.6,speedMax:3.6,hrAvg:131,hrMax:null,steps:4769,incline:2,note:"Infantry",inclineProfile:[{from:0,to:1.75,pct:1},{from:1.75,to:3.61,pct:2}],rower:{duration:17,caloriesOrig:152,caloriesAdj:197,hrAvg:123,resistance:4}},
 ];
 const SW=[
   {date:"2026-03-20",weight:102.15},{date:"2026-04-03",weight:99.65},
@@ -456,6 +456,24 @@ function rReg(){
     </div>
     <div class="sl">📝 Nota</div>
     <div><label>Nota opcional</label><input type="text" id="fn" value="${v('note')}" placeholder="Caminata exterior..."></div>
+    <div class="sl">🚣 Remadora</div>
+    <div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:12px;padding:13px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <input type="checkbox" id="frow" style="width:18px;height:18px;accent-color:#22c55e;cursor:pointer" ${s&&s.rower?'checked':''} onchange="upRower()">
+        <label style="color:#22c55e;margin:0;cursor:pointer" for="frow">Incluir sesión de remadora</label>
+      </div>
+      <div id="rower-fields" style="display:${s&&s.rower?'flex':'none'};flex-direction:column;gap:10px">
+        <div class="g2">
+          <div><label>Duración (min) *</label><input type="number" id="frdu" value="${s&&s.rower?s.rower.duration:''}" placeholder="15" oninput="upRower()"></div>
+          <div><label>FC Promedio (bpm) *</label><input type="number" id="frhr" value="${s&&s.rower?s.rower.hrAvg:''}" placeholder="125" oninput="upRower()"></div>
+        </div>
+        <div class="g2">
+          <div><label>Resistencia (1-10)</label><input type="number" id="frres" min="1" max="10" value="${s&&s.rower?s.rower.resistance:''}" placeholder="5"></div>
+          <div><label>Cal. reloj (ref.)</label><input type="number" id="frorigkcal" value="${s&&s.rower?s.rower.caloriesOrig:''}" placeholder="152" style="border-color:rgba(34,197,94,.3)"></div>
+        </div>
+        <div id="rower-kcal" style="display:none;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:10px;padding:10px 14px;font-family:var(--fm);font-size:12px;color:#22c55e"></div>
+      </div>
+    </div>
     <button class="bp" onclick="saveSession()">${editId?'Actualizar sesión':'Guardar sesión'}</button>
     ${editId?'<button class="bg2" onclick="cancelEdit()">Cancelar edición</button>':''}
   </div>`;
@@ -467,11 +485,47 @@ function upPace(){
   if(d>0&&di>0){el.style.display='block';el.innerHTML=`🕐 Pace: <strong>${pace(d,di)} min/km</strong>`;}
   else el.style.display='none';
 }
+function calcRowerKcal(hrAvg,minutes,weightKg){
+  // Keytel et al. (2005) - Men formula
+  return Math.round(((hrAvg*0.6309)+(weightKg*0.1988)+(35*0.2017)-55.0969)*minutes/4.184);
+}
+function upRower(){
+  const chk=document.getElementById('frow');
+  const fields=document.getElementById('rower-fields');
+  const kcalDiv=document.getElementById('rower-kcal');
+  if(!chk||!fields||!kcalDiv)return;
+  fields.style.display=chk.checked?'flex':'none';
+  if(!chk.checked){kcalDiv.style.display='none';return;}
+  const dur=parseFloat(document.getElementById('frdu')?.value)||0;
+  const hr=parseFloat(document.getElementById('frhr')?.value)||0;
+  if(dur>0&&hr>0){
+    // Get weight from last registered weight entry
+    const dateVal=document.getElementById('fd')?.value;
+    const w=dateVal?wForDate(dateVal):null;
+    const peso=w?w.weight:97;
+    const kcal=calcRowerKcal(hr,dur,peso);
+    kcalDiv.style.display='block';
+    kcalDiv.innerHTML='🔥 Calorías calculadas: <strong>'+kcal+' kcal</strong>'
+      +'<span style="color:rgba(34,197,94,.6);font-size:10px;margin-left:6px">'
+      +'(FC '+hr+' bpm · '+dur+' min · '+peso+' kg)</span>';
+  } else {
+    kcalDiv.style.display='none';
+  }
+}
 function gv(id){const e=document.getElementById(id);return e?e.value:'';}
 function saveSession(){
   const dt=gv('fd');if(!dt||!gv('fdu'))return;
   const n=x=>x!==''&&x!=null?Number(x):null;
   const s={id:editId||Date.now().toString(),date:dt,duration:n(gv('fdu')),distance:n(gv('fdi')),calories:n(gv('fc')),totalCalories:n(gv('ftc')),steps:n(gv('fst')),hrAvg:n(gv('fhr')),hrMax:n(gv('fhrm')),speedAvg:n(gv('fsp')),speedMax:n(gv('fspm')),incline:n(gv('fin')),note:gv('fn')||undefined,elevGain:n(gv('feg')),elevLow:n(gv('fel')),elevHigh:n(gv('feh')),ascent:n(gv('fas')),descent:n(gv('fde'))};
+  // Rower section
+  const rowChk=document.getElementById('frow');
+  const rowDur=n(gv('frdu'));const rowHr=n(gv('frhr'));const rowRes=n(gv('frres'));
+  if(rowChk&&rowChk.checked&&rowDur&&rowHr){
+    const w=wForDate(dt);const peso=w?w.weight:97;
+    const kcal=calcRowerKcal(rowHr,rowDur,peso);
+    const rowOrigKcal=n(gv('frorigkcal'))||null;
+    s.rower={duration:rowDur,hrAvg:rowHr,resistance:rowRes||null,caloriesAdj:kcal,caloriesOrig:rowOrigKcal};
+  }
   if(editId){sessions=sessions.map(x=>x.id===editId?s:x);editId=null;}
   else sessions=[...sessions,s].sort((a,b)=>a.date.localeCompare(b.date));
   saveS();toast();render();
@@ -594,11 +648,12 @@ function rSCard(s){
       +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Duraci\xf3n</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+fd(s.rower.duration)+'</span></div>'
       +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Resistencia</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+s.rower.resistance+' <span style="font-size:10px;color:var(--muted)">nivel</span></span></div>'
       +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">FC promedio</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a2)">'+s.rower.hrAvg+' <span style="font-size:10px;color:var(--muted)">bpm</span></span></div>'
-      +'<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Calor\xedas</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a4)">'+s.rower.calories+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Cal. ajustadas (FC)</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a4)">'+s.rower.caloriesAdj+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>'
+      +(s.rower.caloriesOrig?'<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Cal. reloj (ref.)</span><span style="font-family:var(--fh);font-weight:700;font-size:13px;color:var(--muted)">'+s.rower.caloriesOrig+' <span style="font-size:10px">kcal</span></span></div>':'')
     +'</div>';
   }
   var totalDur=s.rower?fd(s.duration+s.rower.duration):fd(s.duration);
-  var totalCal=s.rower?(calTM+s.rower.calories):calTM;
+  var totalCal=s.rower?(calTM+(s.rower.caloriesAdj||s.rower.calories||0)):calTM;
   var totalHR=s.rower?Math.round((s.hrAvg*s.duration+s.rower.hrAvg*s.rower.duration)/(s.duration+s.rower.duration)):s.hrAvg;
   var totalLabel=s.rower?'Totales (TM + Rower)':'Totales';
   var totalBox='<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:13px;padding:12px 13px;">'
@@ -696,7 +751,7 @@ function rCharts(){
     {id:'c5',label:'Calorías (kcal) · ↑ mejor · 🟠 sin inclin. · 🔵 con inclin.',data:data.map(s=>calAdj(s)),type:'bar',color:'#ffa020',colorFn:s=>s.incline&&s.incline>0?'#00e5ff':'#ffa020'},
     {id:'c6',label:'FC promedio (bpm) · ↓ mejor',data:data.map(s=>s.hrAvg),type:'line',color:'#ff2020',yMin:90,yMax:160},
     {id:'c7',label:'Duración por sesión (min) · ↑ mejor',data:data.map(s=>s.duration),type:'line',color:'#60a5fa'},
-    ...(pSub==='Rower'?[{id:'c8r',label:'Duraci\xf3n Rower (min)',data:data.map(s=>s.rower?s.rower.duration:null),type:'bar',color:'#22c55e'},{id:'c9r',label:'Resistencia Rower',data:data.map(s=>s.rower?s.rower.resistance:null),type:'bar',color:'#22c55e',yMin:0,yMax:10},{id:'c10r',label:'Cal. Rower (kcal)',data:data.map(s=>s.rower?s.rower.calories:null),type:'bar',color:'#4ade80'},{id:'c11r',label:'FC Rower (bpm)',data:data.map(s=>s.rower?s.rower.hrAvg:null),type:'line',color:'#ff2020',yMin:90,yMax:160}]:[]),
+    ...(pSub==='Rower'?[{id:'c8r',label:'Duraci\xf3n Rower (min)',data:data.map(s=>s.rower?s.rower.duration:null),type:'bar',color:'#22c55e'},{id:'c9r',label:'Resistencia Rower',data:data.map(s=>s.rower?s.rower.resistance:null),type:'bar',color:'#22c55e',yMin:0,yMax:10},{id:'c10r',label:'Cal. Rower aj. (kcal)',data:data.map(s=>s.rower?(s.rower.caloriesAdj||s.rower.calories||0):null),type:'bar',color:'#4ade80'},{id:'c11r',label:'FC Rower (bpm)',data:data.map(s=>s.rower?s.rower.hrAvg:null),type:'line',color:'#ff2020',yMin:90,yMax:160}]:[]),
     ...(pSub==='Treadmill'?[{id:'c8',label:'Inclinación (%) · contexto',data:data.map(s=>s.incline),type:'bar',color:'#ff4500',yMin:0,yMax:5}]:[]),
     {id:'c9',label:'Calorías consumidas por día (kcal) · ↓ mejor',data:data.map(s=>{var r=kcalDbGet()[s.date];return r?r.kcal:null;}),type:'bar',color:'#c084fc',colorFn:null},
   ];
@@ -1083,7 +1138,7 @@ function rCal(){
                 +'<div class="sm2"><div class="sl2">Duraci\xf3n</div><div class="sv" style="color:#22c55e">'+fd(s.rower.duration)+'</div></div>'
                 +'<div class="sm2"><div class="sl2">Resistencia</div><div class="sv" style="color:#22c55e">Niv. '+s.rower.resistance+'</div></div>'
                 +'<div class="sm2"><div class="sl2">FC prom</div><div class="sv" style="color:var(--a2)">'+s.rower.hrAvg+' bpm</div></div>'
-                +'<div class="sm2"><div class="sl2">Calor\xedas</div><div class="sv" style="color:var(--a4)">'+s.rower.calories+' kcal</div></div>'
+                +'<div class="sm2"><div class="sl2">Cal. Rower (aj.)</div><div class="sv" style="color:var(--a4)">'+((s.rower.caloriesAdj||s.rower.calories||0))+' kcal</div></div>'
               +'</div></div>';
           }
           return '<div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px 12px;border-left:3px solid '+accentColor+';margin-bottom:8px">'
@@ -1322,7 +1377,7 @@ function rRecs(){
           {l:'Duraci\xf3n TM',v:fd(s.duration),c:'var(--a3)'},
           {l:'Duraci\xf3n Rower',v:fd(s.rower.duration),c:'#22c55e'},
           {l:'Resistencia',v:'Nivel '+s.rower.resistance,c:'#22c55e'},
-          {l:'Cal. Rower',v:s.rower.calories+' kcal',c:'var(--a4)'},
+          {l:'Cal. Rower (aj.)',v:(s.rower.caloriesAdj||s.rower.calories||0)+' kcal',c:'var(--a4)'},{l:'Cal. Rower (reloj)',v:(s.rower.caloriesOrig||'—')+' kcal',c:'var(--muted)'},
           {l:'FC Rower',v:s.rower.hrAvg+' bpm',c:'var(--a2)'}
         ].filter(function(x){return x&&x.v!=null;});
         return '<div>'
@@ -1358,7 +1413,7 @@ function rRecs(){
       content='<div class="empty">Sin sesiones de rower a\xfan.</div>';
     } else {
       content+=RBR('Duraci\xf3n Rower','&#x23F1;&#xFE0F;',top5r('duration','desc'),function(s){return fd(s.rower.duration);},'#22c55e')
-        +RBR('Calor\xedas Rower','&#x1F525;',top5r('calories','desc'),function(s){return s.rower.calories+' kcal';},'#4ade80')
+        +RBR('Calor\xedas Rower (aj.)','&#x1F525;',top5r('caloriesAdj','desc'),function(s){return (s.rower.caloriesAdj||s.rower.calories||0)+' kcal';},'#4ade80')
         +RBR('FC m\xe1s baja Rower','&#x2764;&#xFE0F;',top5r('hrAvg','asc'),function(s){return s.rower.hrAvg+' bpm';},'var(--a2)')
         +RBR('Mayor resistencia','&#x1F4AA;',top5r('resistance','desc'),function(s){return 'Nivel '+s.rower.resistance;},'#22c55e');
     }
@@ -1435,7 +1490,7 @@ function rTots(){
       content='<div class="empty">Sin sesiones de rower a\xfan.</div>';
     } else {
       var totDur=rs.reduce(function(a,s){return a+s.rower.duration;},0);
-      var totCal=rs.reduce(function(a,s){return a+s.rower.calories;},0);
+      var totCal=rs.reduce(function(a,s){return a+(s.rower.caloriesAdj||s.rower.calories||0);},0);
       var avgFC=Math.round(rs.reduce(function(a,s){return a+s.rower.hrAvg*s.rower.duration;},0)/totDur);
       var avgRes=Math.round(rs.reduce(function(a,s){return a+s.rower.resistance;},0)/rs.length*10)/10;
       content='<div style="color:#22c55e;font-family:var(--fh);font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">&#x1F6A3; Rower</div>'
