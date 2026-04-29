@@ -1060,16 +1060,47 @@ function rCal(){
         <button onclick="selDay=null;rContent()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px">✕</button>
       </div>
       ${we?`<div style="display:flex;align-items:center;gap:10px;background:rgba(212,130,10,.12);border:1px solid rgba(212,130,10,.3);border-radius:10px;padding:8px 12px;margin-bottom:8px"><span>⚖️</span><span style="color:var(--muted);font-family:var(--fm);font-size:10px;text-transform:uppercase">Peso</span><span style="color:var(--wt);font-family:var(--fh);font-weight:700;font-size:22px;margin-left:auto">${we.weight} <span style="font-size:12px;color:var(--muted);font-weight:400">kg</span></span></div>`:''}
-      ${ds2.map(s=>{
-        const p2=pace(s.duration,s.distance),ext2=isExt(s);
-        return`<div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px 12px;border-left:3px solid ${ext2?'var(--a3)':'var(--a5)'};margin-bottom:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-            <div style="font-family:var(--fh);font-weight:700;font-size:15px;color:${ext2?'var(--a3)':'var(--a5)'}">${ext2?'🚶 ':'🎚️ '}${ext2?(s.note||'Exterior'):'Treadmill'}</div>
-            <div style="font-family:var(--fm);font-size:10px;color:var(--muted)">${fd(s.duration)} · ${s.distance} km</div>
-          </div>
-          <div class="g3">${[{l:'Cal.',v:s.calories,u:'kcal',c:'var(--a4)'},{l:'FC',v:s.hrAvg,u:'bpm',c:'var(--a2)'},{l:'Pasos',v:s.steps?.toLocaleString(),u:'',c:'var(--a3)'},{l:'Vel.',v:s.speedAvg,u:'km/h',c:'var(--a1)'},p2?{l:'Pace',v:p2,u:'min/km',c:'var(--a5)'}:null,s.incline!=null?{l:'Inclin.',v:`${s.incline}%`,u:'',c:'var(--a5)'}:null].filter(x=>x&&x.v!=null).map(x=>`<div class="sm2"><div class="sl2">${x.l}</div><div class="sv" style="color:${x.c}">${x.v} <span style="color:var(--muted);font-size:9px;font-weight:400">${x.u}</span></div></div>`).join('')}</div>
-        </div>`;
-      }).join('')}
+      ${(function(){
+        return ds2.map(function(s){
+          var p2=pace(s.duration,s.distance),ext2=isExt(s),isSim=SIMULATION_IDS.has(s.id);
+          var accentColor=ext2?'var(--a3)':'var(--a5)';
+          var typeLabel=ext2?'\ud83d\udeb6 '+(s.note||'Exterior'):(isSim?'\ud83c\udfc3 Treadmill (Simulaci\xf3n)':'\ud83c\udfc3 Treadmill');
+          var durLabel=s.rower?fd(s.duration)+' TM + '+fd(s.rower.duration)+' Rower':fd(s.duration);
+          var inclineInfo='';
+          if(s.inclineProfile){
+            var avg=Math.round(s.inclineProfile.reduce(function(a,t){return a+(t.pct*(t.to-t.from));},0)/s.distance*10)/10;
+            inclineInfo='<div class="sm2"><div class="sl2">Ruta</div><div class="sv" style="color:var(--a5)">'+(s.note||'')+' <span style="font-size:9px;color:var(--muted)">~'+avg+'%</span></div></div>';
+          } else if(s.incline!=null){
+            inclineInfo='<div class="sm2"><div class="sl2">Inclin.</div><div class="sv" style="color:var(--a5)">'+s.incline+'%</div></div>';
+          }
+          var rowerBlock='';
+          if(s.rower){
+            rowerBlock='<div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:8px 10px;margin-top:8px">'
+              +'<div style="font-family:var(--fm);font-size:8px;color:#22c55e;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">&#x1F6A3; Rower</div>'
+              +'<div class="g3">'
+                +'<div class="sm2"><div class="sl2">Duraci\xf3n</div><div class="sv" style="color:#22c55e">'+fd(s.rower.duration)+'</div></div>'
+                +'<div class="sm2"><div class="sl2">Resistencia</div><div class="sv" style="color:#22c55e">Niv. '+s.rower.resistance+'</div></div>'
+                +'<div class="sm2"><div class="sl2">FC prom</div><div class="sv" style="color:var(--a2)">'+s.rower.hrAvg+' bpm</div></div>'
+                +'<div class="sm2"><div class="sl2">Calor\xedas</div><div class="sv" style="color:var(--a4)">'+s.rower.calories+' kcal</div></div>'
+              +'</div></div>';
+          }
+          return '<div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px 12px;border-left:3px solid '+accentColor+';margin-bottom:8px">'
+            +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+              +'<div style="font-family:var(--fh);font-weight:700;font-size:15px;color:'+accentColor+'">'+typeLabel+'</div>'
+              +'<div style="font-family:var(--fm);font-size:10px;color:var(--muted)">'+durLabel+' \xb7 '+s.distance+' km</div>'
+            +'</div>'
+            +'<div class="g3">'
+              +'<div class="sm2"><div class="sl2">Cal.</div><div class="sv" style="color:var(--a4)">'+s.calories+' <span style="color:var(--muted);font-size:9px">kcal</span></div></div>'
+              +'<div class="sm2"><div class="sl2">FC</div><div class="sv" style="color:var(--a2)">'+s.hrAvg+' <span style="color:var(--muted);font-size:9px">bpm</span></div></div>'
+              +'<div class="sm2"><div class="sl2">Pasos</div><div class="sv" style="color:var(--a3)">'+(s.steps?s.steps.toLocaleString():'-')+'</div></div>'
+              +'<div class="sm2"><div class="sl2">Vel.</div><div class="sv" style="color:var(--a1)">'+s.speedAvg+' <span style="color:var(--muted);font-size:9px">km/h</span></div></div>'
+              +(p2?'<div class="sm2"><div class="sl2">Pace</div><div class="sv" style="color:var(--a5)">'+p2+' <span style="color:var(--muted);font-size:9px">min/km</span></div></div>':'')
+              +inclineInfo
+            +'</div>'
+            +rowerBlock
+          +'</div>';
+        }).join('');
+      })()}
     </div>`;
   }
 
