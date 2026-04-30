@@ -149,6 +149,7 @@ const SS=[
   {id:"s32",date:"2026-04-26",duration:81,distance:4.94,calories:405,totalCalories:2748,steps:8152,hrAvg:115,hrMax:126,speedAvg:3.9,speedMax:4.3,elevGain:21.6,note:"exterior"},
   {id:"s33",date:"2026-04-27",duration:63,distance:3.60,calories:372,totalCalories:2431,steps:4862,hrAvg:115,hrMax:130,speedAvg:3.6,speedMax:3.6,incline:2,note:"Infantry",inclineProfile:[{from:0,to:1.75,pct:1},{from:1.75,to:3.60,pct:2}]},
   {id:"s34",date:"2026-04-28",duration:61,distance:3.61,calories:348,totalCalories:2523,speedAvg:3.6,speedMax:3.6,hrAvg:131,hrMax:null,steps:4769,incline:2,note:"Infantry",inclineProfile:[{from:0,to:1.75,pct:1},{from:1.75,to:3.61,pct:2}],rower:{duration:17,caloriesOrig:152,caloriesAdj:197,hrAvg:123,resistance:4}},
+  {id:"s35",date:"2026-04-29",duration:65,distance:3.92,calories:372,totalCalories:2494,speedAvg:3.7,speedMax:3.7,hrAvg:120,hrMax:null,steps:5156,incline:1,rower:{duration:16,caloriesOrig:135,caloriesAdj:185,hrAvg:123,hrMax:135,resistance:6}},
 ];
 const SW=[
   {date:"2026-03-20",weight:102.15},{date:"2026-04-03",weight:99.65},
@@ -163,10 +164,12 @@ const SW=[
   {date:"2026-04-24",weight:95.85},
   {date:"2026-04-25",weight:95.35},
   {date:"2026-04-27",weight:95.15},
-  {date:"2026-04-28",weight:94.80}
+  {date:"2026-04-28",weight:94.80},
+  {date:"2026-04-29",weight:94.20}
 ];
 // Calorías consumidas por día — actualizado manualmente
 const KCAL_RECORDS={
+  "2026-04-29":{kcal:1167,prot:84,carbs:109.2,fat:39.6},
   "2026-04-28":{kcal:932,prot:67.5,carbs:76.9,fat:37.8,selections:[{emoji:"x",name:"Arroz Integral 50g",qty:2,kcal:120},{emoji:"x",name:"Papa Rustica",qty:5,kcal:30},{emoji:"x",name:"Estofado de Carne 50g",qty:7,kcal:294},{emoji:"x",name:"Huevo Revuelto con Guiso",qty:3,kcal:300},{emoji:"x",name:"Salchicha Ranchera",qty:1,kcal:84},{emoji:"x",name:"Kiwi",qty:1,kcal:60},{emoji:"x",name:"Panelada",qty:16,kcal:44}]},
   "2026-04-27":{kcal:1062,prot:85,carbs:73,fat:44,selections:[{emoji:"x",name:"Arroz 50g",qty:2,kcal:120},{emoji:"x",name:"Papa Rustica",qty:6,kcal:36},{emoji:"x",name:"Filete Carne",qty:2,kcal:476},{emoji:"x",name:"Arroz 50g",qty:1,kcal:60},{emoji:"x",name:"Kiwi",qty:1,kcal:60},{emoji:"x",name:"Estofado 50g",qty:7,kcal:294},{emoji:"x",name:"Clight",qty:16,kcal:16}]},
   "2026-04-26":{kcal:1284,prot:94,carbs:59,fat:78,selections:[{emoji:"x",name:"Arroz 50g",qty:1,kcal:60},{emoji:"x",name:"Papa Rustica",qty:8,kcal:48},{emoji:"x",name:"Filete Carne Molida",qty:2,kcal:476},{emoji:"x",name:"Huevo revuelto",qty:4,kcal:400},{emoji:"x",name:"Salchicha Ranchera",qty:2,kcal:168},{emoji:"x",name:"Jamon Sanduche Zenu",qty:3,kcal:72},{emoji:"x",name:"Kiwi",qty:1,kcal:60}]},
@@ -241,7 +244,8 @@ const DAILY_STEPS=[
   {date:"2026-04-25",steps:8816},
   {date:"2026-04-26",steps:15039},
   {date:"2026-04-27",steps:8236},
-  {date:"2026-04-28",steps:7593}
+  {date:"2026-04-28",steps:7593},
+  {date:"2026-04-29",steps:7062}
 ];
 
 // STATE
