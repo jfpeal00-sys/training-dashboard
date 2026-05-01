@@ -148,8 +148,9 @@ const SS=[
   {id:"s31",date:"2026-04-26",duration:63,distance:3.81,calories:357,totalCalories:2748,steps:5043,hrAvg:121,hrMax:132,speedAvg:3.6,speedMax:3.6,incline:2,note:"Infantry",inclineProfile:[{from:0,to:1.75,pct:1},{from:1.75,to:3.81,pct:2}]},
   {id:"s32",date:"2026-04-26",duration:81,distance:4.94,calories:405,totalCalories:2748,steps:8152,hrAvg:115,hrMax:126,speedAvg:3.9,speedMax:4.3,elevGain:21.6,note:"exterior"},
   {id:"s33",date:"2026-04-27",duration:63,distance:3.60,calories:372,totalCalories:2431,steps:4862,hrAvg:115,hrMax:130,speedAvg:3.6,speedMax:3.6,incline:2,note:"Infantry",inclineProfile:[{from:0,to:1.75,pct:1},{from:1.75,to:3.60,pct:2}]},
-  {id:"s34",date:"2026-04-28",duration:61,distance:3.61,calories:348,totalCalories:2523,speedAvg:3.6,speedMax:3.6,hrAvg:131,hrMax:null,steps:4769,incline:2,note:"Infantry",inclineProfile:[{from:0,to:1.75,pct:1},{from:1.75,to:3.61,pct:2}],rower:{duration:17,caloriesOrig:152,caloriesAdj:197,hrAvg:123,resistance:4}},
-  {id:"s35",date:"2026-04-29",duration:65,distance:3.92,calories:372,totalCalories:2494,speedAvg:3.7,speedMax:3.7,hrAvg:120,hrMax:null,steps:5156,incline:1,rower:{duration:16,caloriesOrig:135,caloriesAdj:185,hrAvg:123,hrMax:135,resistance:6}},
+  {id:"s34",date:"2026-04-28",duration:61,distance:3.61,calories:348,totalCalories:2523,speedAvg:3.6,speedMax:3.6,hrAvg:131,hrMax:null,steps:4769,incline:2,note:"Infantry",inclineProfile:[{from:0,to:1.75,pct:1},{from:1.75,to:3.61,pct:2}],rower:{duration:17,calories:152,hrAvg:123,resistance:4}},
+  {id:"s35",date:"2026-04-29",duration:65,distance:3.92,calories:372,totalCalories:2494,speedAvg:3.6,speedMax:3.6,hrAvg:120,hrMax:null,steps:5156,incline:1,rower:{duration:16,calories:135,hrAvg:123,hrMax:135,resistance:6}},
+  {id:"s36",date:"2026-04-30",duration:65,distance:3.82,calories:366,totalCalories:2548,speedAvg:3.6,speedMax:3.6,hrAvg:121,hrMax:null,steps:5068,incline:2,rower:{duration:17,calories:148,hrAvg:128,hrMax:138,resistance:6}},
 ];
 const SW=[
   {date:"2026-03-20",weight:102.15},{date:"2026-04-03",weight:99.65},
@@ -169,6 +170,8 @@ const SW=[
 ];
 // Calorías consumidas por día — actualizado manualmente
 const KCAL_RECORDS={
+  "2026-05-01":{kcal:1022,prot:78.4,carbs:118.1,fat:25},
+  "2026-04-30":{kcal:1022,prot:78.4,carbs:118.1,fat:25},
   "2026-04-29":{kcal:1167,prot:84,carbs:109.2,fat:39.6},
   "2026-04-28":{kcal:932,prot:67.5,carbs:76.9,fat:37.8,selections:[{emoji:"x",name:"Arroz Integral 50g",qty:2,kcal:120},{emoji:"x",name:"Papa Rustica",qty:5,kcal:30},{emoji:"x",name:"Estofado de Carne 50g",qty:7,kcal:294},{emoji:"x",name:"Huevo Revuelto con Guiso",qty:3,kcal:300},{emoji:"x",name:"Salchicha Ranchera",qty:1,kcal:84},{emoji:"x",name:"Kiwi",qty:1,kcal:60},{emoji:"x",name:"Panelada",qty:16,kcal:44}]},
   "2026-04-27":{kcal:1062,prot:85,carbs:73,fat:44,selections:[{emoji:"x",name:"Arroz 50g",qty:2,kcal:120},{emoji:"x",name:"Papa Rustica",qty:6,kcal:36},{emoji:"x",name:"Filete Carne",qty:2,kcal:476},{emoji:"x",name:"Arroz 50g",qty:1,kcal:60},{emoji:"x",name:"Kiwi",qty:1,kcal:60},{emoji:"x",name:"Estofado 50g",qty:7,kcal:294},{emoji:"x",name:"Clight",qty:16,kcal:16}]},
@@ -245,7 +248,8 @@ const DAILY_STEPS=[
   {date:"2026-04-26",steps:15039},
   {date:"2026-04-27",steps:8236},
   {date:"2026-04-28",steps:7593},
-  {date:"2026-04-29",steps:7062}
+  {date:"2026-04-29",steps:7062},
+  {date:"2026-04-30",steps:8318}
 ];
 
 // STATE
@@ -473,7 +477,7 @@ function rReg(){
         </div>
         <div class="g2">
           <div><label>Resistencia (1-10)</label><input type="number" id="frres" min="1" max="10" value="${s&&s.rower?s.rower.resistance:''}" placeholder="5"></div>
-          <div><label>Cal. reloj (ref.)</label><input type="number" id="frorigkcal" value="${s&&s.rower?s.rower.caloriesOrig:''}" placeholder="152" style="border-color:rgba(34,197,94,.3)"></div>
+          <div><label>Cal. reloj (ref.)</label><input type="number" id="frorigkcal" value="${s&&s.rower?s.rower.calories:''}" placeholder="152" style="border-color:rgba(34,197,94,.3)"></div>
         </div>
         <div id="rower-kcal" style="display:none;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:10px;padding:10px 14px;font-family:var(--fm);font-size:12px;color:#22c55e"></div>
       </div>
@@ -488,10 +492,6 @@ function upPace(){
   const el=document.getElementById('fpc');if(!el)return;
   if(d>0&&di>0){el.style.display='block';el.innerHTML=`🕐 Pace: <strong>${pace(d,di)} min/km</strong>`;}
   else el.style.display='none';
-}
-function calcRowerKcal(hrAvg,minutes,weightKg){
-  // Keytel et al. (2005) - Men formula
-  return Math.round(((hrAvg*0.6309)+(weightKg*0.1988)+(35*0.2017)-55.0969)*minutes/4.184);
 }
 function upRower(){
   const chk=document.getElementById('frow');
@@ -528,7 +528,7 @@ function saveSession(){
     const w=wForDate(dt);const peso=w?w.weight:97;
     const kcal=calcRowerKcal(rowHr,rowDur,peso);
     const rowOrigKcal=n(gv('frorigkcal'))||null;
-    s.rower={duration:rowDur,hrAvg:rowHr,resistance:rowRes||null,caloriesAdj:kcal,caloriesOrig:rowOrigKcal};
+    s.rower={duration:rowDur,hrAvg:rowHr,resistance:rowRes||null,calories:rowOrigKcal};
   }
   if(editId){sessions=sessions.map(x=>x.id===editId?s:x);editId=null;}
   else sessions=[...sessions,s].sort((a,b)=>a.date.localeCompare(b.date));
@@ -618,7 +618,7 @@ function rSCard(s){
     +(SIMULATION_IDS.has(s.id)?'<span style="display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 8px;font-family:var(--fm);font-size:8px;border:1px solid rgba(251,146,60,.3);background:rgba(251,146,60,.08);color:#fb923c">Simulaci\xf3n</span>':'')
     +(s.rower?'<span style="display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 8px;font-family:var(--fm);font-size:8px;border:1px solid rgba(34,197,94,.35);background:rgba(34,197,94,.1);color:#22c55e">&#x1F6A3; Rower</span>':'');
   var tmBox='<div style="background:rgba(255,107,26,.05);border:1px solid rgba(255,107,26,.18);border-radius:13px;padding:12px 13px;">'
-    +'<div style="font-family:var(--fm);font-size:8px;color:var(--a1);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:9px;opacity:.9">&#x1F3C3; Treadmill</div>'
+    +'<div style="font-family:var(--fm);font-size:8px;color:var(--a1);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:9px;opacity:.9">'+(ext?'&#x1F6B6; Exterior':'&#x1F3C3; Treadmill')+'</div>'
     +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Duraci\xf3n</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a1)">'+fd(s.duration)+'</span></div>'
     +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Distancia</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a1)">'+s.distance+' <span style="font-size:10px;color:var(--muted)">km</span></span></div>'
     +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Vel. promedio</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a1)">'+s.speedAvg+' <span style="font-size:10px;color:var(--muted)">km/h</span></span></div>'
@@ -642,7 +642,7 @@ function rSCard(s){
     +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Cal. totales d\xeda</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a4)">'+(s.totalCalories?s.totalCalories.toLocaleString():'\u2014')+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>'
     +(kcalDay
       ?'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Consumidas (comida)</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#c084fc">'+kcalDay.kcal+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>'
-       +'<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Balance del d\xeda</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:'+((s.totalCalories-kcalDay.kcal)>=0?'var(--a3)':'var(--a2)')+'">'+((s.totalCalories-kcalDay.kcal)>0?'+':'')+(s.totalCalories-kcalDay.kcal)+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>'
+
       :'')
     +'</div>';
   var rowerBox='';
@@ -652,19 +652,19 @@ function rSCard(s){
       +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Duraci\xf3n</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+fd(s.rower.duration)+'</span></div>'
       +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Resistencia</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+s.rower.resistance+' <span style="font-size:10px;color:var(--muted)">nivel</span></span></div>'
       +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">FC promedio</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a2)">'+s.rower.hrAvg+' <span style="font-size:10px;color:var(--muted)">bpm</span></span></div>'
-      +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Cal. ajustadas (FC)</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a4)">'+s.rower.caloriesAdj+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>'
-      +(s.rower.caloriesOrig?'<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Cal. reloj (ref.)</span><span style="font-family:var(--fh);font-weight:700;font-size:13px;color:var(--muted)">'+s.rower.caloriesOrig+' <span style="font-size:10px">kcal</span></span></div>':'')
-    +'</div>';
+      +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Cal. Rower</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a4)">'+s.rower.calories+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>'
+          +'</div>';
   }
   var totalDur=s.rower?fd(s.duration+s.rower.duration):fd(s.duration);
-  var totalCal=s.rower?(calTM+(s.rower.caloriesAdj||s.rower.calories||0)):calTM;
+  var totalCal=s.rower?(calTM+s.rower.calories):calTM;
   var totalHR=s.rower?Math.round((s.hrAvg*s.duration+s.rower.hrAvg*s.rower.duration)/(s.duration+s.rower.duration)):s.hrAvg;
   var totalLabel=s.rower?'Totales (TM + Rower)':'Totales';
   var totalBox='<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:13px;padding:12px 13px;">'
     +'<div style="font-family:var(--fm);font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:9px;opacity:.85">&#x26A1; '+totalLabel+'</div>'
     +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Tiempo total</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--text)">'+totalDur+'</span></div>'
     +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Cal. combinadas</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a4)">'+totalCal+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>'
-    +'<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">FC prom. pond.</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a2)">'+totalHR+' <span style="font-size:10px;color:var(--muted)">bpm</span></span></div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">FC prom. pond.</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a2)">'+totalHR+' <span style="font-size:10px;color:var(--muted)">bpm</span></span></div>'
+    +(kcalDay?'<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Balance del d\xeda</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:'+(s.totalCalories?(s.totalCalories-kcalDay.kcal>=0?'var(--a3)':'var(--a2)'):'var(--muted)')+'">'+(s.totalCalories&&(s.totalCalories-kcalDay.kcal)>0?'+':'')+((s.totalCalories)?(s.totalCalories-kcalDay.kcal):'-')+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>':'')
   +'</div>';
   var fatBox='';
   if(fb){
@@ -755,7 +755,7 @@ function rCharts(){
     {id:'c5',label:'Calorías (kcal) · ↑ mejor · 🟠 sin inclin. · 🔵 con inclin.',data:data.map(s=>calAdj(s)),type:'bar',color:'#ffa020',colorFn:s=>s.incline&&s.incline>0?'#00e5ff':'#ffa020'},
     {id:'c6',label:'FC promedio (bpm) · ↓ mejor',data:data.map(s=>s.hrAvg),type:'line',color:'#ff2020',yMin:90,yMax:160},
     {id:'c7',label:'Duración por sesión (min) · ↑ mejor',data:data.map(s=>s.duration),type:'line',color:'#60a5fa'},
-    ...(pSub==='Rower'?[{id:'c8r',label:'Duraci\xf3n Rower (min)',data:data.map(s=>s.rower?s.rower.duration:null),type:'bar',color:'#22c55e'},{id:'c9r',label:'Resistencia Rower',data:data.map(s=>s.rower?s.rower.resistance:null),type:'bar',color:'#22c55e',yMin:0,yMax:10},{id:'c10r',label:'Cal. Rower aj. (kcal)',data:data.map(s=>s.rower?(s.rower.caloriesAdj||s.rower.calories||0):null),type:'bar',color:'#4ade80'},{id:'c11r',label:'FC Rower (bpm)',data:data.map(s=>s.rower?s.rower.hrAvg:null),type:'line',color:'#ff2020',yMin:90,yMax:160}]:[]),
+    ...(pSub==='Rower'?[{id:'c8r',label:'Duraci\xf3n Rower (min)',data:data.map(s=>s.rower?s.rower.duration:null),type:'bar',color:'#22c55e'},{id:'c9r',label:'Resistencia Rower',data:data.map(s=>s.rower?s.rower.resistance:null),type:'bar',color:'#22c55e',yMin:0,yMax:10},{id:'c10r',label:'Cal. Rower (kcal)',data:data.map(s=>s.rower?s.rower.calories:null),type:'bar',color:'#4ade80'},{id:'c11r',label:'FC Rower (bpm)',data:data.map(s=>s.rower?s.rower.hrAvg:null),type:'line',color:'#ff2020',yMin:90,yMax:160}]:[]),
     ...(pSub==='Treadmill'?[{id:'c8',label:'Inclinación (%) · contexto',data:data.map(s=>s.incline),type:'bar',color:'#ff4500',yMin:0,yMax:5}]:[]),
     {id:'c9',label:'Calorías consumidas por día (kcal) · ↓ mejor',data:data.map(s=>{var r=kcalDbGet()[s.date];return r?r.kcal:null;}),type:'bar',color:'#c084fc',colorFn:null},
   ];
@@ -1142,7 +1142,7 @@ function rCal(){
                 +'<div class="sm2"><div class="sl2">Duraci\xf3n</div><div class="sv" style="color:#22c55e">'+fd(s.rower.duration)+'</div></div>'
                 +'<div class="sm2"><div class="sl2">Resistencia</div><div class="sv" style="color:#22c55e">Niv. '+s.rower.resistance+'</div></div>'
                 +'<div class="sm2"><div class="sl2">FC prom</div><div class="sv" style="color:var(--a2)">'+s.rower.hrAvg+' bpm</div></div>'
-                +'<div class="sm2"><div class="sl2">Cal. Rower (aj.)</div><div class="sv" style="color:var(--a4)">'+((s.rower.caloriesAdj||s.rower.calories||0))+' kcal</div></div>'
+                +'<div class="sm2"><div class="sl2">Cal. Rower (aj.)</div><div class="sv" style="color:var(--a4)">'+s.rower.calories+' kcal</div></div>'
               +'</div></div>';
           }
           return '<div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px 12px;border-left:3px solid '+accentColor+';margin-bottom:8px">'
@@ -1381,7 +1381,7 @@ function rRecs(){
           {l:'Duraci\xf3n TM',v:fd(s.duration),c:'var(--a3)'},
           {l:'Duraci\xf3n Rower',v:fd(s.rower.duration),c:'#22c55e'},
           {l:'Resistencia',v:'Nivel '+s.rower.resistance,c:'#22c55e'},
-          {l:'Cal. Rower (aj.)',v:(s.rower.caloriesAdj||s.rower.calories||0)+' kcal',c:'var(--a4)'},{l:'Cal. Rower (reloj)',v:(s.rower.caloriesOrig||'—')+' kcal',c:'var(--muted)'},
+          {l:'Cal. Rower',v:s.rower.calories+' kcal',c:'var(--a4)'},
           {l:'FC Rower',v:s.rower.hrAvg+' bpm',c:'var(--a2)'}
         ].filter(function(x){return x&&x.v!=null;});
         return '<div>'
@@ -1417,7 +1417,7 @@ function rRecs(){
       content='<div class="empty">Sin sesiones de rower a\xfan.</div>';
     } else {
       content+=RBR('Duraci\xf3n Rower','&#x23F1;&#xFE0F;',top5r('duration','desc'),function(s){return fd(s.rower.duration);},'#22c55e')
-        +RBR('Calor\xedas Rower (aj.)','&#x1F525;',top5r('caloriesAdj','desc'),function(s){return (s.rower.caloriesAdj||s.rower.calories||0)+' kcal';},'#4ade80')
+        +RBR('Calor\xedas Rower','&#x1F525;',top5r('calories','desc'),function(s){return s.rower.calories+' kcal';},'#4ade80')
         +RBR('FC m\xe1s baja Rower','&#x2764;&#xFE0F;',top5r('hrAvg','asc'),function(s){return s.rower.hrAvg+' bpm';},'var(--a2)')
         +RBR('Mayor resistencia','&#x1F4AA;',top5r('resistance','desc'),function(s){return 'Nivel '+s.rower.resistance;},'#22c55e');
     }
@@ -1494,7 +1494,7 @@ function rTots(){
       content='<div class="empty">Sin sesiones de rower a\xfan.</div>';
     } else {
       var totDur=rs.reduce(function(a,s){return a+s.rower.duration;},0);
-      var totCal=rs.reduce(function(a,s){return a+(s.rower.caloriesAdj||s.rower.calories||0);},0);
+      var totCal=rs.reduce(function(a,s){return a+s.rower.calories;},0);
       var avgFC=Math.round(rs.reduce(function(a,s){return a+s.rower.hrAvg*s.rower.duration;},0)/totDur);
       var avgRes=Math.round(rs.reduce(function(a,s){return a+s.rower.resistance;},0)/rs.length*10)/10;
       content='<div style="color:#22c55e;font-family:var(--fh);font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">&#x1F6A3; Rower</div>'
