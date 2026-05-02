@@ -337,6 +337,23 @@ function fatBurnData(s){
   const fatGT=fatCalT?Math.round(fatCalT/9):null;
   return{pct,fatCalW,fatGW,fatCalT,fatGT};
 }
+function fatBurnDataDay(daySessions){
+  var totalW=0,totalHR=0,totalCalW=0;
+  daySessions.forEach(function(s){
+    totalHR+=s.hrAvg*s.duration;totalW+=s.duration;totalCalW+=(hasAdj(s)?calAdj(s):s.calories);
+    if(s.rower){totalHR+=s.rower.hrAvg*s.rower.duration;totalW+=s.rower.duration;totalCalW+=s.rower.calories;}
+  });
+  var avgHR=totalW>0?Math.round(totalHR/totalW):0;
+  var pct=fatBurnPct(avgHR);
+  if(!pct||!totalCalW)return null;
+  var fatCalW=Math.round(totalCalW*(pct/100));
+  var fatGW=Math.round(fatCalW/9);
+  var totalCal=daySessions[0]?daySessions[0].totalCalories:null;
+  var fatCalT=totalCal?Math.round(totalCal*(pct/100)):null;
+  var fatGT=fatCalT?Math.round(fatCalT/9):null;
+  return{pct:pct,fatCalW:fatCalW,fatGW:fatGW,fatCalT:fatCalT,fatGT:fatGT};
+}
+
 function calAdj(s){
   if(!s.calories)return s.calories;
   if(!s.incline||s.incline===0)return s.calories;
@@ -546,28 +563,167 @@ function confDel(id){sessions=sessions.filter(s=>s.id!==id);saveS();delId=null;r
 
 // HISTORIAL
 function rHist(){
-  const fl=[...sessions].reverse().filter(s=>hSub==='General'?true:hSub==='Exterior'?isExt(s):hSub==='Rower'?!!s.rower:!isExt(s));
-  return `<div style="display:flex;flex-direction:column;gap:11px">
-    <div class="stabs">${['General','Treadmill','Exterior','Rower'].map(t=>`<button class="stb${hSub===t?' on':''}" onclick="hSub='${t}';rContent()">${t==='Treadmill'?'&#x1F3C3;':t==='Exterior'?'&#x1F6B6;':t==='Rower'?'&#x1F6A3;':'&#x1F4C5;'} ${t}</button>`).join('')}</div>
-    ${fl.length===0?'<div class="empty">No hay sesiones.</div>':fl.map(s=>rSCard(s)).join('')}
-  </div>`;
+  // Group all sessions by date, sorted newest first
+  var allDates=[...new Set([...sessions].reverse().map(function(s){return s.date;}))];
+
+  // Filter dates based on subpestana
+  var filteredDates=allDates.filter(function(date){
+    var daySessions=sessions.filter(function(s){return s.date===date;});
+    if(hSub==='General') return true;
+    if(hSub==='Treadmill') return daySessions.some(function(s){return !isExt(s)&&!s.rower||(!isExt(s)&&s.rower);});
+    if(hSub==='Exterior') return daySessions.some(function(s){return isExt(s);});
+    if(hSub==='Rower') return daySessions.some(function(s){return !!s.rower;});
+    return true;
+  });
+
+  return '<div style="display:flex;flex-direction:column;gap:11px">'
+    +'<div class="stabs">'+['General','Treadmill','Exterior','Rower'].map(function(t){
+      return '<button class="stb'+(hSub===t?' on':'')+'" onclick="hSub=\''+t+'\';rContent()">'
+        +(t==='Treadmill'?'&#x1F3C3;':t==='Exterior'?'&#x1F6B6;':t==='Rower'?'&#x1F6A3;':'&#x1F4C5;')+' '+t+'</button>';
+    }).join('')+'</div>'
+    +(filteredDates.length===0?'<div class="empty">No hay sesiones.</div>'
+      :filteredDates.map(function(date){
+        var daySessions=sessions.filter(function(s){return s.date===date;});
+        return rDayCard(date,daySessions);
+      }).join(''))
+    +'</div>';
 }
-function rSCard(s){
-  var p=pace(s.duration,s.distance),w=wForDate(s.date),ext=isExt(s);
-  if(delId===s.id)return '<div class="sc"><div class="cfd"><p>\xbfEliminar esta sesi\xf3n?</p><div class="cfdb"><button class="bda" onclick="confDel(\''+s.id+'\')">Eliminar</button><button class="bca" onclick="cancelDel()">Cancelar</button></div></div></div>';
-  var dailyS=DAILY_STEPS.find(function(d){return d.date===s.date;});
-  var fb=fatBurnData(s);
-  var kcalDay=KCAL_RECORDS[s.date];
+
+function rDayCard(date,daySessions){
+  // Separate by type
+  var tmSessions=daySessions.filter(function(s){return !isExt(s);});
+  var extSessions=daySessions.filter(function(s){return isExt(s);});
+  // Rower comes from TM sessions that have rower
+  var rowerSession=daySessions.find(function(s){return !!s.rower;});
+
+  // Show based on subpestana
+  var showTM   =(hSub==='General'||hSub==='Treadmill')&&tmSessions.length>0;
+  var showExt  =(hSub==='General'||hSub==='Exterior')&&extSessions.length>0;
+  var showRower=(hSub==='General'||hSub==='Rower')&&!!rowerSession;
+  var showTotal=(hSub==='General')&&(tmSessions.length+extSessions.length+(rowerSession?1:0))>1;
+
+  // Weight for this date
+  var w=wForDate(date);
+  var kcalDay=KCAL_RECORDS[date];
+
+  // Total duration across all sessions
+  var totalDurAll=daySessions.reduce(function(a,s){return a+s.duration+(s.rower?s.rower.duration:0);},0);
+  var totalCalAll=daySessions.reduce(function(a,s){return a+(hasAdj(s)?calAdj(s):s.calories)+(s.rower?s.rower.calories:0);},0);
+  var totalStepsAll=daySessions.reduce(function(a,s){return a+(s.steps||0);},0);
+
+  // Banner
+  var typeLabels=[];
+  if(tmSessions.length>0) typeLabels.push('&#x1F3C3; Treadmill');
+  if(extSessions.length>0) typeLabels.push('&#x1F6B6; Exterior');
+  if(rowerSession) typeLabels.push('&#x1F6A3; Rower');
+  var badges='';
+  daySessions.forEach(function(s){
+    if(SIMULATION_IDS.has(s.id)) badges+='<span style="display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 8px;font-family:var(--fm);font-size:8px;border:1px solid rgba(251,146,60,.3);background:rgba(251,146,60,.08);color:#fb923c">Simulaci\xf3n</span>';
+    if(ENDURANCE_IDS.has(s.id)) badges+='<span style="display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 8px;font-family:var(--fm);font-size:8px;border:1px solid rgba(168,85,247,.3);background:rgba(168,85,247,.08);color:#a855f7">Endurance</span>';
+  });
+  if(rowerSession) badges+='<span style="display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 8px;font-family:var(--fm);font-size:8px;border:1px solid rgba(34,197,94,.35);background:rgba(34,197,94,.1);color:#22c55e">&#x1F6A3; Rower</span>';
+
+  var banner='<div style="background:linear-gradient(135deg,rgba(255,107,26,.14),rgba(255,69,0,.05));padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.05)">'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">'
+      +'<div style="flex:1;min-width:0">'
+        +'<div style="font-family:var(--fh);font-weight:800;font-size:22px;color:var(--a1);line-height:1.1">&#x1F4C5; '+fdate(date)+'</div>'
+        +'<div style="margin-top:5px;font-family:var(--fm);font-size:10px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px;align-items:center">'
+          +'<span style="color:var(--text)">&#x23F1; '+fd(totalDurAll)+'</span>'
+          +'<span>\xb7</span>'
+          +'<span>'+typeLabels.join(' + ')+'</span>'
+        +'</div>'
+        +(badges?'<div style="margin-top:6px;display:flex;gap:5px;flex-wrap:wrap">'+badges+'</div>':'')
+      +'</div>'
+      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">'
+        +(w?'<div style="background:rgba(212,130,10,.12);border:1px solid rgba(212,130,10,.3);border-radius:10px;padding:6px 10px;text-align:center"><div style="font-family:var(--fh);font-weight:800;font-size:22px;line-height:1;color:var(--wt)">'+w+'</div><div style="font-family:var(--fm);font-size:8px;color:var(--muted);margin-top:1px">kg</div></div>':'')
+      +'</div>'
+    +'</div>'
+  +'</div>';
+
+  // Build left column blocks
+  var leftBlocks='';
+
+  if(showTM){
+    tmSessions.forEach(function(s){
+      leftBlocks+=rSessionBlock(s,'tm');
+    });
+  }
+  if(showExt){
+    extSessions.forEach(function(s){
+      leftBlocks+=rSessionBlock(s,'ext');
+    });
+  }
+
+  // Build right column blocks
+  var rightBlocks='';
+  if(showRower){
+    rightBlocks+=rRowerBlock(rowerSession);
+  }
+  if(showTotal){
+    var totalHRAll=0,totalHRWeight=0;
+    daySessions.forEach(function(s){
+      totalHRAll+=s.hrAvg*s.duration;
+      totalHRWeight+=s.duration;
+      if(s.rower){totalHRAll+=s.rower.hrAvg*s.rower.duration;totalHRWeight+=s.rower.duration;}
+    });
+    var avgFC=totalHRWeight>0?Math.round(totalHRAll/totalHRWeight):0;
+    var totalBox='<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:13px;padding:12px 13px;">'
+      +'<div style="font-family:var(--fm);font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:9px;opacity:.85">&#x26A1; Totales d\xeda</div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Tiempo total</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--text)">'+fd(totalDurAll)+'</span></div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Cal. totales</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a4)">'+totalCalAll+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">FC prom. pond.</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a2)">'+avgFC+' <span style="font-size:10px;color:var(--muted)">bpm</span></span></div>'
+      +(kcalDay?'<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Balance del d\xeda</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:'+(daySessions[0].totalCalories?(daySessions[0].totalCalories-kcalDay.kcal>=0?'var(--a3)':'var(--a2)'):'var(--muted)')+'\">'+(daySessions[0].totalCalories&&(daySessions[0].totalCalories-kcalDay.kcal)>0?'+':'')+((daySessions[0].totalCalories)?(daySessions[0].totalCalories-kcalDay.kcal):'-')+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>':'')
+    +(function(){
+      var fbDay=fatBurnDataDay(daySessions);
+      if(!fbDay)return '';
+      return '<div style="height:1px;background:rgba(255,255,255,.05);margin:8px 0"></div>'
+        +'<div style="font-family:var(--fm);font-size:8px;color:#f472b6;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;opacity:.8">&#x1FAC0; Grasa quemada</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">'
+          +'<div style="background:rgba(244,114,182,.06);border:1px solid rgba(244,114,182,.15);border-radius:10px;padding:9px;text-align:center"><div style="font-family:var(--fh);font-weight:800;font-size:20px;color:#f472b6;line-height:1">'+fbDay.pct+'%</div><div style="font-family:var(--fm);font-size:8px;color:var(--muted);margin-top:2px">del total</div></div>'
+          +'<div style="background:rgba(244,114,182,.06);border:1px solid rgba(244,114,182,.15);border-radius:10px;padding:9px;text-align:center"><div style="font-family:var(--fh);font-weight:800;font-size:20px;color:#f472b6;line-height:1">'+fbDay.fatGW+'g</div><div style="font-family:var(--fm);font-size:8px;color:var(--muted);margin-top:2px">workout</div></div>'
+          +(fbDay.fatGT?'<div style="background:rgba(236,72,153,.06);border:1px solid rgba(236,72,153,.15);border-radius:10px;padding:9px;text-align:center"><div style="font-family:var(--fh);font-weight:800;font-size:20px;color:#ec4899;line-height:1">'+fbDay.fatGT+'g</div><div style="font-family:var(--fm);font-size:8px;color:var(--muted);margin-top:2px">d\xeda total</div></div>':'<div></div>')
+        +'</div>'
+        +'<div style="height:4px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden"><div style="width:'+fbDay.pct+'%;height:100%;background:linear-gradient(90deg,#f472b6,#ec4899);border-radius:99px"></div></div>';
+    })()
+    +'</div>';
+    rightBlocks+=totalBox;
+  }
+
+  // If only one side has content, full width
+  var bodyStyle=(leftBlocks&&rightBlocks)?'display:grid;grid-template-columns:3fr 2fr;':'display:flex;flex-direction:column;';
+
+  return '<div style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:20px;overflow:hidden;margin-bottom:12px">'
+    +banner
+    +'<div style="'+bodyStyle+'">'
+      +(leftBlocks?'<div style="padding:14px;border-right:'+(rightBlocks?'1px solid rgba(255,255,255,.05)':'none')+';display:flex;flex-direction:column;gap:10px;">'+leftBlocks+'</div>':'')
+      +(rightBlocks?'<div style="padding:14px;display:flex;flex-direction:column;gap:10px;">'+rightBlocks+'</div>':'')
+    +'</div>'
+  +'</div>';
+}
+
+function rSessionBlock(s,type){
+  var isTM=type==='tm', isE=type==='ext';
+  var color=isTM?'var(--a1)':'#f59e0b';
+  var bgColor=isTM?'rgba(255,107,26,.05)':'rgba(245,158,11,.05)';
+  var borderColor=isTM?'rgba(255,107,26,.18)':'rgba(245,158,11,.2)';
+  var icon=isE?'&#x1F6B6;':'&#x1F3C3;';
+  var label=isE?'Exterior':'Treadmill';
+
+  var p=pace(s.duration,s.distance);
   var z=fcZone(s.hrAvg);
   var zid=s.id+'-zone';
   var isZOpen=expZone===zid;
-  var sep='<div style="height:1px;background:rgba(255,255,255,.05);margin:8px 0"></div>';
+  var kcalDay=KCAL_RECORDS[s.date];
+  var dailyS=DAILY_STEPS.find(function(d){return d.date===s.date;});
+  var fb=fatBurnData(s);
+
+  // Zone popup
   var zPopup='';
   if(isZOpen){
     var zRows=FC_ZONES.map(function(zn){
       var isA=z&&zn.label===z.label;
       return '<div style="display:flex;align-items:center;justify-content:space-between;padding:3px 6px;border-radius:5px;background:'+(isA?zn.color+'22':'transparent')+';border:1px solid '+(isA?zn.color+'55':'transparent')+'">'
-        +'<div style="display:flex;align-items:center;gap:6px"><span>'+zn.icon+'</span><span style="font-family:var(--fh);font-size:11px;color:'+zn.color+'">'+zn.label+'</span></div>'
+        +'<div style="display:flex;align-items:center;gap:4px"><span style="font-size:12px">'+zn.icon+'</span><span style="font-family:var(--fh);font-size:11px;color:'+zn.color+'">'+zn.label+'</span></div>'
         +'<span style="font-family:var(--fm);font-size:8px;color:var(--muted)">'+(zn.min===0?'< 111 bpm':zn.max===999?'\u2265 167 bpm':zn.min+' \u2013 '+zn.max+' bpm')+' <span style="color:'+zn.color+';opacity:.7">'+zn.pct+'</span></span>'
         +'</div>';
     }).join('');
@@ -577,56 +733,46 @@ function rSCard(s){
       +'<div style="color:var(--muted);font-family:var(--fm);font-size:8px;margin-top:3px;text-align:center">Tu FC promedio: <span style="color:'+(z?z.color:'#fff')+'">'+s.hrAvg+' bpm</span></div>'
       +'</div>';
   }
+
+  // Incline
   var inclineBlock='';
   if(s.inclineProfile){
     var avg=Math.round(s.inclineProfile.reduce(function(a,t){return a+(t.pct*(t.to-t.from));},0)/s.distance*10)/10;
-    var rows=s.inclineProfile.map(function(t){
+    var rows2=s.inclineProfile.map(function(t){
       return '<div style="display:flex;justify-content:space-between;padding:4px 6px;border-radius:5px;background:rgba(255,255,255,.03);margin-bottom:3px">'
         +'<span style="font-family:var(--fm);font-size:9px;color:var(--muted)">'+t.from+' \u2013 '+t.to+' km</span>'
         +'<span style="font-family:var(--fh);font-weight:700;font-size:14px;color:var(--a5)">'+t.pct+'%</span>'
         +'</div>';
     }).join('');
-    inclineBlock=
-      '<div style="height:1px;background:rgba(255,255,255,.05);margin:8px 0"></div>'
-      +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">'
-        +'<span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Nombre ruta</span>'
-        +'<span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a5)">'+s.note+'</span>'
-      +'</div>'
-      +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">'
-        +'<span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Inclin. promedio</span>'
-        +'<span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a5)">~'+avg+' <span style="font-size:8px;color:var(--muted)">%</span></span>'
-      +'</div>'
+    if(s.note&&SIMULATION_IDS.has(s.id)){
+      inclineBlock='<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Nombre ruta</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a5)">'+s.note+'</span></div>';
+    }
+    inclineBlock+='<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Inclin. promedio</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a5)">~'+avg+' <span style="font-size:10px;color:var(--muted)">%</span></span></div>'
       +'<div style="font-family:var(--fm);font-size:9px;color:var(--a5);cursor:pointer;margin-bottom:4px" onclick="event.stopPropagation();var e=document.getElementById(\'ip-'+s.id+'\');e.style.display=e.style.display==\'none\'?\'block\':\'none\'">'
-        +'&#x1F5FA; Perfil de inclinaci\xf3n &#9662;'
+        +'\ud83d\uddfa Perfil de inclinaci\xf3n &#9662;'
       +'</div>'
       +'<div id="ip-'+s.id+'" style="display:none;background:rgba(0,0,0,.5);border:1px solid rgba(255,107,26,.25);border-radius:8px;padding:8px 10px;margin-bottom:4px">'
         +'<div style="font-family:var(--fm);font-size:8px;color:var(--a1);letter-spacing:1px;margin-bottom:6px">Perfil inclinaci\xf3n</div>'
-        +rows
+        +rows2
       +'</div>';
   } else if(s.incline!=null){
-    inclineBlock='<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">'
-      +'<span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Inclinaci\xf3n</span>'
-      +'<span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a5)">'+s.incline+' <span style="font-size:10px;color:var(--muted)">%</span></span>'
-      +'</div>';
+    inclineBlock='<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Inclinaci\xf3n</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a5)">'+s.incline+' <span style="font-size:10px;color:var(--muted)">%</span></span></div>';
   }
+
+  var sep='<div style="height:1px;background:rgba(255,255,255,.05);margin:8px 0"></div>';
   var calTM=hasAdj(s)?calAdj(s):s.calories;
-  var durDisplay=s.rower?fd(s.duration+s.rower.duration):fd(s.duration);
-  var typeLabel=ext?'&#x1F6B6; Exterior':(s.rower?'&#x1F3C3; Treadmill + Remadora':'&#x1F3C3; Treadmill');
-  var bannerMeta='<span style="color:var(--text)">&#x23F1; '+durDisplay+'</span>'
-    +'<span>\xb7</span>'
-    +'<span>'+typeLabel+'</span>'
-    +(s.elevGain!=null?'<span>\xb7</span><span>&#x26F0;&#xFE0F; +'+s.elevGain+'m</span>':'')
-    +(s.note&&!SIMULATION_IDS.has(s.id)?'<span>\xb7</span><span style="font-style:italic">'+s.note+'</span>':'');
-  var badges=''
-    +(ENDURANCE_IDS.has(s.id)?'<span style="display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 8px;font-family:var(--fm);font-size:8px;border:1px solid rgba(168,85,247,.3);background:rgba(168,85,247,.08);color:#a855f7">&#x1F3CB;&#xFE0F; Endurance</span>':'')
-    +(SIMULATION_IDS.has(s.id)?'<span style="display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 8px;font-family:var(--fm);font-size:8px;border:1px solid rgba(251,146,60,.3);background:rgba(251,146,60,.08);color:#fb923c">Simulaci\xf3n</span>':'')
-    +(s.rower?'<span style="display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 8px;font-family:var(--fm);font-size:8px;border:1px solid rgba(34,197,94,.35);background:rgba(34,197,94,.1);color:#22c55e">&#x1F6A3; Rower</span>':'');
-  var tmBox='<div style="background:rgba(255,107,26,.05);border:1px solid rgba(255,107,26,.18);border-radius:13px;padding:12px 13px;">'
-    +'<div style="font-family:var(--fm);font-size:8px;color:var(--a1);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:9px;opacity:.9">'+(ext?'&#x1F6B6; Exterior':'&#x1F3C3; Treadmill')+'</div>'
-    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Duraci\xf3n</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a1)">'+fd(s.duration)+'</span></div>'
-    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Distancia</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a1)">'+s.distance+' <span style="font-size:10px;color:var(--muted)">km</span></span></div>'
-    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Vel. promedio</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a1)">'+s.speedAvg+' <span style="font-size:10px;color:var(--muted)">km/h</span></span></div>'
-    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Vel. m\xe1xima</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a1)">'+s.speedMax+' <span style="font-size:10px;color:var(--muted)">km/h</span></span></div>'
+
+  var html='<div style="background:'+bgColor+';border:1px solid '+borderColor+';border-radius:13px;padding:12px 13px;">'
+    +'<div style="font-family:var(--fm);font-size:8px;color:'+color+';text-transform:uppercase;letter-spacing:1.5px;margin-bottom:9px;opacity:.9">'+icon+' '+label+'</div>'
+    // Edit/delete buttons
+    +'<div style="display:flex;gap:4px;margin-bottom:8px">'
+      +'<button onclick="startEdit(\''+s.id+'\')" style="background:rgba(57,255,110,.08);border:1px solid rgba(57,255,110,.2);border-radius:8px;cursor:pointer;font-size:11px;padding:3px 6px;color:var(--a3)">&#9999;&#xFE0F;</button>'
+      +'<button onclick="startDel(\''+s.id+'\')" style="background:rgba(255,32,32,.08);border:1px solid rgba(255,32,32,.2);border-radius:8px;cursor:pointer;font-size:11px;padding:3px 6px;color:var(--a2)">&#x1F5D1;&#xFE0F;</button>'
+    +'</div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Duraci\xf3n</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:'+color+'">'+fd(s.duration)+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Distancia</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:'+color+'">'+s.distance+' <span style="font-size:10px;color:var(--muted)">km</span></span></div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Vel. promedio</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:'+color+'">'+s.speedAvg+' <span style="font-size:10px;color:var(--muted)">km/h</span></span></div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Vel. m\xe1xima</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:'+color+'">'+s.speedMax+' <span style="font-size:10px;color:var(--muted)">km/h</span></span></div>'
     +(p?'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Pace</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a5)">'+p+' <span style="font-size:10px;color:var(--muted)">min/km</span></span></div>':'')
     +inclineBlock
     +sep
@@ -646,72 +792,24 @@ function rSCard(s){
     +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Cal. totales d\xeda</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a4)">'+(s.totalCalories?s.totalCalories.toLocaleString():'\u2014')+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>'
     +(kcalDay
       ?'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Consumidas (comida)</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#c084fc">'+kcalDay.kcal+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>'
-
       :'')
-    +'</div>';
-  var rowerBox='';
-  if(s.rower){
-    rowerBox='<div style="background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.2);border-radius:13px;padding:12px 13px;">'
-      +'<div style="font-family:var(--fm);font-size:8px;color:#22c55e;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:9px;opacity:.9">&#x1F6A3; Rower</div>'
-      +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Duraci\xf3n</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+fd(s.rower.duration)+'</span></div>'
-      +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Resistencia</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+s.rower.resistance+' <span style="font-size:10px;color:var(--muted)">nivel</span></span></div>'
-      +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">FC promedio</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a2)">'+s.rower.hrAvg+' <span style="font-size:10px;color:var(--muted)">bpm</span></span></div>'
-      +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Cal. Rower</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a4)">'+s.rower.calories+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>'
-      +(s.rower.rows?'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Rows</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+s.rower.rows+' <span style="font-size:10px;color:var(--muted)">rows</span></span></div>':'')
-      +(s.rower.rowerDist?'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Distancia</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+s.rower.rowerDist+' <span style="font-size:10px;color:var(--muted)">km</span></span></div>':'')
-          +'</div>';
-  }
-  var totalDur=s.rower?fd(s.duration+s.rower.duration):fd(s.duration);
-  var totalCal=s.rower?(calTM+s.rower.calories):calTM;
-  var totalHR=s.rower?Math.round((s.hrAvg*s.duration+s.rower.hrAvg*s.rower.duration)/(s.duration+s.rower.duration)):s.hrAvg;
-  var totalLabel=s.rower?'Totales (TM + Rower)':'Totales';
-  var totalBox='<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:13px;padding:12px 13px;">'
-    +'<div style="font-family:var(--fm);font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:9px;opacity:.85">&#x26A1; '+totalLabel+'</div>'
-    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Tiempo total</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--text)">'+totalDur+'</span></div>'
-    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Cal. combinadas</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a4)">'+totalCal+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>'
-    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">FC prom. pond.</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a2)">'+totalHR+' <span style="font-size:10px;color:var(--muted)">bpm</span></span></div>'
-    +(kcalDay?'<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Balance del d\xeda</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:'+(s.totalCalories?(s.totalCalories-kcalDay.kcal>=0?'var(--a3)':'var(--a2)'):'var(--muted)')+'">'+(s.totalCalories&&(s.totalCalories-kcalDay.kcal)>0?'+':'')+((s.totalCalories)?(s.totalCalories-kcalDay.kcal):'-')+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>':'')
+    
   +'</div>';
-  var fatBox='';
-  if(fb){
-    fatBox='<div style="padding:12px 14px 14px;border-top:1px solid rgba(244,114,182,.1);grid-column:1/-1;">'
-      +'<div style="font-family:var(--fm);font-size:8px;color:#f472b6;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;opacity:.8">&#x1FAC0; Grasa quemada</div>'
-      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">'
-        +'<div style="background:rgba(244,114,182,.06);border:1px solid rgba(244,114,182,.15);border-radius:10px;padding:9px;text-align:center"><div style="font-family:var(--fh);font-weight:800;font-size:22px;color:#f472b6;line-height:1">'+fb.pct+'%</div><div style="font-family:var(--fm);font-size:8px;color:var(--muted);margin-top:2px">del total</div></div>'
-        +'<div style="background:rgba(244,114,182,.06);border:1px solid rgba(244,114,182,.15);border-radius:10px;padding:9px;text-align:center"><div style="font-family:var(--fh);font-weight:800;font-size:22px;color:#f472b6;line-height:1">'+fb.fatGW+'g</div><div style="font-family:var(--fm);font-size:8px;color:var(--muted);margin-top:2px">workout ('+fb.fatCalW+' kcal)</div></div>'
-        +(fb.fatGT
-          ?'<div style="background:rgba(236,72,153,.06);border:1px solid rgba(236,72,153,.15);border-radius:10px;padding:9px;text-align:center"><div style="font-family:var(--fh);font-weight:800;font-size:22px;color:#ec4899;line-height:1">'+fb.fatGT+'g</div><div style="font-family:var(--fm);font-size:8px;color:var(--muted);margin-top:2px">d\xeda total ('+fb.fatCalT+' kcal)</div></div>'
-          :'<div></div>')
-      +'</div>'
-      +'<div style="height:4px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden"><div style="width:'+fb.pct+'%;height:100%;background:linear-gradient(90deg,#f472b6,#ec4899);border-radius:99px"></div></div>'
-    +'</div>';
-  }
-  return '<div style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:20px;overflow:hidden;margin-bottom:12px">'
-    +'<div style="background:linear-gradient(135deg,rgba(255,107,26,.14),rgba(255,69,0,.05));padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.05)">'
-      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">'
-        +'<div style="flex:1;min-width:0">'
-          +'<div style="font-family:var(--fh);font-weight:800;font-size:22px;color:var(--a1);line-height:1.1">'+(ext?'&#x1F6B6;':'&#x1F3C3;')+' '+fdate(s.date)+'</div>'
-          +'<div style="margin-top:5px;font-family:var(--fm);font-size:10px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px;align-items:center">'+bannerMeta+'</div>'
-          +'<div style="margin-top:6px;display:flex;gap:5px;flex-wrap:wrap">'+badges+'</div>'
-        +'</div>'
-        +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">'
-          +(w?'<div style="background:rgba(212,130,10,.12);border:1px solid rgba(212,130,10,.3);border-radius:10px;padding:6px 10px;text-align:center"><div style="font-family:var(--fh);font-weight:800;font-size:22px;line-height:1;color:var(--wt)">'+w+'</div><div style="font-family:var(--fm);font-size:8px;color:var(--muted);margin-top:1px">kg</div></div>':'')
-          +'<div style="display:flex;gap:4px">'
-            +'<button onclick="startEdit(\''+s.id+'\')" style="background:rgba(57,255,110,.08);border:1px solid rgba(57,255,110,.2);border-radius:8px;cursor:pointer;font-size:13px;padding:5px 7px;color:var(--a3)">&#9999;&#xFE0F;</button>'
-            +'<button onclick="startDel(\''+s.id+'\')" style="background:rgba(255,32,32,.08);border:1px solid rgba(255,32,32,.2);border-radius:8px;cursor:pointer;font-size:13px;padding:5px 7px;color:var(--a2)">&#x1F5D1;&#xFE0F;</button>'
-          +'</div>'
-        +'</div>'
-      +'</div>'
-    +'</div>'
-    +'<div style="display:grid;grid-template-columns:3fr 2fr;">'
-      +'<div style="padding:14px;border-right:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;gap:10px;">'+tmBox+'</div>'
-      +'<div style="padding:14px;display:flex;flex-direction:column;gap:10px;">'+rowerBox+totalBox+'</div>'
-      +fatBox
-    +'</div>'
-  +'</div>';
+  return html;
 }
 
-
+function rRowerBlock(s){
+  if(!s||!s.rower) return '';
+  return '<div style="background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.2);border-radius:13px;padding:12px 13px;">'
+    +'<div style="font-family:var(--fm);font-size:8px;color:#22c55e;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:9px;opacity:.9">&#x1F6A3; Rower</div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Duraci\xf3n</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+fd(s.rower.duration)+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Resistencia</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+s.rower.resistance+' <span style="font-size:10px;color:var(--muted)">nivel</span></span></div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">FC promedio</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a2)">'+s.rower.hrAvg+' <span style="font-size:10px;color:var(--muted)">bpm</span></span></div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Cal. Rower</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a4)">'+s.rower.calories+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>'
+    +(s.rower.rows?'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Rows</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+s.rower.rows+' <span style="font-size:10px;color:var(--muted)">rows</span></span></div>':'')
+    +(s.rower.rowerDist?'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Distancia</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+s.rower.rowerDist+' <span style="font-size:10px;color:var(--muted)">km</span></span></div>':'')
+  +'</div>';
+}
 
 // PROGRESO
 function rStepsMeta(){
@@ -753,17 +851,28 @@ function rCharts(){
   const cc=document.getElementById('ccon');if(!cc)return;
   if(data.length<2){cc.innerHTML='<div class="empty">Necesitas al menos 2 sesiones.</div>';return;}
   const lbl=data.map(s=>s.date.slice(5));
+  const isRower=pSub==='Rower';
+  const showTMCharts=!isRower; // TM metrics for all except Rower-only
   const defs=[
-    {id:'c1',label:'Distancia por sesión (km) · ↑ mejor',data:data.map(s=>s.distance),type:'bar',color:'#ff6b1a'},
-    {id:'c2',label:'Velocidad promedio (km/h) · ↑ mejor',data:data.map(s=>s.speedAvg),type:'line',color:'#39ff6e',trendline:true},
-    {id:'c3',label:'Pace promedio (min/km) · ↓ mejor',data:data.map(s=>s.duration&&s.distance?parseFloat(((s.duration*60)/s.distance/60).toFixed(2)):null),type:'line',color:'#ff4500'},
-    {id:'c4',label:'Pasos por sesión · ↑ mejor',data:data.map(s=>s.steps),type:'bar',color:'#39ff6e'},
-    {id:'c5',label:'Calorías (kcal) · ↑ mejor · 🟠 sin inclin. · 🔵 con inclin.',data:data.map(s=>calAdj(s)),type:'bar',color:'#ffa020',colorFn:s=>s.incline&&s.incline>0?'#00e5ff':'#ffa020'},
-    {id:'c6',label:'FC promedio (bpm) · ↓ mejor',data:data.map(s=>s.hrAvg),type:'line',color:'#ff2020',yMin:90,yMax:160},
-    {id:'c7',label:'Duración por sesión (min) · ↑ mejor',data:data.map(s=>s.duration),type:'line',color:'#60a5fa'},
-    ...(pSub==='Rower'?[{id:'c8r',label:'Duraci\xf3n Rower (min)',data:data.map(s=>s.rower?s.rower.duration:null),type:'bar',color:'#22c55e'},{id:'c9r',label:'Resistencia Rower',data:data.map(s=>s.rower?s.rower.resistance:null),type:'bar',color:'#22c55e',yMin:0,yMax:10},{id:'c10r',label:'Cal. Rower (kcal)',data:data.map(s=>s.rower?s.rower.calories:null),type:'bar',color:'#4ade80'},{id:'c11r',label:'FC Rower (bpm)',data:data.map(s=>s.rower?s.rower.hrAvg:null),type:'line',color:'#ff2020',yMin:90,yMax:160},{id:'c12r',label:'Rows Rower',data:data.map(s=>s.rower&&s.rower.rows?s.rower.rows:null),type:'bar',color:'#22c55e'},{id:'c13r',label:'Distancia Rower (km)',data:data.map(s=>s.rower&&s.rower.rowerDist?s.rower.rowerDist:null),type:'bar',color:'#4ade80'}]:[]),
-    ...(pSub==='Treadmill'?[{id:'c8',label:'Inclinación (%) · contexto',data:data.map(s=>s.incline),type:'bar',color:'#ff4500',yMin:0,yMax:5}]:[]),
-    {id:'c9',label:'Calorías consumidas por día (kcal) · ↓ mejor',data:data.map(s=>{var r=kcalDbGet()[s.date];return r?r.kcal:null;}),type:'bar',color:'#c084fc',colorFn:null},
+    ...(isRower?[
+      {id:'c8r',label:'Duraci\xf3n Rower (min)',data:data.map(s=>s.rower?s.rower.duration:null),type:'bar',color:'#22c55e'},
+      {id:'c9r',label:'Resistencia Rower',data:data.map(s=>s.rower?s.rower.resistance:null),type:'bar',color:'#22c55e',yMin:0,yMax:10},
+      {id:'c10r',label:'Cal. Rower (kcal)',data:data.map(s=>s.rower?s.rower.calories:null),type:'bar',color:'#4ade80'},
+      {id:'c11r',label:'FC Rower (bpm)',data:data.map(s=>s.rower?s.rower.hrAvg:null),type:'line',color:'#ff2020',yMin:90,yMax:160},
+      {id:'c12r',label:'Rows Rower',data:data.map(s=>s.rower&&s.rower.rows?s.rower.rows:null),type:'bar',color:'#22c55e'},
+      {id:'c13r',label:'Distancia Rower (km)',data:data.map(s=>s.rower&&s.rower.rowerDist?s.rower.rowerDist:null),type:'bar',color:'#4ade80'},
+    ]:[]),
+    ...(showTMCharts?[
+      {id:'c1',label:'Distancia por sesi\xf3n (km) \xb7 \u2191 mejor',data:data.map(s=>s.distance),type:'bar',color:'#ff6b1a'},
+      {id:'c2',label:'Velocidad promedio (km/h) \xb7 \u2191 mejor',data:data.map(s=>s.speedAvg),type:'line',color:'#39ff6e',trendline:true},
+      {id:'c3',label:'Pace promedio (min/km) \xb7 \u2193 mejor',data:data.map(s=>s.duration&&s.distance?parseFloat(((s.duration*60)/s.distance/60).toFixed(2)):null),type:'line',color:'#ff4500'},
+      {id:'c4',label:'Pasos por sesi\xf3n \xb7 \u2191 mejor',data:data.map(s=>s.steps),type:'bar',color:'#39ff6e'},
+      {id:'c5',label:'Calor\xedas (kcal) \xb7 \u2191 mejor',data:data.map(s=>calAdj(s)),type:'bar',color:'#ffa020',colorFn:s=>s.incline&&s.incline>0?'#00e5ff':'#ffa020'},
+      {id:'c6',label:'FC promedio (bpm) \xb7 \u2193 mejor',data:data.map(s=>s.hrAvg),type:'line',color:'#ff2020',yMin:90,yMax:160},
+      {id:'c7',label:'Duraci\xf3n por sesi\xf3n (min) \xb7 \u2191 mejor',data:data.map(s=>s.duration),type:'line',color:'#60a5fa'},
+      ...(pSub==='Treadmill'||pSub==='Simulacion'||pSub==='Endurance'?[{id:'c8',label:'Inclinaci\xf3n (%) \xb7 contexto',data:data.map(s=>s.incline),type:'bar',color:'#ff4500',yMin:0,yMax:5}]:[]),
+      {id:'c9',label:'Calor\xedas consumidas por d\xeda (kcal)',data:data.map(s=>{var r=kcalDbGet()[s.date];return r?r.kcal:null;}),type:'bar',color:'#c084fc',colorFn:null},
+    ]:[]),
   ];
   cc.innerHTML=defs.map(d=>`<div class="cw"><div class="cl">${d.label}</div><div style="position:relative;height:150px"><canvas id="${d.id}"></canvas></div></div>`).join('')
     +'<div id="fczone-heatmap-wrap"></div>';
