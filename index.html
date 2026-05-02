@@ -151,6 +151,8 @@ const SS=[
   {id:"s34",date:"2026-04-28",duration:61,distance:3.61,calories:348,totalCalories:2523,speedAvg:3.6,speedMax:3.6,hrAvg:131,hrMax:null,steps:4769,incline:2,note:"Infantry",inclineProfile:[{from:0,to:1.75,pct:1},{from:1.75,to:3.61,pct:2}],rower:{duration:17,calories:152,hrAvg:123,resistance:4}},
   {id:"s35",date:"2026-04-29",duration:65,distance:3.92,calories:372,totalCalories:2494,speedAvg:3.6,speedMax:3.6,hrAvg:120,hrMax:null,steps:5156,incline:1,rower:{duration:16,calories:135,hrAvg:123,hrMax:135,resistance:6}},
   {id:"s36",date:"2026-04-30",duration:65,distance:3.82,calories:366,totalCalories:2548,speedAvg:3.6,speedMax:3.6,hrAvg:121,hrMax:null,steps:5068,incline:2,rower:{duration:17,calories:148,hrAvg:128,hrMax:138,resistance:6}},
+  {id:"s37",date:"2026-05-01",duration:65,distance:3.92,calories:372,totalCalories:2603,speedAvg:3.6,speedMax:3.6,hrAvg:113,hrMax:null,steps:5215,incline:2,rower:{duration:16,calories:137,hrAvg:122,hrMax:131,resistance:6,rows:250,rowerDist:2.52}},
+  {id:"s38",date:"2026-05-01",duration:30,distance:2.01,calories:183,speedAvg:4.0,speedMax:4.0,hrAvg:105,hrMax:null,steps:2625,incline:0,note:"exterior"},
 ];
 const SW=[
   {date:"2026-03-20",weight:102.15},{date:"2026-04-03",weight:99.65},
@@ -171,6 +173,7 @@ const SW=[
 // Calorías consumidas por día — actualizado manualmente
 const KCAL_RECORDS={
   "2026-05-01":{kcal:1022,prot:78.4,carbs:118.1,fat:25},
+  "2026-05-01":{kcal:2338,prot:107,carbs:185,fat:125},
   "2026-04-30":{kcal:1022,prot:78.4,carbs:118.1,fat:25},
   "2026-04-29":{kcal:1167,prot:84,carbs:109.2,fat:39.6},
   "2026-04-28":{kcal:932,prot:67.5,carbs:76.9,fat:37.8,selections:[{emoji:"x",name:"Arroz Integral 50g",qty:2,kcal:120},{emoji:"x",name:"Papa Rustica",qty:5,kcal:30},{emoji:"x",name:"Estofado de Carne 50g",qty:7,kcal:294},{emoji:"x",name:"Huevo Revuelto con Guiso",qty:3,kcal:300},{emoji:"x",name:"Salchicha Ranchera",qty:1,kcal:84},{emoji:"x",name:"Kiwi",qty:1,kcal:60},{emoji:"x",name:"Panelada",qty:16,kcal:44}]},
@@ -249,7 +252,8 @@ const DAILY_STEPS=[
   {date:"2026-04-27",steps:8236},
   {date:"2026-04-28",steps:7593},
   {date:"2026-04-29",steps:7062},
-  {date:"2026-04-30",steps:8318}
+  {date:"2026-04-30",steps:8318},
+  {date:"2026-05-01",steps:11660}
 ];
 
 // STATE
@@ -653,6 +657,8 @@ function rSCard(s){
       +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Resistencia</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+s.rower.resistance+' <span style="font-size:10px;color:var(--muted)">nivel</span></span></div>'
       +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">FC promedio</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a2)">'+s.rower.hrAvg+' <span style="font-size:10px;color:var(--muted)">bpm</span></span></div>'
       +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Cal. Rower</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a4)">'+s.rower.calories+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>'
+      +(s.rower.rows?'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Rows</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+s.rower.rows+' <span style="font-size:10px;color:var(--muted)">rows</span></span></div>':'')
+      +(s.rower.rowerDist?'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Distancia</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+s.rower.rowerDist+' <span style="font-size:10px;color:var(--muted)">km</span></span></div>':'')
           +'</div>';
   }
   var totalDur=s.rower?fd(s.duration+s.rower.duration):fd(s.duration);
@@ -755,7 +761,7 @@ function rCharts(){
     {id:'c5',label:'Calorías (kcal) · ↑ mejor · 🟠 sin inclin. · 🔵 con inclin.',data:data.map(s=>calAdj(s)),type:'bar',color:'#ffa020',colorFn:s=>s.incline&&s.incline>0?'#00e5ff':'#ffa020'},
     {id:'c6',label:'FC promedio (bpm) · ↓ mejor',data:data.map(s=>s.hrAvg),type:'line',color:'#ff2020',yMin:90,yMax:160},
     {id:'c7',label:'Duración por sesión (min) · ↑ mejor',data:data.map(s=>s.duration),type:'line',color:'#60a5fa'},
-    ...(pSub==='Rower'?[{id:'c8r',label:'Duraci\xf3n Rower (min)',data:data.map(s=>s.rower?s.rower.duration:null),type:'bar',color:'#22c55e'},{id:'c9r',label:'Resistencia Rower',data:data.map(s=>s.rower?s.rower.resistance:null),type:'bar',color:'#22c55e',yMin:0,yMax:10},{id:'c10r',label:'Cal. Rower (kcal)',data:data.map(s=>s.rower?s.rower.calories:null),type:'bar',color:'#4ade80'},{id:'c11r',label:'FC Rower (bpm)',data:data.map(s=>s.rower?s.rower.hrAvg:null),type:'line',color:'#ff2020',yMin:90,yMax:160}]:[]),
+    ...(pSub==='Rower'?[{id:'c8r',label:'Duraci\xf3n Rower (min)',data:data.map(s=>s.rower?s.rower.duration:null),type:'bar',color:'#22c55e'},{id:'c9r',label:'Resistencia Rower',data:data.map(s=>s.rower?s.rower.resistance:null),type:'bar',color:'#22c55e',yMin:0,yMax:10},{id:'c10r',label:'Cal. Rower (kcal)',data:data.map(s=>s.rower?s.rower.calories:null),type:'bar',color:'#4ade80'},{id:'c11r',label:'FC Rower (bpm)',data:data.map(s=>s.rower?s.rower.hrAvg:null),type:'line',color:'#ff2020',yMin:90,yMax:160},{id:'c12r',label:'Rows Rower',data:data.map(s=>s.rower&&s.rower.rows?s.rower.rows:null),type:'bar',color:'#22c55e'},{id:'c13r',label:'Distancia Rower (km)',data:data.map(s=>s.rower&&s.rower.rowerDist?s.rower.rowerDist:null),type:'bar',color:'#4ade80'}]:[]),
     ...(pSub==='Treadmill'?[{id:'c8',label:'Inclinación (%) · contexto',data:data.map(s=>s.incline),type:'bar',color:'#ff4500',yMin:0,yMax:5}]:[]),
     {id:'c9',label:'Calorías consumidas por día (kcal) · ↓ mejor',data:data.map(s=>{var r=kcalDbGet()[s.date];return r?r.kcal:null;}),type:'bar',color:'#c084fc',colorFn:null},
   ];
@@ -1502,6 +1508,8 @@ function rTots(){
           +SC('&#x1F6A3;','Sesiones Rower',rs.length,'','#22c55e')+SC('&#x23F1;&#xFE0F;','Tiempo total',fd(totDur),'','#22c55e')
           +SC('&#x1F525;','Calor\xedas',totCal.toLocaleString(),'kcal','#4ade80')+SC('&#x2764;&#xFE0F;','FC promedio',avgFC,'bpm','var(--a2)')
           +SC('&#x1F4AA;','Resistencia prom.',avgRes,'nivel','#22c55e')+SC('&#x23F1;&#xFE0F;','Duraci\xf3n prom.',fd(Math.round(totDur/rs.length)),'','#22c55e')
+        +(rs.some(function(s){return s.rower.rows;})?SC('&#x1F3CB;','Rows totales',rs.reduce(function(a,s){return a+(s.rower.rows||0);},0),'rows','#22c55e'):'')
+        +(rs.some(function(s){return s.rower.rowerDist;})?SC('&#x1F4CD;','Dist. total rower',rs.reduce(function(a,s){return a+(s.rower.rowerDist||0);},0).toFixed(2),'km','#4ade80'):'')
         +'</div>';
     }
   }
