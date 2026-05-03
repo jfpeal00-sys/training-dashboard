@@ -474,7 +474,8 @@ const SS=[
   {id:"s36",date:"2026-04-30",duration:65,distance:3.82,calories:366,totalCalories:2548,speedAvg:3.6,speedMax:3.6,hrAvg:121,hrMax:null,steps:5068,incline:2,rower:{duration:17,calories:148,hrAvg:128,hrMax:138,resistance:6}},
   {id:"s37",date:"2026-05-01",duration:65,distance:3.92,calories:372,totalCalories:2603,speedAvg:3.6,speedMax:3.6,hrAvg:113,hrMax:null,steps:5215,incline:2,rower:{duration:16,calories:137,hrAvg:122,hrMax:131,resistance:6,rows:250,rowerDist:2.52}},
   {id:"s38",date:"2026-05-01",duration:30,distance:2.01,calories:183,totalCalories:2603,speedAvg:4.0,speedMax:4.0,hrAvg:105,hrMax:null,steps:2625,incline:0,note:"exterior"},
-  {id:"s39",date:"2026-05-02",duration:0,distance:0,calories:0,totalCalories:2599,speedAvg:0,hrAvg:0,hrMax:null,steps:0,rowerOnly:true,rower:{duration:56,calories:482,hrAvg:122,hrMax:151,resistance:6,rows:905,rowerDist:8.45}},
+  {id:"s39",date:"2026-05-02",duration:0,distance:0,calories:0,totalCalories:2599,speedAvg:0,hrAvg:0,hrMax:null,steps:0,rowerOnly:true,type:"endurance",rower:{duration:56,calories:482,hrAvg:122,hrMax:151,resistance:6,rows:905,rowerDist:8.45}},
+  {id:"s40",date:"2026-05-03",duration:81,distance:5.00,calories:470,totalCalories:null,speedAvg:3.7,speedMax:3.7,hrAvg:116,hrMax:null,steps:6753,cadence:83,incline:2,type:"endurance"},
 ];
 const SW=[
   {date:"2026-03-20",weight:102.15},{date:"2026-04-03",weight:99.65},
@@ -491,7 +492,8 @@ const SW=[
   {date:"2026-04-27",weight:95.15},
   {date:"2026-04-28",weight:94.80},
   {date:"2026-04-29",weight:94.20},
-  {date:"2026-05-02",weight:92.55}
+  {date:"2026-05-02",weight:94.20},
+  {date:"2026-05-03",weight:92.55}
 ];
 // Calorías consumidas por día — actualizado manualmente
 const KCAL_RECORDS={
@@ -784,7 +786,7 @@ function rHeader(){
     grid.innerHTML=g5.map(s=>`<div class="hdr-g5"><div class="hdr-g5v" style="color:${s.c}">${s.v}</div><div class="hdr-g5l">${s.l}</div></div>`).join('');
   }
 }
-const ENDURANCE_IDS=new Set(['s30','s29','s24','s21','s17','s15','s10','s5b','s2']);
+const ENDURANCE_IDS=new Set(['s30','s29','s24','s21','s17','s15','s10','s5b','s2','s39','s40']);
 const SIMULATION_IDS=new Set(['s31','s33','s34']);
 function getStreaks(){
   const dates=[...new Set(sessions.map(s=>s.date))].sort();
