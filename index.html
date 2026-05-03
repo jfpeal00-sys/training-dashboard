@@ -2179,7 +2179,7 @@ function rSimCharts(){
   // Desktop: try immediately on load
   window.addEventListener('load', tryPlay);
   // Mobile: hook into first interaction anywhere on the page
-  ['touchstart','touchend','click','keydown','scroll','wheel','touchmove'].forEach(function(ev){
+  ['touchstart','click','keydown','scroll','wheel'].forEach(function(ev){
     document.addEventListener(ev, tryPlay, {once:true, passive:true, capture:true});
   });
 })();
