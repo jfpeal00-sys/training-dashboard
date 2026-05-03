@@ -2166,64 +2166,23 @@ function rSimCharts(){
 </script></script>
 
 <!-- ══ AUDIO AUTOPLAY ══ -->
-<div id="audio-btn" onclick="startAudio()" style="
-  position:fixed;bottom:24px;right:20px;z-index:9999;
-  background:rgba(255,69,0,.15);border:1px solid rgba(255,69,0,.4);
-  border-radius:50%;width:44px;height:44px;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;backdrop-filter:blur(8px);
-  box-shadow:0 0 12px rgba(255,69,0,.3);
-  transition:opacity .3s;
-" title="Play soundtrack">
-  <svg id="audio-icon-play" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff6b1a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left:2px">
-    <polygon points="5 3 19 12 5 21 5 3"/>
-  </svg>
-  <svg id="audio-icon-pause" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff6b1a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none">
-    <line x1="6" y1="4" x2="6" y2="20"/><line x1="18" y1="4" x2="18" y2="20"/>
-  </svg>
-</div>
 <script>
-var _audioPlaying=false;
-function startAudio(){
-  var a=document.getElementById('bg-audio');
-  var btnPlay=document.getElementById('audio-icon-play');
-  var btnPause=document.getElementById('audio-icon-pause');
-  if(!a) return;
-  if(_audioPlaying){
-    a.pause();
-    _audioPlaying=false;
-    btnPlay.style.display='block';
-    btnPause.style.display='none';
-  } else {
-    a.volume=0.60;
-    a.play().then(function(){
-      _audioPlaying=true;
-      btnPlay.style.display='none';
-      btnPause.style.display='block';
-    }).catch(function(e){console.log('Audio play failed:',e);});
-  }
-}
-// Try silent autoplay on load — works on desktop, blocked on mobile until tap
-window.addEventListener('load',function(){
+(function(){
   var a=document.getElementById('bg-audio');
   if(!a) return;
   a.volume=0.60;
-  a.play().then(function(){
-    _audioPlaying=true;
-    document.getElementById('audio-icon-play').style.display='none';
-    document.getElementById('audio-icon-pause').style.display='block';
-  }).catch(function(){
-    // Mobile: show pulsing play button as hint
-    var btn=document.getElementById('audio-btn');
-    if(btn) btn.style.animation='audio-pulse 1.5s ease-in-out infinite';
+  var started=false;
+  function tryPlay(){
+    if(started) return;
+    a.play().then(function(){started=true;}).catch(function(){});
+  }
+  // Desktop: try immediately on load
+  window.addEventListener('load', tryPlay);
+  // Mobile: hook into first interaction anywhere on the page
+  ['touchstart','touchend','click','keydown'].forEach(function(ev){
+    document.addEventListener(ev, tryPlay, {once:true, passive:true, capture:true});
   });
-});
+})();
 </script>
-<style>
-@keyframes audio-pulse{
-  0%,100%{box-shadow:0 0 8px rgba(255,69,0,.3);}
-  50%{box-shadow:0 0 18px rgba(255,107,26,.7),0 0 30px rgba(255,69,0,.3);}
-}
-</style>
 </body>
 </html>
