@@ -743,6 +743,38 @@ function hasAdj(s){return s.incline&&s.incline>0;}
 
 
 
+
+function initAchievementCache() {
+  // Pre-populate the achievement cache with already-done ones
+  // Also re-initializes if achievement names have changed (rebuild)
+  var achs = buildAchievements();
+  var currentDone = achs.filter(function(a) { return a.done; }).map(function(a) { return a.name; });
+  var storedRaw = localStorage.getItem('ts_ach_done');
+  
+  if (storedRaw === null) {
+    // First time — store all currently done achievements silently
+    localStorage.setItem('ts_ach_done', JSON.stringify(currentDone));
+    console.log('[Achievements] Cache initialized: ' + currentDone.length + ' achievements');
+    return;
+  }
+  
+  var stored = JSON.parse(storedRaw);
+  // If stored names don't match current achievement names, rebuild silently
+  var allNames = achs.map(function(a) { return a.name; });
+  var validStored = stored.filter(function(n) { return allNames.indexOf(n) >= 0; });
+  
+  // Add any done achievements not yet in stored (catch-up for renamed/new achievements)
+  var merged = validStored.slice();
+  currentDone.forEach(function(n) {
+    if (merged.indexOf(n) < 0) merged.push(n);
+  });
+  
+  if (merged.length !== stored.length) {
+    localStorage.setItem('ts_ach_done', JSON.stringify(merged));
+    console.log('[Achievements] Cache updated: ' + merged.length + ' achievements');
+  }
+}
+
 function checkAchievementUnlocks() {
   // Called after saving session or weight — check if new achievements unlocked
   var achs = buildAchievements();
@@ -2761,16 +2793,31 @@ function buildAchievements() {
   var totalRKm   = rSess.reduce(function(a,s){return a+(s.rower&&s.rower.rowerDist?s.rower.rowerDist:0);},0);
   var maxDist    = sessions.reduce(function(a,s){return Math.max(a,s.distance||0);},0);
   var maxIncl    = sessions.reduce(function(a,s){return Math.max(a,s.incline||0);},0);
-  var maxDur     = sessions.reduce(function(a,s){return Math.max(a,s.duration||0);},0);
-  var maxCal     = sessions.reduce(function(a,s){return Math.max(a,s.calories||0);},0);
+  var maxDur     = sessions.reduce(function(a,s){
+    var rDur = s.rower ? (s.rower.duration||0) : 0;
+    return Math.max(a,(s.duration||0)+rDur);
+  },0);
+  var maxCal     = sessions.reduce(function(a,s){
+    var rCal = s.rower ? (s.rower.calories||0) : 0;
+    return Math.max(a,(s.calories||0)+rCal);
+  },0);
   var maxSteps   = sessions.reduce(function(a,s){return Math.max(a,s.steps||0);},0);
   var maxRRows   = rSess.reduce(function(a,s){return Math.max(a,s.rower&&s.rower.rows?s.rower.rows:0);},0);
   var maxRKm     = rSess.reduce(function(a,s){return Math.max(a,s.rower&&s.rower.rowerDist?s.rower.rowerDist:0);},0);
   var totalActiveDays = sessions.reduce(function(acc,s){
     if(s.date&&acc.indexOf(s.date)<0) acc.push(s.date); return acc;
   },[]).length;
-  var totalSessMin60 = sessions.filter(function(s){return (s.duration||0)>=60;}).length;
-  var totalSessMin90 = sessions.filter(function(s){return (s.duration||0)>=90;}).length;
+  // Include rower duration/calories in totals
+  var totalCalAll = t.cal + rSess.reduce(function(a,s){return a+(s.rower&&s.rower.calories?s.rower.calories:0);},0);
+  var totalDurAll = t.dur + rSess.reduce(function(a,s){return a+(s.rower&&s.rower.duration?s.rower.duration:0);},0);
+  var totalSessMin60 = sessions.filter(function(s){
+    var rDur = s.rower?(s.rower.duration||0):0;
+    return ((s.duration||0)+rDur)>=60;
+  }).length;
+  var totalSessMin90 = sessions.filter(function(s){
+    var rDur = s.rower?(s.rower.duration||0):0;
+    return ((s.duration||0)+rDur)>=90;
+  }).length;
   var maxSpeedMax = sessions.reduce(function(a,s){return Math.max(a,s.speedMax||s.speedAvg||0);},0);
 
   return [
@@ -2791,7 +2838,7 @@ function buildAchievements() {
   {cat:'Distancia',tier:'Phobos Marine',name:'Shores of Phobos',   desc:'50 km totales acumulados.',                                 ico:'mountain', col:'#64b4ff', done:t.dist>=50,                 prog:Math.min(t.dist,50),                 goal:50},
   {cat:'Distancia',tier:'Phobos Marine',name:'Shotgun Run',        desc:'7 km en una sola sesión.',                                  ico:'bolt',     col:'#64b4ff', done:maxDist>=7,                 prog:Math.min(maxDist,7),                 goal:7},
   {cat:'Calorías', tier:'Phobos Marine',name:'Plasma Burn',        desc:'500 cal en una sesión.',                                    ico:'flame',    col:'#64b4ff', done:maxCal>=500,                prog:Math.min(maxCal,500),                goal:500},
-  {cat:'Calorías', tier:'Phobos Marine',name:'UAC Furnace',        desc:'5,000 cal totales quemadas.',                               ico:'flame',    col:'#64b4ff', done:t.cal>=5000,                prog:Math.min(t.cal,5000),                goal:5000},
+  {cat:'Calorías', tier:'Phobos Marine',name:'UAC Furnace',        desc:'5,000 cal totales quemadas.',                               ico:'flame',    col:'#64b4ff', done:totalCalAll>=5000,                prog:Math.min(totalCalAll,5000),                goal:5000},
   {cat:'Constancia',tier:'Phobos Marine',name:'Deimos Week',       desc:'7 días seguidos.',                                          ico:'flame',    col:'#64b4ff', done:streak.max>=7,              prog:Math.min(streak.max,7),              goal:7},
   {cat:'Remo',     tier:'Phobos Marine',name:'First Stroke',       desc:'Primera sesión de remo completada.',                        ico:'activity', col:'#64b4ff', done:rSess.length>=1,            prog:Math.min(1,rSess.length),            goal:1},
   {cat:'Peso',     tier:'Phobos Marine',name:'Phobos Gate H1',     desc:'Hito 1 alcanzado — 95 kg o menos.',                         ico:'target',   col:'#64b4ff', done:cw<=95,                     prog:cw<=95?1:0,                           goal:1},
@@ -2806,7 +2853,7 @@ function buildAchievements() {
   {cat:'Inclinación',tier:'Sentinel',  name:'UAC Ramp',            desc:'Inclinación del 2% en una sesión.',                         ico:'mountain', col:'#39ff6e', done:maxIncl>=2,                 prog:Math.min(maxIncl,2),                 goal:2},
   {cat:'Remo',     tier:'Sentinel',    name:'Acheron Rower',       desc:'5 sesiones de remo completadas.',                           ico:'award',    col:'#39ff6e', done:rSess.length>=5,            prog:Math.min(rSess.length,5),            goal:5},
   {cat:'Remo',     tier:'Sentinel',    name:'1K Demon Strokes',    desc:'1,000 paladas de remo acumuladas.',                         ico:'zap',      col:'#39ff6e', done:totalRows>=1000,            prog:Math.min(totalRows,1000),            goal:1000},
-  {cat:'Calorías', tier:'Sentinel',    name:'Hell Furnace',        desc:'10,000 cal totales quemadas.',                              ico:'flame',    col:'#39ff6e', done:t.cal>=10000,               prog:Math.min(t.cal,10000),               goal:10000},
+  {cat:'Calorías', tier:'Sentinel',    name:'Hell Furnace',        desc:'10,000 cal totales quemadas.',                              ico:'flame',    col:'#39ff6e', done:totalCalAll>=10000,               prog:Math.min(totalCalAll,10000),               goal:10000},
   {cat:'Duración', tier:'Sentinel',    name:'Hour of Power',       desc:'60 minutos en una sesión.',                                 ico:'clock',    col:'#39ff6e', done:maxDur>=60,                 prog:Math.min(maxDur,60),                 goal:60},
   {cat:'Pasos',    tier:'Sentinel',    name:'UAC Step Counter',    desc:'100,000 pasos totales.',                                    ico:'activity', col:'#39ff6e', done:t.steps>=100000,            prog:Math.min(t.steps,100000),            goal:100000},
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2817,10 +2864,10 @@ function buildAchievements() {
   {cat:'Constancia',tier:'Hell Knight',name:'The Shores of Hell',  desc:'22 días seguidos de entrenamiento.',                        ico:'flame',    col:'#ffa020', done:streak.max>=22,             prog:Math.min(streak.max,22),             goal:22},
   {cat:'Inclinación',tier:'Hell Knight',name:'Phobos Crater',      desc:'Inclinación del 5% en una sesión.',                         ico:'mountain', col:'#ffa020', done:maxIncl>=5,                 prog:Math.min(maxIncl,5),                 goal:5},
   {cat:'Remo',     tier:'Hell Knight', name:'River Styx',          desc:'10 km remados en total.',                                   ico:'rocket',   col:'#ffa020', done:totalRKm>=10,               prog:Math.min(totalRKm,10),               goal:10},
-  {cat:'Calorías', tier:'Hell Knight', name:'Berserk Calorie Pack',desc:'14,000 cal totales quemadas.',                              ico:'flame',    col:'#ffa020', done:t.cal>=14000,               prog:Math.min(t.cal,14000),               goal:14000},
+  {cat:'Calorías', tier:'Hell Knight', name:'Berserk Calorie Pack',desc:'14,000 cal totales quemadas.',                              ico:'flame',    col:'#ffa020', done:totalCalAll>=14000,               prog:Math.min(totalCalAll,14000),               goal:14000},
   {cat:'Peso',     tier:'Hell Knight', name:'Armor Lightened',     desc:'-9 kg desde el inicio.',                                    ico:'trophy',   col:'#ffa020', done:lost>=9,                    prog:Math.min(lost,9),                    goal:9},
   {cat:'Duración', tier:'Hell Knight', name:'Hell Marathon',       desc:'10 sesiones de 60+ minutos.',                               ico:'clock',    col:'#ffa020', done:totalSessMin60>=10,         prog:Math.min(totalSessMin60,10),         goal:10},
-  {cat:'Tiempo',   tier:'Hell Knight', name:'42 Hours: The Answer',desc:'42 horas totales de entrenamiento.',                         ico:'clock',    col:'#ffa020', done:t.dur>=2520,                prog:Math.min(t.dur,2520),                goal:2520},
+  {cat:'Tiempo',   tier:'Hell Knight', name:'42 Hours: The Answer',desc:'42 horas totales de entrenamiento.',                         ico:'clock',    col:'#ffa020', done:totalDurAll>=2520,                prog:Math.min(totalDurAll,2520),                goal:2520},
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // TIER 5 — BARON OF HELL (niveles 21-25)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2831,7 +2878,7 @@ function buildAchievements() {
   {cat:'Inclinación',tier:'Baron of Hell',name:'Mt. Erebus',       desc:'Inclinación del 8% en una sesión.',                         ico:'mountain', col:'#ff6b1a', done:maxIncl>=8,                 prog:Math.min(maxIncl,8),                 goal:8},
   {cat:'Remo',     tier:'Baron of Hell',name:'Styx Navigator',     desc:'10 sesiones de remo completadas.',                          ico:'award',    col:'#ff6b1a', done:rSess.length>=10,           prog:Math.min(rSess.length,10),           goal:10},
   {cat:'Peso',     tier:'Baron of Hell',name:'Deimos Gate H2',     desc:'Hito 2 alcanzado — 90 kg o menos.',                         ico:'target',   col:'#ff6b1a', done:cw<=90,                     prog:Math.max(0,Math.min(1,sw>0?(sw-cw)/(sw-90):0)), goal:1},
-  {cat:'Calorías', tier:'Baron of Hell',name:'Plasma Furnace',     desc:'20,000 cal totales quemadas.',                              ico:'flame',    col:'#ff6b1a', done:t.cal>=20000,               prog:Math.min(t.cal,20000),               goal:20000},
+  {cat:'Calorías', tier:'Baron of Hell',name:'Plasma Furnace',     desc:'20,000 cal totales quemadas.',                              ico:'flame',    col:'#ff6b1a', done:totalCalAll>=20000,               prog:Math.min(totalCalAll,20000),               goal:20000},
   {cat:'Pasos',    tier:'Baron of Hell',name:'200K Steps',         desc:'200,000 pasos totales.',                                    ico:'activity', col:'#ff6b1a', done:t.steps>=200000,            prog:Math.min(t.steps,200000),            goal:200000},
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // TIER 6 — ARCH-VILE (niveles 26-30)
@@ -2843,7 +2890,7 @@ function buildAchievements() {
   {cat:'Remo',     tier:'Arch-Vile',   name:'Phlegethon',          desc:'20 sesiones de remo completadas.',                          ico:'trophy',   col:'#ff4040', done:rSess.length>=20,           prog:Math.min(rSess.length,20),           goal:20},
   {cat:'Remo',     tier:'Arch-Vile',   name:'5K Hell Strokes',     desc:'5,000 paladas de remo acumuladas.',                         ico:'zap',      col:'#ff4040', done:totalRows>=5000,            prog:Math.min(totalRows,5000),            goal:5000},
   {cat:'Duración', tier:'Arch-Vile',   name:'90 Min Beast',        desc:'90 minutos en una sesión.',                                 ico:'clock',    col:'#ff4040', done:maxDur>=90,                 prog:Math.min(maxDur,90),                 goal:90},
-  {cat:'Tiempo',   tier:'Arch-Vile',   name:'100 Hours Inferno',   desc:'100 horas totales de entrenamiento.',                       ico:'trophy',   col:'#ff4040', done:t.dur>=6000,                prog:Math.min(t.dur,6000),                goal:6000},
+  {cat:'Tiempo',   tier:'Arch-Vile',   name:'100 Hours Inferno',   desc:'100 horas totales de entrenamiento.',                       ico:'trophy',   col:'#ff4040', done:totalDurAll>=6000,                prog:Math.min(totalDurAll,6000),                goal:6000},
   {cat:'Peso',     tier:'Arch-Vile',   name:'Demon Mass Purge',    desc:'-15 kg desde el inicio.',                                   ico:'crown',    col:'#ff4040', done:lost>=15,                   prog:Math.min(lost,15),                   goal:15},
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // TIER 7 — KHAN MAYKR (niveles 31-35)
@@ -2855,7 +2902,7 @@ function buildAchievements() {
   {cat:'Inclinación',tier:'Khan Maykr',name:'Maykr Ascension',     desc:'Inclinación del 12% en una sesión.',                        ico:'mountain', col:'#ffd700', done:maxIncl>=12,                prog:Math.min(maxIncl,12),                goal:12},
   {cat:'Remo',     tier:'Khan Maykr',  name:'10K Hell Strokes',    desc:'10,000 paladas de remo acumuladas.',                        ico:'crown',    col:'#ffd700', done:totalRows>=10000,           prog:Math.min(totalRows,10000),           goal:10000},
   {cat:'Peso',     tier:'Khan Maykr',  name:'Inferno Gate H3',     desc:'Hito 3 alcanzado — 85 kg o menos.',                         ico:'target',   col:'#ffd700', done:cw<=85,                     prog:Math.max(0,Math.min(1,sw>0?(sw-cw)/(sw-85):0)), goal:1},
-  {cat:'Calorías', tier:'Khan Maykr',  name:'BFG9000 Output',      desc:'30,000 cal totales quemadas.',                              ico:'star',     col:'#ffd700', done:t.cal>=30000,               prog:Math.min(t.cal,30000),               goal:30000},
+  {cat:'Calorías', tier:'Khan Maykr',  name:'BFG9000 Output',      desc:'30,000 cal totales quemadas.',                              ico:'star',     col:'#ffd700', done:totalCalAll>=30000,               prog:Math.min(totalCalAll,30000),               goal:30000},
   {cat:'Pasos',    tier:'Khan Maykr',  name:'500K Steps',          desc:'500,000 pasos totales.',                                    ico:'mountain', col:'#ffd700', done:t.steps>=500000,            prog:Math.min(t.steps,500000),            goal:500000},
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // TIER 8 — ICON OF SIN (niveles 36-40)
@@ -2866,7 +2913,7 @@ function buildAchievements() {
   {cat:'Constancia',tier:'Icon of Sin',name:'Icon Streak',         desc:'150 días activos totales.',                                 ico:'skull',    col:'#cc1100', done:totalActiveDays>=150,       prog:Math.min(totalActiveDays,150),       goal:150},
   {cat:'Inclinación',tier:'Icon of Sin',name:'Icon Climb',         desc:'Inclinación del 15% en una sesión.',                        ico:'mountain', col:'#cc1100', done:maxIncl>=15,                prog:Math.min(maxIncl,15),                goal:15},
   {cat:'Remo',     tier:'Icon of Sin', name:'Styx Master',         desc:'50 sesiones de remo completadas.',                          ico:'crown',    col:'#cc1100', done:rSess.length>=50,           prog:Math.min(rSess.length,50),           goal:50},
-  {cat:'Tiempo',   tier:'Icon of Sin', name:'200 Hours Doom',      desc:'200 horas totales de entrenamiento.',                       ico:'skull',    col:'#cc1100', done:t.dur>=12000,               prog:Math.min(t.dur,12000),               goal:12000},
+  {cat:'Tiempo',   tier:'Icon of Sin', name:'200 Hours Doom',      desc:'200 horas totales de entrenamiento.',                       ico:'skull',    col:'#cc1100', done:totalDurAll>=12000,               prog:Math.min(totalDurAll,12000),               goal:12000},
   {cat:'Peso',     tier:'Icon of Sin', name:'Soul Sphere Weight',  desc:'-20 kg desde el inicio.',                                   ico:'skull',    col:'#cc1100', done:lost>=20,                   prog:Math.min(lost,20),                   goal:20},
   {cat:'Duración', tier:'Icon of Sin', name:'25 Sessions 90min',   desc:'25 sesiones de 90+ minutos.',                               ico:'clock',    col:'#cc1100', done:totalSessMin90>=25,         prog:Math.min(totalSessMin90,25),         goal:25},
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2877,8 +2924,8 @@ function buildAchievements() {
   {cat:'Constancia',tier:'Doom Slayer',name:'Slayer Eternal',      desc:'200 días activos totales.',                                 ico:'infinity', col:'#ff6b1a', done:totalActiveDays>=200,       prog:Math.min(totalActiveDays,200),       goal:200},
   {cat:'Remo',     tier:'Doom Slayer', name:'20K Strokes',         desc:'20,000 paladas de remo acumuladas.',                        ico:'crown',    col:'#ff6b1a', done:totalRows>=20000,           prog:Math.min(totalRows,20000),           goal:20000},
   {cat:'Remo',     tier:'Doom Slayer', name:'Remo Elite',          desc:'50 km remados en total.',                                   ico:'rocket',   col:'#ff6b1a', done:totalRKm>=50,               prog:Math.min(totalRKm,50),               goal:50},
-  {cat:'Tiempo',   tier:'Doom Slayer', name:'300 Hours Eternal',   desc:'300 horas totales de entrenamiento.',                       ico:'infinity', col:'#ff6b1a', done:t.dur>=18000,               prog:Math.min(t.dur,18000),               goal:18000},
-  {cat:'Calorías', tier:'Doom Slayer', name:'50K Cal Inferno',     desc:'50,000 cal totales quemadas.',                              ico:'flame',    col:'#ff6b1a', done:t.cal>=50000,               prog:Math.min(t.cal,50000),               goal:50000},
+  {cat:'Tiempo',   tier:'Doom Slayer', name:'300 Hours Eternal',   desc:'300 horas totales de entrenamiento.',                       ico:'infinity', col:'#ff6b1a', done:totalDurAll>=18000,               prog:Math.min(totalDurAll,18000),               goal:18000},
+  {cat:'Calorías', tier:'Doom Slayer', name:'50K Cal Inferno',     desc:'50,000 cal totales quemadas.',                              ico:'flame',    col:'#ff6b1a', done:totalCalAll>=50000,               prog:Math.min(totalCalAll,50000),               goal:50000},
   {cat:'Peso',     tier:'Doom Slayer', name:'Slayer Body',         desc:'-25 kg desde el inicio.',                                   ico:'trophy',   col:'#ff6b1a', done:lost>=25,                   prog:Math.min(lost,25),                   goal:25},
   {cat:'Duración', tier:'Doom Slayer', name:'50 Sessions 90min',   desc:'50 sesiones de 90+ minutos.',                               ico:'clock',    col:'#ff6b1a', done:totalSessMin90>=50,         prog:Math.min(totalSessMin90,50),         goal:50},
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2886,10 +2933,10 @@ function buildAchievements() {
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   {cat:'Sesiones', tier:'Father',      name:'The Father Count',    desc:'300 sesiones completadas.',                                 ico:'crown',    col:'#ffffff', done:sessions.length>=300,       prog:Math.min(sessions.length,300),       goal:300},
   {cat:'Distancia',tier:'Father',      name:'Father Distance',     desc:'1,500 km totales acumulados.',                              ico:'infinity', col:'#ffffff', done:t.dist>=1500,               prog:Math.min(t.dist,1500),               goal:1500},
-  {cat:'Tiempo',   tier:'Father',      name:'500 Hours IDDQD',     desc:'500 horas totales de entrenamiento.',                       ico:'skull',    col:'#ffffff', done:t.dur>=30000,               prog:Math.min(t.dur,30000),               goal:30000},
+  {cat:'Tiempo',   tier:'Father',      name:'500 Hours IDDQD',     desc:'500 horas totales de entrenamiento.',                       ico:'skull',    col:'#ffffff', done:totalDurAll>=30000,               prog:Math.min(totalDurAll,30000),               goal:30000},
   {cat:'Constancia',tier:'Father',     name:'Father Flame',        desc:'365 días activos totales.',                                 ico:'infinity', col:'#ffffff', done:totalActiveDays>=365,       prog:Math.min(totalActiveDays,365),       goal:365},
   {cat:'Remo',     tier:'Father',      name:'Remo God',            desc:'100 sesiones de remo completadas.',                         ico:'trophy',   col:'#ffffff', done:rSess.length>=100,          prog:Math.min(rSess.length,100),          goal:100},
-  {cat:'Calorías', tier:'Father',      name:'100K Cal God',        desc:'100,000 cal totales quemadas.',                             ico:'flame',    col:'#ffffff', done:t.cal>=100000,              prog:Math.min(t.cal,100000),              goal:100000},
+  {cat:'Calorías', tier:'Father',      name:'100K Cal God',        desc:'100,000 cal totales quemadas.',                             ico:'flame',    col:'#ffffff', done:totalCalAll>=100000,              prog:Math.min(totalCalAll,100000),              goal:100000},
   {cat:'Pasos',    tier:'Father',      name:'1M Steps Father',     desc:'1,000,000 pasos totales.',                                  ico:'mountain', col:'#ffffff', done:t.steps>=1000000,           prog:Math.min(t.steps,1000000),           goal:1000000},
   {cat:'Peso',     tier:'Father',      name:'Father Body',         desc:'-30 kg desde el inicio.',                                   ico:'crown',    col:'#ffffff', done:lost>=30,                   prog:Math.min(lost,30),                   goal:30},
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2897,9 +2944,9 @@ function buildAchievements() {
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   {cat:'Sesiones', tier:'Dark Lord',   name:'Infinite Runs',       desc:'500 sesiones completadas.',                                 ico:'skull',    col:'#ff0000', done:sessions.length>=500,       prog:Math.min(sessions.length,500),       goal:500},
   {cat:'Distancia',tier:'Dark Lord',   name:'Dark Lord Distance',  desc:'2,000 km totales acumulados.',                              ico:'skull',    col:'#ff0000', done:t.dist>=2000,               prog:Math.min(t.dist,2000),               goal:2000},
-  {cat:'Tiempo',   tier:'Dark Lord',   name:'1000 Hours: IDDQD',   desc:'1,000 horas totales de entrenamiento.',                     ico:'infinity', col:'#ff0000', done:t.dur>=60000,               prog:Math.min(t.dur,60000),               goal:60000},
+  {cat:'Tiempo',   tier:'Dark Lord',   name:'1000 Hours: IDDQD',   desc:'1,000 horas totales de entrenamiento.',                     ico:'infinity', col:'#ff0000', done:totalDurAll>=60000,               prog:Math.min(totalDurAll,60000),               goal:60000},
   {cat:'Remo',     tier:'Dark Lord',   name:'Dark Lord Remo',      desc:'50,000 paladas de remo acumuladas.',                        ico:'skull',    col:'#ff0000', done:totalRows>=50000,           prog:Math.min(totalRows,50000),           goal:50000},
-  {cat:'Calorías', tier:'Dark Lord',   name:'Dark Fire',           desc:'200,000 cal totales quemadas.',                             ico:'flame',    col:'#ff0000', done:t.cal>=200000,              prog:Math.min(t.cal,200000),              goal:200000},
+  {cat:'Calorías', tier:'Dark Lord',   name:'Dark Fire',           desc:'200,000 cal totales quemadas.',                             ico:'flame',    col:'#ff0000', done:totalCalAll>=200000,              prog:Math.min(totalCalAll,200000),              goal:200000},
   {cat:'Constancia',tier:'Dark Lord',  name:'Never Stops',         desc:'500 días activos totales.',                                 ico:'infinity', col:'#ff0000', done:totalActiveDays>=500,       prog:Math.min(totalActiveDays,500),       goal:500},
   {cat:'Peso',     tier:'Dark Lord',   name:'Dark Transformation', desc:'-35 kg desde el inicio.',                                   ico:'crown',    col:'#ff0000', done:lost>=35,                   prog:Math.min(lost,35),                   goal:35},
   // ── VELOCIDAD (3.5 → 5.0 km/h, un logro por tier) ──────────
@@ -3457,7 +3504,7 @@ function checkMonthlySummary(){
 }
 
 render();
-document.addEventListener("DOMContentLoaded",function(){checkMonthlySummary();});
+document.addEventListener("DOMContentLoaded",function(){checkMonthlySummary();initAchievementCache();});
 </script>
 
 <!-- ══ SPLASH + AUDIO ══ -->
