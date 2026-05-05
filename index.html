@@ -547,7 +547,8 @@ const SW=[
   {date:"2026-04-28",weight:94.80},
   {date:"2026-04-29",weight:94.20},
   {date:"2026-05-02",weight:94.20},
-  {date:"2026-05-03",weight:92.55}
+  {date:"2026-05-03",weight:92.55},
+  {date:"2026-05-04",weight:92.15}
 ];
 // Calorías consumidas por día — actualizado manualmente
 const KCAL_RECORDS={
@@ -637,7 +638,8 @@ const DAILY_STEPS=[
   {date:"2026-04-30",steps:8318},
   {date:"2026-05-01",steps:11660},
   {date:"2026-05-02",steps:3944},
-  {date:"2026-05-03",steps:7708}
+  {date:"2026-05-03",steps:7708},
+  {date:"2026-05-04",steps:7919}
 ];
 
 // STATE
@@ -1389,8 +1391,7 @@ function rDayCard(date,daySessions){
     +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Tiempo total</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--text)">'+fd(totalDurAll)+'</span></div>'
     +(avgFC?'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">FC prom. pond.</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a2)">'+avgFC+' <span style="font-size:10px;color:var(--muted)">bpm</span></span></div>':'')
     +(function(){var _s=daySessions.find(function(s){return s.totalCalories;});return _s?'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Cal. totales d\xeda</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a4)">'+_s.totalCalories.toLocaleString()+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>':'';})()
-    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Cal. workout</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a4)">'+totalCalAll+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>'+(totalStepsAll>0?'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Pasos del día</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a3)">'+totalStepsAll.toLocaleString()+'</span></div>':'')
-    +(kcalDay
+    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Cal. workout</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a4)">'+totalCalAll+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>'+(function(){var _ds=DAILY_STEPS.find(function(d){return d.date===date;});return _ds?'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Pasos del d\xeda</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a3)">'+_ds.steps.toLocaleString()+'</span></div>':'';})()    +(kcalDay
       ?'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Consumidas (comida)</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#c084fc">'+kcalDay.kcal+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>'
       :'')
     +(function(){var _s=daySessions.find(function(s){return s.totalCalories;});return (kcalDay&&_s)?'<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Balance del d\xeda</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:'+(_s.totalCalories-kcalDay.kcal>=0?'var(--a3)':'var(--a2)')+'">'+((_s.totalCalories-kcalDay.kcal>0?'+':'')+(_s.totalCalories-kcalDay.kcal))+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>':'';})()
