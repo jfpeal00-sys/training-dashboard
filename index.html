@@ -531,6 +531,7 @@ const SS=[
   {id:"s41",date:"2026-05-04",duration:61,distance:3.80,calories:355,steps:5122,hrAvg:113,hrMax:122,speedAvg:3.7,speedMax:4.4,incline:2,totalCalories:2425,type:"treadmill"},
   {id:"s42",date:"2026-05-04",duration:0,distance:0,calories:0,steps:0,hrAvg:120,hrMax:128,speedAvg:0,speedMax:0,incline:0,rowerOnly:true,rower:{duration:16,calories:144,hrAvg:120,hrMax:128,resistance:6,rows:247,rowerDist:2.64}},
   {id:"s43",date:"2026-05-05",duration:60,distance:3.72,calories:349,totalCalories:2368,speedAvg:3.7,speedMax:3.7,hrAvg:119,hrMax:137,steps:4966,incline:3,rower:{duration:16,calories:129,hrAvg:115,hrMax:130,resistance:6,rows:265,rowerDist:2.48}},
+  {id:"s44",date:"2026-05-06",duration:60,distance:3.72,calories:345,totalCalories:2345,speedAvg:3.7,speedMax:3.7,hrAvg:117,hrMax:143,steps:4932,incline:3,rower:{duration:18,calories:159,hrAvg:123,hrMax:136,resistance:6,rows:312,rowerDist:2.94}},
 ];
 const SW=[
   {date:"2026-03-20",weight:102.15},{date:"2026-04-03",weight:99.65},
@@ -550,10 +551,12 @@ const SW=[
   {date:"2026-05-02",weight:94.20},
   {date:"2026-05-03",weight:92.55},
   {date:"2026-05-04",weight:92.15},
-  {date:"2026-05-05",weight:91.50}
+  {date:"2026-05-05",weight:91.50},
+  {date:"2026-05-06",weight:91.10}
 ];
 // Calorías consumidas por día — actualizado manualmente
 const KCAL_RECORDS={
+  "2026-05-06":{kcal:1535,prot:97.9,carbs:104.3,fat:62.7},
   "2026-05-05":{kcal:1299,prot:93.3,carbs:51.3,fat:61.3},
   "2026-05-04":{kcal:1372,prot:100,carbs:114.1,fat:42.3,fiber:7},
   "2026-05-01":{kcal:1022,prot:78.4,carbs:118.1,fat:25},
@@ -643,7 +646,8 @@ const DAILY_STEPS=[
   {date:"2026-05-02",steps:3944},
   {date:"2026-05-03",steps:7708},
   {date:"2026-05-04",steps:7919},
-  {date:"2026-05-05",steps:6371}
+  {date:"2026-05-05",steps:6371},
+  {date:"2026-05-06",steps:5899}
 ];
 
 // STATE
@@ -837,7 +841,7 @@ function checkPR(s){
     if(r.resistance>0&&r.resistance>maxOf(rowerOthers,function(x){return x.rower.resistance||0;}))
       prs.push('Resistencia remo: '+r.resistance);
     if(r.rows>0&&r.rows>maxOf(rowerOthers,function(x){return x.rower.rows||0;}))
-      prs.push('Paladas: '+r.rows);
+      prs.push('Rows: '+r.rows);
     if(r.rowerDist>0&&r.rowerDist>maxOf(rowerOthers,function(x){return x.rower.rowerDist||0;}))
       prs.push('Distancia remo: '+r.rowerDist+' km');
   }
@@ -1544,10 +1548,10 @@ function rRowerBlock(s){
     +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Duración</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+fd(r.duration)+'</span></div>'
     +(r.resistance!=null?'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Resistencia</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+r.resistance+' <span style="font-size:10px;color:var(--muted)">nivel</span></span></div>':'')
     +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">FC promedio</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a2)">'+r.hrAvg+' <span style="font-size:10px;color:var(--muted)">bpm</span></span></div>'
-    +(r.rows?'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Paladas</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+r.rows+' <span style="font-size:10px;color:var(--muted)">rows</span></span></div>':'')
+    +(r.rows?'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Rows</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+r.rows+' <span style="font-size:10px;color:var(--muted)">rows</span></span></div>':'')
     +(r.rowerDist?'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Distancia remo</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+r.rowerDist.toFixed(2)+' <span style="font-size:10px;color:var(--muted)">km</span></span></div>':'')
     +sep
-    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Cal. ajustadas (FC)</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a4)">'+kcalAdj+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Cal. Rower</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a4)">'+kcalAdj+' <span style="font-size:10px;color:var(--muted)">kcal</span></span></div>'
     +(kcalOrig&&kcalOrig!==kcalAdj?'<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Cal. reloj (ref.)</span><span style="font-family:var(--fh);font-weight:700;font-size:13px;color:var(--muted)">'+kcalOrig+' <span style="font-size:10px">kcal</span></span></div>':'')
   +'</div>';
 }
@@ -1613,7 +1617,7 @@ function rCharts(){
       {id:'c7',label:'Duraci\xf3n por sesi\xf3n (min) \xb7 \u2191 mejor',data:data.map(s=>s.duration),type:'line',color:'#60a5fa'},
       ...(pSub==='Treadmill'||pSub==='Simulacion'||pSub==='Endurance'?[{id:'c8',label:'Inclinaci\xf3n (%) \xb7 contexto',data:data.map(s=>s.incline),type:'bar',color:'#ff4500',yMin:0,yMax:5}]:[]),
       ...(data.some(s=>s.rower&&s.rower.rows)?[
-        {id:'c12g',label:'Paladas remo \xb7 \u2191 mejor',data:data.map(s=>s.rower&&s.rower.rows?s.rower.rows:null),type:'bar',color:'#22c55e'},
+        {id:'c12g',label:'Rows remo \xb7 \u2191 mejor',data:data.map(s=>s.rower&&s.rower.rows?s.rower.rows:null),type:'bar',color:'#22c55e'},
         {id:'c13g',label:'Distancia remo (km) \xb7 \u2191 mejor',data:data.map(s=>s.rower&&s.rower.rowerDist?s.rower.rowerDist:null),type:'bar',color:'#4ade80'},
       ]:[]),
       {id:'c9',label:'Calor\xedas consumidas por d\xeda (kcal)',data:data.map(s=>{var r=kcalDbGet()[s.date];return r?r.kcal:null;}),type:'bar',color:'#c084fc',colorFn:null},
