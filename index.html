@@ -532,6 +532,7 @@ const SS=[
   {id:"s42",date:"2026-05-04",duration:0,distance:0,calories:0,steps:0,hrAvg:120,hrMax:128,speedAvg:0,speedMax:0,incline:0,rowerOnly:true,rower:{duration:16,calories:144,hrAvg:120,hrMax:128,resistance:6,rows:247,rowerDist:2.64}},
   {id:"s43",date:"2026-05-05",duration:60,distance:3.72,calories:349,totalCalories:2368,speedAvg:3.7,speedMax:3.7,hrAvg:119,hrMax:137,steps:4966,incline:3,rower:{duration:16,calories:129,hrAvg:115,hrMax:130,resistance:6,rows:265,rowerDist:2.48}},
   {id:"s44",date:"2026-05-06",duration:60,distance:3.72,calories:345,totalCalories:2345,speedAvg:3.7,speedMax:3.7,hrAvg:117,hrMax:143,steps:4932,incline:3,rower:{duration:18,calories:159,hrAvg:123,hrMax:136,resistance:6,rows:312,rowerDist:2.94}},
+  {id:"s45",calMET:566,date:"2026-05-07",duration:60,distance:3.74,calories:342,totalCalories:2404,speedAvg:3.7,speedMax:7.3,hrAvg:130,hrMax:155,steps:4887,incline:9,note:"Trail Dans Les Calanques",inclineProfile:[{from:0,to:0.35,pct:3},{from:0.35,to:0.60,pct:15},{from:0.60,to:0.85,pct:3},{from:0.85,to:1.10,pct:15},{from:1.10,to:1.40,pct:3},{from:1.40,to:1.60,pct:15},{from:1.60,to:1.80,pct:3},{from:1.80,to:2.20,pct:15},{from:2.20,to:2.40,pct:3},{from:2.40,to:2.50,pct:15},{from:2.50,to:2.90,pct:3},{from:2.90,to:3.30,pct:15},{from:3.30,to:3.40,pct:3},{from:3.40,to:3.60,pct:15},{from:3.60,to:3.74,pct:3}],rower:{duration:937,calories:137,hrAvg:120,hrMax:129,resistance:6,rows:294,rowerDist:2.24}},
 ];
 const SW=[
   {date:"2026-03-20",weight:102.15},{date:"2026-04-03",weight:99.65},
@@ -552,7 +553,8 @@ const SW=[
   {date:"2026-05-03",weight:92.55},
   {date:"2026-05-04",weight:92.15},
   {date:"2026-05-05",weight:91.50},
-  {date:"2026-05-06",weight:91.10}
+  {date:"2026-05-06",weight:91.10},
+  {date:"2026-05-07",weight:91.35}
 ];
 // Calorías consumidas por día — actualizado manualmente
 const KCAL_RECORDS={
@@ -647,7 +649,8 @@ const DAILY_STEPS=[
   {date:"2026-05-03",steps:7708},
   {date:"2026-05-04",steps:7919},
   {date:"2026-05-05",steps:6371},
-  {date:"2026-05-06",steps:5899}
+  {date:"2026-05-06",steps:5899},
+  {date:"2026-05-07",steps:5830}
 ];
 
 // STATE
@@ -670,6 +673,7 @@ function saveW(){
 
 // UTILS
 function fd(m){if(!m&&m!==0)return'—';const h=Math.floor(m/60),mm=m%60;return h?`${h}h ${mm}m`:`${mm}m`;}
+function fdr(d){if(!d&&d!==0)return'';if(d>120){var m=Math.floor(d/60),s=d%60;return s?(m+'m '+String(s).padStart(2,'0')+'s'):(m+'m');}return fd(d);}
 function pace(d,di){if(!d||!di)return null;const s=(d*60)/di;return`${Math.floor(s/60)}:${String(Math.round(s%60)).padStart(2,'0')}`;}
 function fdate(d){return new Date(d+'T12:00:00').toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short',year:'numeric'});}
 function fdshort(d){return new Date(d+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short'});}
@@ -749,6 +753,7 @@ function metBase(speed){
 }
 function calAdj(s){
   if(!s.calories)return s.calories;
+  if(s.calMET)return s.calMET;
   if(isExt(s)||s.rowerOnly)return s.calories;
   if(!s.incline||s.incline===0)return s.calories;
   var w=wForDate(s.date)||90;
@@ -1010,8 +1015,9 @@ function rHeader(){
   // ── Grid 5 inferior ────────────────────────────────────────────
   const grid=document.getElementById('hdr-grid');
   if(grid){
-    const g5=[
-      {v:fd(t.dur),l:'Tiempo',c:'var(--a3)'},
+    const totalDurBanner=sessions.reduce(function(a,s){var rd=s.rower?(s.rower.duration>120?Math.round(s.rower.duration/60):s.rower.duration):0;return a+(s.duration||0)+rd;},0);
+  const g5=[
+      {v:fd(totalDurBanner),l:'Tiempo',c:'var(--a3)'},
       {v:t.dist.toFixed(1)+' km',l:'Distancia',c:'var(--a4)'},
       {v:t.ap,l:'Pace',c:'var(--a5)'},
       {v:t.as+' km/h',l:'Vel. prom',c:'var(--a1)'},
@@ -1021,7 +1027,7 @@ function rHeader(){
   }
 }
 const ENDURANCE_IDS=new Set(['s30','s29','s24','s21','s17','s15','s10','s5b','s2','s39','s40']);
-const SIMULATION_IDS=new Set(['s31','s33','s34']);
+const SIMULATION_IDS=new Set(['s29','s30','s31','s33','s34','s45']);
 function getStreaks(){
   const dates=[...new Set(sessions.map(s=>s.date))].sort();
   if(!dates.length)return{cur:0,max:0,lastDate:null};
@@ -1304,7 +1310,7 @@ function rHist(){
       html+='</div></div>';
     });
     html+='</div>';
-    return '<div style="display:flex;flex-direction:column;gap:11px">'      +'<div class="stabs">'+['General','Treadmill','Exterior','Rower','Comparativa'].map(function(t){        return '<button class="stb'+(hSub===t?' on':'')+'" onclick="hSub=\''+t+'\';render()">'+t+'</button>';      }).join('')+'</div>'+html+'</div>';  }
+    return '<div style="display:flex;flex-direction:column;gap:11px">'      +'<div class="stabs">'+['General','Treadmill','Exterior','Rower','Simulacion','Comparativa'].map(function(t){        return '<button class="stb'+(hSub===t?' on':'')+'" onclick="hSub=\''+t+'\';render()">'+t+'</button>';      }).join('')+'</div>'+html+'</div>';  }
 
   var filteredDates=allDates.filter(function(date){
     var daySessions=sessions.filter(function(s){return s.date===date;});
@@ -1312,11 +1318,12 @@ function rHist(){
     if(hSub==='Treadmill') return daySessions.some(function(s){return !isExt(s)&&!s.rower||(!isExt(s)&&s.rower);});
     if(hSub==='Exterior') return daySessions.some(function(s){return isExt(s);});
     if(hSub==='Rower') return daySessions.some(function(s){return !!s.rower;});
+    if(hSub==='Simulacion') return daySessions.some(function(s){return SIMULATION_IDS.has(s.id);});
     return true;
   });
 
   return '<div style="display:flex;flex-direction:column;gap:11px">'
-    +'<div class="stabs">'+['General','Treadmill','Exterior','Rower','Comparativa'].map(function(t){
+    +'<div class="stabs">'+['General','Treadmill','Exterior','Rower','Simulacion','Comparativa'].map(function(t){
       return '<button class="stb'+(hSub===t?' on':'')+'" onclick="hSub=\''+t+'\';rContent()">'
         +(t==='Treadmill'?'<svg style="display:inline;width:12px;height:12px;vertical-align:middle;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>':t==='Exterior'?'<svg style="display:inline;width:12px;height:12px;vertical-align:middle;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M13 4v6l2 5v5h-3v-4h-4v4H5v-5l2-5V4"/><circle cx="12" cy="2" r="1"/></svg>':t==='Rower'?'<svg style="display:inline;width:12px;height:12px;vertical-align:middle;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M3 17l4-8 4 4 4-4 4 8"/><circle cx="12" cy="5" r="2"/></svg>':'<svg style="display:inline;width:12px;height:12px;vertical-align:middle;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>')+' '+t+'</button>';
     }).join('')+'</div>'
@@ -1336,9 +1343,12 @@ function rDayCard(date,daySessions){
   var rowerSession=daySessions.find(function(s){return !!s.rower;});
 
   // Show based on subpestana
-  var showTM   =(hSub==='General'||hSub==='Treadmill')&&tmSessions.length>0;
+  var isSim=(hSub==='Simulacion');
+  var showTM   =(hSub==='General'||hSub==='Treadmill'||isSim)&&tmSessions.length>0;
   var showExt  =(hSub==='General'||hSub==='Exterior')&&extSessions.length>0;
-  var showRower=(hSub==='General'||hSub==='Rower')&&!!rowerSession;
+  var showRower=(hSub==='General'||hSub==='Rower'||isSim)&&!!rowerSession;
+  var simSessions=daySessions.filter(function(s){return SIMULATION_IDS.has(s.id);});
+  var showSim   =(hSub==='General'||isSim)&&simSessions.length>0;
   var showTotal=(hSub==='General');
 
   // Weight for this date
@@ -1346,7 +1356,7 @@ function rDayCard(date,daySessions){
   var kcalDay=KCAL_RECORDS[date];
 
   // Total duration across all sessions
-  var totalDurAll=daySessions.reduce(function(a,s){return a+s.duration+(s.rower?s.rower.duration:0);},0);
+  var totalDurAll=daySessions.reduce(function(a,s){return a+s.duration+(s.rower?(function(d){return d>120?Math.round(d/60):d;})(s.rower.duration):0);},0);
   var totalCalAll=daySessions.reduce(function(a,s){return a+(hasAdj(s)?calAdj(s):s.calories)+(s.rower?s.rower.calories:0);},0);
   var totalStepsAll=daySessions.reduce(function(a,s){return a+(s.steps||0);},0);
 
@@ -1545,7 +1555,7 @@ function rRowerBlock(s){
   var sep='<div style="height:1px;background:rgba(255,255,255,.05);margin:8px 0"></div>';
   return '<div style="background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.2);border-radius:13px;padding:12px 13px;">'
     +'<div style="font-family:var(--fm);font-size:8px;color:#22c55e;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:9px;opacity:.9">🚣 Rower</div>'
-    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Duración</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+fd(r.duration)+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Duración</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+fdr(r.duration)+'</span></div>'
     +(r.resistance!=null?'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Resistencia</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+r.resistance+' <span style="font-size:10px;color:var(--muted)">nivel</span></span></div>':'')
     +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">FC promedio</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:var(--a2)">'+r.hrAvg+' <span style="font-size:10px;color:var(--muted)">bpm</span></span></div>'
     +(r.rows?'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-family:var(--fm);font-size:9px;color:var(--muted)">Rows</span><span style="font-family:var(--fh);font-weight:700;font-size:15px;color:#22c55e">'+r.rows+' <span style="font-size:10px;color:var(--muted)">rows</span></span></div>':'')
@@ -2015,7 +2025,7 @@ function rCal(){
           var p2=pace(s.duration,s.distance),ext2=isExt(s),isSim=SIMULATION_IDS.has(s.id);
           var accentColor=ext2?'var(--a3)':'var(--a5)';
           var typeLabel=ext2?'\ud83d\udeb6 '+(s.note||'Exterior'):(isSim?'\ud83c\udfc3 Treadmill (Simulaci\xf3n)':'\ud83c\udfc3 Treadmill');
-          var durLabel=s.rower?fd(s.duration)+' TM + '+fd(s.rower.duration)+' Rower':fd(s.duration);
+          var durLabel=s.rower?fd(s.duration)+' TM + '+(s.rower.duration>120?(Math.floor(s.rower.duration/60)+'m '+String(s.rower.duration%60).padStart(2,'0')+'s'):s.rower.duration+'m')+' Rower':fd(s.duration);
           var inclineInfo='';
           if(s.inclineProfile){
             var avg=Math.round(s.inclineProfile.reduce(function(a,t){return a+(t.pct*(t.to-t.from));},0)/s.distance*10)/10;
@@ -2028,7 +2038,7 @@ function rCal(){
             rowerBlock='<div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:8px 10px;margin-top:8px">'
               +'<div style="font-family:var(--fm);font-size:8px;color:#22c55e;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px"><svg style="display:inline;width:12px;height:12px;vertical-align:middle;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M3 17l4-8 4 4 4-4 4 8"/><circle cx="12" cy="5" r="2"/></svg> Rower</div>'
               +'<div class="g3">'
-                +'<div class="sm2"><div class="sl2">Duraci\xf3n</div><div class="sv" style="color:#22c55e">'+fd(s.rower.duration)+'</div></div>'
+                +'<div class="sm2"><div class="sl2">Duraci\xf3n</div><div class="sv" style="color:#22c55e">'+fdr(s.rower.duration)+'</div></div>'
                 +'<div class="sm2"><div class="sl2">Resistencia</div><div class="sv" style="color:#22c55e">Niv. '+s.rower.resistance+'</div></div>'
                 +'<div class="sm2"><div class="sl2">FC prom</div><div class="sv" style="color:var(--a2)">'+s.rower.hrAvg+' bpm</div></div>'
                 +'<div class="sm2"><div class="sl2">Cal. Rower (aj.)</div><div class="sv" style="color:var(--a4)">'+s.rower.calories+' kcal</div></div>'
@@ -2274,7 +2284,7 @@ function rRecs(){
         var det=[
           {l:'Fecha',v:new Date(s.date+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'}),c:color},
           {l:'Duraci\xf3n TM',v:fd(s.duration),c:'var(--a3)'},
-          {l:'Duraci\xf3n Rower',v:fd(s.rower.duration),c:'#22c55e'},
+          {l:'Duraci\xf3n Rower',v:fdr(s.rower.duration),c:'#22c55e'},
           {l:'Resistencia',v:'Nivel '+s.rower.resistance,c:'#22c55e'},
           {l:'Cal. Rower',v:s.rower.calories+' kcal',c:'var(--a4)'},
           {l:'FC Rower',v:s.rower.hrAvg+' bpm',c:'var(--a2)'}
@@ -2311,7 +2321,7 @@ function rRecs(){
     if(!rowerSess.length){
       content='<div class="empty">Sin sesiones de rower a\xfan.</div>';
     } else {
-      content+=RBR('Duraci\xf3n Rower','<svg style="display:inline;width:12px;height:12px;vertical-align:middle;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 6 12 12 16 14"/></svg>',top5r('duration','desc'),function(s){return fd(s.rower.duration);},'#22c55e')
+      content+=RBR('Duraci\xf3n Rower','<svg style="display:inline;width:12px;height:12px;vertical-align:middle;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 6 12 12 16 14"/></svg>',top5r('duration','desc'),function(s){return fdr(s.rower.duration);},'#22c55e')
         +RBR('Calor\xedas Rower','<svg style="display:inline;width:12px;height:12px;vertical-align:middle;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>',top5r('calories','desc'),function(s){return s.rower.calories+' kcal';},'#4ade80')
         +RBR('FC m\xe1s baja Rower','<svg style="display:inline;width:12px;height:12px;vertical-align:middle;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',top5r('hrAvg','asc'),function(s){return s.rower.hrAvg+' bpm';},'var(--a2)')
         +RBR('Mayor resistencia','<svg style="display:inline;width:12px;height:12px;vertical-align:middle;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>',top5r('resistance','desc'),function(s){return 'Nivel '+s.rower.resistance;},'#22c55e');
@@ -2388,9 +2398,9 @@ function rTots(){
     if(!rs.length){
       content='<div class="empty">Sin sesiones de rower a\xfan.</div>';
     } else {
-      var totDur=rs.reduce(function(a,s){return a+s.rower.duration;},0);
+      var totDur=rs.reduce(function(a,s){return a+(function(d){return d>120?Math.round(d/60):d;})(s.rower.duration);},0);
       var totCal=rs.reduce(function(a,s){return a+s.rower.calories;},0);
-      var avgFC=Math.round(rs.reduce(function(a,s){return a+s.rower.hrAvg*s.rower.duration;},0)/totDur);
+      var avgFC=Math.round(rs.reduce(function(a,s){return a+s.rower.hrAvg*(function(d){return d>120?Math.round(d/60):d;})(s.rower.duration);},0)/totDur);
       var avgRes=Math.round(rs.reduce(function(a,s){return a+s.rower.resistance;},0)/rs.length*10)/10;
       content='<div style="color:#22c55e;font-family:var(--fh);font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px"><svg style="display:inline;width:12px;height:12px;vertical-align:middle;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M3 17l4-8 4 4 4-4 4 8"/><circle cx="12" cy="5" r="2"/></svg> Rower</div>'
         +'<div class="g2">'
@@ -2779,17 +2789,76 @@ function getNextLevel(xp) {
 }
 
 // ── DOOM ACHIEVEMENTS — each assigned to a level range ───────────
+function achCompletedOn(a,sess,wts,rSess){
+  if(!a.done)return null;
+  var cat=a.cat||'';
+  var sorted=[].concat(sess).sort(function(a,b){return a.date<b.date?-1:1;});
+  // Weight milestones
+  if(cat==='Peso'){
+    var target=a.goal;
+    for(var i=0;i<wts.length;i++){if(wts[i].weight<=target)return wts[i].date;}
+  }
+  // Session count milestones
+  if(cat==='Sesiones'){
+    var allDates=[];
+    sess.filter(function(s){return !s.rowerOnly;}).forEach(function(s){allDates.push(s.date);});
+    rSess.filter(function(s){return !s.rowerOnly;}).forEach(function(s){allDates.push(s.date);});
+    sess.filter(function(s){return s.rowerOnly;}).forEach(function(s){allDates.push(s.date);});
+    allDates.sort();
+    if(allDates.length>=a.goal)return allDates[a.goal-1];
+  }
+  // Cumulative distance
+  if(cat==='Distancia'&&a.goal>1){
+    var acc=0;
+    for(var j=0;j<sorted.length;j++){acc+=(sorted[j].distance||0);if(acc>=a.goal)return sorted[j].date;}
+  }
+  // Remo distance
+  if(cat==='Remo'){
+    var accR=0,sortedR=[].concat(rSess).sort(function(a,b){return a.date<b.date?-1:1;});
+    for(var k=0;k<sortedR.length;k++){
+      accR+=(sortedR[k].rower&&sortedR[k].rower.rowerDist?sortedR[k].rower.rowerDist:0);
+      if(accR>=a.goal)return sortedR[k].date;
+    }
+  }
+  // Duration milestones: find first session meeting threshold
+  if(cat==='Duraci\xc3\xb3n'&&a.goal<=180){
+    for(var m=0;m<sorted.length;m++){if((sorted[m].duration||0)>=a.goal)return sorted[m].date;}
+  }
+  // Calories single session
+  if(cat==='Calor\xc3\xadas'&&a.goal<=1000){
+    for(var n=0;n<sorted.length;n++){if((sorted[n].calories||0)>=a.goal)return sorted[n].date;}
+  }
+  // Fallback: date of last session
+  return sorted.length?sorted[sorted.length-1].date:null;
+}
+
 function buildAchievements() {
   var t = tots(sessions);
+  var totalIndivSessions = sessions.length; // same as header
   var cw = weights.length ? weights[weights.length-1].weight : 999;
   var sw = weights.length ? weights[0].weight : 0;
   var lost = sw > 0 ? sw - cw : 0;
   var streak = getStreaks();
-  var rSess = sessions.filter(function(s){return !!s.rower;});
-  var eSess = sessions.filter(function(s){return !!isExt(s);});
-  var tSess = sessions.filter(function(s){return !isExt(s)&&!s.rower&&!s.rowerOnly;});
+
+  // Individual session types (each exercise = 1 session)
+  var rSess   = sessions.filter(function(s){return !!s.rower;});           // all with rower
+  var eSess   = sessions.filter(function(s){return !!isExt(s);});          // exterior only
+  var tmSess  = sessions.filter(function(s){return !isExt(s)&&!s.rowerOnly;}); // treadmill (may include rower object)
+
+  // Total individual sessions = TM/Ext entries + Rower entries (since TM+Rower = 2 sessions)
+  var totalIndivSessions = sessions.length + rSess.filter(function(s){return !s.rowerOnly;}).length;
+  // Since Apr 7
+  var sSince  = sessions.filter(function(s){return s.date>='2026-04-07';});
+  var rSinceAll = rSess.filter(function(s){return s.date>='2026-04-07';});
+  var tmExtSince = sSince.filter(function(s){return !s.rowerOnly;});
+  // Individual sessions since Apr 7 = TM/Ext + Rower (embedded rower = extra session)
+  var embeddedRowerSince = rSinceAll.filter(function(s){return !s.rowerOnly;}).length;
+  var totalIndivSessions = sSince.length + embeddedRowerSince;
+
   var totalRows  = rSess.reduce(function(a,s){return a+(s.rower&&s.rower.rows?s.rower.rows:0);},0);
   var totalRKm   = rSess.reduce(function(a,s){return a+(s.rower&&s.rower.rowerDist?s.rower.rowerDist:0);},0);
+
+  // Distance  per individual TM/Ext session (not combined with rower)
   var maxDist    = sessions.reduce(function(a,s){return Math.max(a,s.distance||0);},0);
   var maxIncl    = sessions.reduce(function(a,s){return Math.max(a,s.incline||0);},0);
   var maxDur     = sessions.reduce(function(a,s){return Math.max(a,s.duration||0);},0);
@@ -2797,170 +2866,211 @@ function buildAchievements() {
   var maxSteps   = sessions.reduce(function(a,s){return Math.max(a,s.steps||0);},0);
   var maxRRows   = rSess.reduce(function(a,s){return Math.max(a,s.rower&&s.rower.rows?s.rower.rows:0);},0);
   var maxRKm     = rSess.reduce(function(a,s){return Math.max(a,s.rower&&s.rower.rowerDist?s.rower.rowerDist:0);},0);
-  var totalCalAll  = t.cal + rSess.reduce(function(a,s){return a+(s.rower&&s.rower.calories?s.rower.calories:0);},0);
-  var totalDurAll  = t.dur + rSess.reduce(function(a,s){return a+(s.rower&&s.rower.duration?s.rower.duration:0);},0);
-  var maxSpeedMax  = sessions.reduce(function(a,s){return Math.max(a,s.speedMax||s.speedAvg||0);},0);
+  var totalCalAll= t.cal + rSess.reduce(function(a,s){return a+(s.rower&&s.rower.calories?s.rower.calories:0);},0);
+  var totalDurAll= sessions.reduce(function(a,s){return a+(s.duration||0)+(s.rower?(function(d){return d>120?Math.round(d/60):d;})(s.rower.duration):0);},0);
+  var maxSpeedMax= sessions.reduce(function(a,s){return Math.max(a,s.speedMax||s.speedAvg||0);},0);
+
+  // Since Apr 7  using totalIndivSessions for session-count achievements
+  var tDistS   = sSince.reduce(function(a,s){return a+(s.distance||0);},0);
+  var rSince   = rSinceAll;
+  var maxDistS = sSince.reduce(function(a,s){return Math.max(a,s.distance||0);},0);
+  var maxInclS = sSince.reduce(function(a,s){return Math.max(a,s.incline||0);},0);
+  var maxResS  = rSince.reduce(function(a,s){
+    var r=s.rower;return Math.max(a,r&&r.resistance?r.resistance:0);},0);
+  var sessIncl8 = sSince.filter(function(s){return (s.incline||0)>=8;}).length;
+  var rSessR6   = rSince.filter(function(s){return s.rower&&(s.rower.resistance||0)>=6;}).length;
+  var sessByIncl=function(n){return sessions.filter(function(s){return !s.rowerOnly&&(s.incline||0)>=n;}).length;};
+  var sessByInclExact=function(n){return sessions.filter(function(s){return !s.rowerOnly&&(s.incline||0)===n;}).length;};
+  var sessI6=sessByIncl(6);
+  var sessI7=sessByIncl(7);
+  var sessI8=sessByIncl(8);
+  var simByIncl=function(n){return sessions.filter(function(s){return SIMULATION_IDS.has(s.id)&&(s.incline||0)>=n;}).length;};
+  var simI7=simByIncl(7);
+  var simI8=simByIncl(8);
+  var simI9=simByIncl(9);
+  var simI10=simByIncl(10);
+  var simI15=simByIncl(15);
+  var rSessByRes=function(n){return rSess.filter(function(s){return s.rower&&(s.rower.resistance||0)>=n;}).length;};
+  var resR7=rSessByRes(7);
+  var resR8=rSessByRes(8);
+  var resR9=rSessByRes(9);
+  var resR10=rSessByRes(10);
+  var resR11=rSessByRes(11);
+  var resR12=rSessByRes(12);
+
   var totalActiveDays = sessions.reduce(function(acc,s){
     if(s.date&&acc.indexOf(s.date)<0) acc.push(s.date); return acc;
   },[]).length;
-  var totalSessMin60 = sessions.filter(function(s){return (s.duration||0)>=60;}).length;
-  var totalSessMin90 = sessions.filter(function(s){return (s.duration||0)>=90;}).length;
 
-  return [
+  var totalSessMin60  = sessions.filter(function(s){return !s.rowerOnly&&(s.duration||0)>=60;}).length;
+  var totalSessMin90  = sessions.filter(function(s){return !s.rowerOnly&&(s.duration||0)>=90;}).length;
+  var achs=[
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // TIER 1 — UAC RECRUIT (niveles 1-5)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  {cat:'Sesiones', tier:'UAC Recruit', name:'E1M1: Hangar',        desc:'Primera sesión completada. Bienvenido a la UAC.',           ico:'flag',     col:'#39ff6e', done:sessions.length>=1,         prog:Math.min(1,sessions.length),         goal:1},
-  {cat:'Sesiones', tier:'UAC Recruit', name:'Boot Camp',           desc:'5 sesiones completadas.',                                   ico:'dumbbell', col:'#39ff6e', done:sessions.length>=5,         prog:Math.min(sessions.length,5),         goal:5},
-  {cat:'Distancia',tier:'UAC Recruit', name:'First Steps',         desc:'Acumula 10 km totales.',                                    ico:'map',      col:'#39ff6e', done:t.dist>=10,                 prog:Math.min(t.dist,10),                 goal:10},
-  {cat:'Distancia',tier:'UAC Recruit', name:'Knee-Deep Run',       desc:'5 km en una sola sesión.',                                  ico:'bolt',     col:'#39ff6e', done:maxDist>=5,                 prog:Math.min(maxDist,5),                 goal:5},
+  {cat:'Sesiones', tier:'UAC Recruit', name:'E1M1: Hangar',        desc:'Primera sesión desde Apr 7. Bienvenido.',           ico:'flag',     col:'#39ff6e', done:totalIndivSessions>=1,    prog:Math.min(totalIndivSessions,1),    goal:1},
+  {cat:'Sesiones', tier:'UAC Recruit', name:'Boot Camp',           desc:'5 sesiones completadas.',                                   ico:'dumbbell', col:'#39ff6e', done:totalIndivSessions>=5,    prog:Math.min(totalIndivSessions,5),    goal:5},
+  {cat:'Distancia',tier:'UAC Recruit', name:'First Steps',         desc:'10 km totales acumulados.',                                    ico:'map',      col:'#39ff6e', done:t.dist>=10,                 prog:Math.min(t.dist,10),                 goal:10},
+  {cat:'Distancia',tier:'UAC Recruit', name:'Knee-Deep Run',       desc:'3 km en una sola sesión.',                                  ico:'bolt',     col:'#39ff6e', done:maxDist>=3,                 prog:Math.min(maxDist,3),                 goal:3},
   {cat:'Calorías', tier:'UAC Recruit', name:'Berserk Pack',        desc:'300 cal en una sesión.',                                    ico:'flame',    col:'#39ff6e', done:maxCal>=300,                prog:Math.min(maxCal,300),                goal:300},
-  {cat:'Peso',     tier:'UAC Recruit', name:'Armor Adjusted',      desc:'Pierde tu primer kg.',                                      ico:'activity', col:'#39ff6e', done:lost>=1,                    prog:Math.min(lost,1),                    goal:1},
+  {cat:'Peso',     tier:'UAC Recruit', name:'Armor Adjusted',      desc:'Pierde tu primer kg.',                                      ico:'activity', col:'#39ff6e', done:lost>=1, prog:lost, goal:1},
   {cat:'Constancia',tier:'UAC Recruit',name:'Phobos Day 3',        desc:'3 días seguidos de entrenamiento.',                         ico:'flame',    col:'#39ff6e', done:streak.max>=3,              prog:Math.min(streak.max,3),              goal:3},
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // TIER 2 — PHOBOS MARINE (niveles 6-10)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  {cat:'Sesiones', tier:'Phobos Marine',name:'Phobos Veteran',     desc:'10 sesiones completadas.',                                  ico:'dumbbell', col:'#64b4ff', done:sessions.length>=10,        prog:Math.min(sessions.length,10),        goal:10},
+  {cat:'Sesiones', tier:'Phobos Marine',name:'Phobos Veteran',     desc:'10 sesiones completadas.',                                  ico:'dumbbell', col:'#64b4ff', done:totalIndivSessions>=10,   prog:Math.min(totalIndivSessions,10),   goal:10},
   {cat:'Distancia',tier:'Phobos Marine',name:'Shores of Phobos',   desc:'50 km totales acumulados.',                                 ico:'mountain', col:'#64b4ff', done:t.dist>=50,                 prog:Math.min(t.dist,50),                 goal:50},
-  {cat:'Distancia',tier:'Phobos Marine',name:'Shotgun Run',        desc:'7 km en una sola sesión.',                                  ico:'bolt',     col:'#64b4ff', done:maxDist>=7,                 prog:Math.min(maxDist,7),                 goal:7},
-  {cat:'Calorías', tier:'Phobos Marine',name:'Plasma Burn',        desc:'500 cal en una sesión.',                                    ico:'flame',    col:'#64b4ff', done:maxCal>=500,                prog:Math.min(maxCal,500),                goal:500},
+  {cat:'Distancia',tier:'Phobos Marine',name:'Recon Run',        desc:'3.5 km en una sola sesión.',                                  ico:'bolt',     col:'#64b4ff', done:maxDist>=4,                 prog:Math.min(maxDist,4),                 goal:4},
+  {cat:'Calorías', tier:'Phobos Marine',name:'Plasma Burn',        desc:'400 cal en una sesión.',                                    ico:'flame',    col:'#64b4ff', done:maxCal>=400, prog:Math.min(maxCal,400), goal:400},
   {cat:'Calorías', tier:'Phobos Marine',name:'UAC Furnace',        desc:'5,000 cal totales quemadas.',                               ico:'flame',    col:'#64b4ff', done:t.cal>=5000,                prog:Math.min(t.cal,5000),                goal:5000},
   {cat:'Constancia',tier:'Phobos Marine',name:'Deimos Week',       desc:'7 días seguidos.',                                          ico:'flame',    col:'#64b4ff', done:streak.max>=7,              prog:Math.min(streak.max,7),              goal:7},
   {cat:'Remo',     tier:'Phobos Marine',name:'First Stroke',       desc:'Primera sesión de remo completada.',                        ico:'activity', col:'#64b4ff', done:rSess.length>=1,            prog:Math.min(1,rSess.length),            goal:1},
-  {cat:'Peso',     tier:'Phobos Marine',name:'Phobos Gate H1',     desc:'Hito 1 alcanzado — 95 kg o menos.',                         ico:'target',   col:'#64b4ff', done:cw<=95,                     prog:cw<=95?1:0,                           goal:1},
-  {cat:'Duración', tier:'Phobos Marine',name:'Endurance Init',     desc:'45 minutos en una sesión.',                                 ico:'clock',    col:'#64b4ff', done:maxDur>=45,                 prog:Math.min(maxDur,45),                 goal:45},
+  {cat:'Peso',     tier:'Phobos Marine',name:'Phobos Gate',     desc:'Pesa 99 kg o menos.',                              ico:'target',   col:'#64b4ff', done:cw<=99, prog:Math.max(0,Math.round((sw-cw)*10)/10), goal:Math.round((sw-99)*10)/10},
+  {cat:'Duración', tier:'Phobos Marine',name:'Iron Hour',     desc:'60 minutos en una sola sesión.',                                 ico:'clock',    col:'#64b4ff', done:maxDur>=45,                 prog:Math.min(maxDur,45),                 goal:45},
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // TIER 3 — SENTINEL (niveles 11-15)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  {cat:'Sesiones', tier:'Sentinel',    name:'Sentinel Vet',        desc:'25 sesiones completadas.',                                  ico:'shield',   col:'#39ff6e', done:sessions.length>=25,        prog:Math.min(sessions.length,25),        goal:25},
+  {cat:'Sesiones', tier:'Sentinel',    name:'Sentinel Vet',        desc:'25 sesiones completadas.',                                  ico:'shield',   col:'#39ff6e', done:totalIndivSessions>=25,   prog:Math.min(totalIndivSessions,25),   goal:25},
   {cat:'Distancia',tier:'Sentinel',    name:'Inferno Runner',      desc:'100 km totales acumulados.',                                ico:'mountain', col:'#39ff6e', done:t.dist>=100,                prog:Math.min(t.dist,100),                goal:100},
   {cat:'Distancia',tier:'Sentinel',    name:'Exterior Warrior',    desc:'Primera caminata exterior completada.',                     ico:'map',      col:'#39ff6e', done:eSess.length>=1,            prog:Math.min(1,eSess.length),            goal:1},
+  {cat:'Distancia',tier:'Sentinel',    name:'Sentinel Run',   desc:'5 km en una sola sesión.',  ico:'bolt',     col:'#39ff6e', done:maxDist>=5,  prog:Math.min(maxDist,5),  goal:5},
   {cat:'Constancia',tier:'Sentinel',   name:'Inferno Fortnight',   desc:'14 días seguidos de entrenamiento.',                        ico:'flame',    col:'#39ff6e', done:streak.max>=14,             prog:Math.min(streak.max,14),             goal:14},
-  {cat:'Inclinación',tier:'Sentinel',  name:'UAC Ramp',            desc:'Inclinación del 2% en una sesión.',                         ico:'mountain', col:'#39ff6e', done:maxIncl>=2,                 prog:Math.min(maxIncl,2),                 goal:2},
-  {cat:'Remo',     tier:'Sentinel',    name:'Acheron Rower',       desc:'5 sesiones de remo completadas.',                           ico:'award',    col:'#39ff6e', done:rSess.length>=5,            prog:Math.min(rSess.length,5),            goal:5},
+  {cat:'Inclinación',tier:'Sentinel',  name:'UAC Ramp',            desc:'10 sesiones con inclinación 2%.',                         ico:'mountain', col:'#39ff6e', done:sessByIncl(2)>=10, prog:Math.min(sessByIncl(2),10), goal:10},
+  {cat:'Remo',     tier:'Sentinel',    name:'First Stroke',       desc:'Primera sesión de remo en resistencia 4.',                           ico:'award',    col:'#39ff6e', done:rSessByRes(4)>=1,        prog:Math.min(rSessByRes(4),1),        goal:1},
   {cat:'Remo',     tier:'Sentinel',    name:'1K Demon Strokes',    desc:'1,000 paladas de remo acumuladas.',                         ico:'zap',      col:'#39ff6e', done:totalRows>=1000,            prog:Math.min(totalRows,1000),            goal:1000},
   {cat:'Calorías', tier:'Sentinel',    name:'Hell Furnace',        desc:'10,000 cal totales quemadas.',                              ico:'flame',    col:'#39ff6e', done:t.cal>=10000,               prog:Math.min(t.cal,10000),               goal:10000},
-  {cat:'Duración', tier:'Sentinel',    name:'Hour of Power',       desc:'60 minutos en una sesión.',                                 ico:'clock',    col:'#39ff6e', done:maxDur>=60,                 prog:Math.min(maxDur,60),                 goal:60},
+  {cat:'Duración', tier:'Sentinel',    name:'90 Min Warrior',       desc:'90 minutos en una sola sesión.',                                 ico:'clock',    col:'#39ff6e', done:maxDur>=90, prog:Math.min(maxDur,90), goal:90},
   {cat:'Pasos',    tier:'Sentinel',    name:'UAC Step Counter',    desc:'100,000 pasos totales.',                                    ico:'activity', col:'#39ff6e', done:t.steps>=100000,            prog:Math.min(t.steps,100000),            goal:100000},
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // TIER 4 — HELL KNIGHT (niveles 16-20)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  {cat:'Sesiones', tier:'Hell Knight', name:'Hell Veteran',        desc:'43 sesiones completadas.',                                  ico:'dumbbell', col:'#ffa020', done:sessions.length>=43,        prog:Math.min(sessions.length,43),        goal:43},
+  {cat:'Sesiones', tier:'Hell Knight', name:'Hell Veteran',        desc:'30 sesiones completadas.',                                  ico:'dumbbell', col:'#ffa020', done:totalIndivSessions>=30, prog:Math.min(totalIndivSessions,30), goal:30},
   {cat:'Distancia',tier:'Hell Knight', name:'Hell Expressway',     desc:'150 km totales acumulados.',                                ico:'rocket',   col:'#ffa020', done:t.dist>=150,                prog:Math.min(t.dist,150),                goal:150},
-  {cat:'Constancia',tier:'Hell Knight',name:'The Shores of Hell',  desc:'22 días seguidos de entrenamiento.',                        ico:'flame',    col:'#ffa020', done:streak.max>=22,             prog:Math.min(streak.max,22),             goal:22},
-  {cat:'Inclinación',tier:'Hell Knight',name:'Phobos Crater',      desc:'Inclinación del 5% en una sesión.',                         ico:'mountain', col:'#ffa020', done:maxIncl>=5,                 prog:Math.min(maxIncl,5),                 goal:5},
-  {cat:'Remo',     tier:'Hell Knight', name:'River Styx',          desc:'10 km remados en total.',                                   ico:'rocket',   col:'#ffa020', done:totalRKm>=10,               prog:Math.min(totalRKm,10),               goal:10},
+  {cat:'Distancia',tier:'Hell Knight', name:'Hell Run',       desc:'6 km en una sola sesión.',  ico:'bolt',     col:'#ffa020', done:maxDist>=6,  prog:Math.min(maxDist,6),  goal:6},
+  {cat:'Constancia',tier:'Hell Knight',name:'Acheron Rower',  desc:'10 sesiones de remo en resistencia 6.',                        ico:'flame',    col:'#ffa020', done:rSessR6>=10, prog:Math.min(rSessR6,10), goal:10},
+  {cat:'Inclinación',tier:'Hell Knight',name:'Phobos Crater',      desc:'10 sesiones con inclinación 4%.',                         ico:'mountain', col:'#ffa020', done:sessByIncl(4)>=10, prog:Math.min(sessByIncl(4),10), goal:10},
+  {cat:'Remo',     tier:'Hell Knight', name:'River Styx',          desc:'15 km remados en total.',                                   ico:'rocket',   col:'#ffa020', done:totalRKm>=15, prog:Math.min(totalRKm,15), goal:15},
   {cat:'Calorías', tier:'Hell Knight', name:'Berserk Calorie Pack',desc:'14,000 cal totales quemadas.',                              ico:'flame',    col:'#ffa020', done:t.cal>=14000,               prog:Math.min(t.cal,14000),               goal:14000},
-  {cat:'Peso',     tier:'Hell Knight', name:'Armor Lightened',     desc:'-9 kg desde el inicio.',                                    ico:'trophy',   col:'#ffa020', done:lost>=9,                    prog:Math.min(lost,9),                    goal:9},
-  {cat:'Duración', tier:'Hell Knight', name:'Hell Marathon',       desc:'10 sesiones de 60+ minutos.',                               ico:'clock',    col:'#ffa020', done:totalSessMin60>=10,         prog:Math.min(totalSessMin60,10),         goal:10},
-  {cat:'Tiempo',   tier:'Hell Knight', name:'42 Hours: The Answer',desc:'42 horas totales de entrenamiento.',                         ico:'clock',    col:'#ffa020', done:t.dur>=2520,                prog:Math.min(t.dur,2520),                goal:2520},
+  {cat:'Peso',     tier:'Hell Knight', name:'Hito 1 Complete',     desc:'Hito 1 completado - 95 kg alcanzados.',                                    ico:'trophy',   col:'#ffa020', done:cw<=95, prog:Math.max(0,Math.round((sw-cw)*10)/10), goal:Math.round((sw-95)*10)/10},
+  {cat:'Duración', tier:'Hell Knight', name:'Hell Marathon',       desc:'10 sesiones de 90+ minutos.',                               ico:'clock',    col:'#ffa020', done:totalSessMin90>=10,         prog:Math.min(totalSessMin90,10),         goal:10},
+  {cat:'Tiempo',   tier:'Hell Knight', name:'42 Hours: The Answer',desc:'42 horas totales de entrenamiento.',                         ico:'clock',    col:'#ffa020', done:totalDurAll>=2520, prog:Math.round(totalDurAll/60*10)/10, goal:42},
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // TIER 5 — BARON OF HELL (niveles 21-25)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  {cat:'Sesiones', tier:'Baron of Hell',name:'Baron Count',        desc:'50 sesiones completadas.',                                  ico:'trophy',   col:'#ff6b1a', done:sessions.length>=50,        prog:Math.min(sessions.length,50),        goal:50},
+  {cat:'Sesiones', tier:'Baron of Hell',name:'Baron Count',        desc:'50 sesiones completadas.',                                  ico:'trophy',   col:'#ff6b1a', done:totalIndivSessions>=50, prog:Math.min(totalIndivSessions,50), goal:50},
   {cat:'Distancia',tier:'Baron of Hell',name:'Doom II Marathon',   desc:'200 km totales acumulados.',                                ico:'trophy',   col:'#ff6b1a', done:t.dist>=200,                prog:Math.min(t.dist,200),                goal:200},
-  {cat:'Distancia',tier:'Baron of Hell',name:'10K Session',        desc:'10 km en una sola sesión.',                                 ico:'star',     col:'#ff6b1a', done:maxDist>=10,                prog:Math.min(maxDist,10),                goal:10},
-  {cat:'Constancia',tier:'Baron of Hell',name:'Hell Month',        desc:'30 días seguidos de entrenamiento.',                        ico:'crown',    col:'#ff6b1a', done:streak.max>=30,             prog:Math.min(streak.max,30),             goal:30},
-  {cat:'Inclinación',tier:'Baron of Hell',name:'Mt. Erebus',       desc:'Inclinación del 8% en una sesión.',                         ico:'mountain', col:'#ff6b1a', done:maxIncl>=8,                 prog:Math.min(maxIncl,8),                 goal:8},
-  {cat:'Remo',     tier:'Baron of Hell',name:'Styx Navigator',     desc:'10 sesiones de remo completadas.',                          ico:'award',    col:'#ff6b1a', done:rSess.length>=10,           prog:Math.min(rSess.length,10),           goal:10},
-  {cat:'Peso',     tier:'Baron of Hell',name:'Deimos Gate H2',     desc:'Hito 2 alcanzado — 90 kg o menos.',                         ico:'target',   col:'#ff6b1a', done:cw<=90,                     prog:Math.max(0,Math.min(1,sw>0?(sw-cw)/(sw-90):0)), goal:1},
+  {cat:'Distancia',tier:'Baron of Hell',name:'Baron Run',          desc:'7 km en una sola sesión.',                                 ico:'star',     col:'#ff6b1a', done:maxDist>=7,                prog:Math.min(maxDist,7),                goal:7},
+  {cat:'Constancia',tier:'Baron of Hell',name:'Hell March',        desc:'50 días activos de entrenamiento.',                        ico:'crown',    col:'#ff6b1a', done:totalActiveDays>=50, prog:Math.min(totalActiveDays,50), goal:50},
+  {cat:'Inclinación',tier:'Baron of Hell',name:'Mt. Erebus',       desc:'10 sesiones con inclinación 5%.',                         ico:'mountain', col:'#ff6b1a', done:sessByIncl(5)>=10, prog:Math.min(sessByIncl(5),10), goal:10},
+  {cat:'Remo',     tier:'Baron of Hell',name:'Styx Navigator',     desc:'10 sesiones de remo con resistencia 7.',                          ico:'award',    col:'#ff6b1a', done:rSessByRes(7)>=10, prog:Math.min(rSessByRes(7),10), goal:10},
+  {cat:'Peso',     tier:'Baron of Hell',name:'Deimos Gate H2',     desc:'Hito 2 completado - 90 kg alcanzados.',                         ico:'target',   col:'#ff6b1a', done:cw<=90, prog:Math.max(0,Math.round((sw-cw)*10)/10), goal:Math.round((sw-90)*10)/10},
   {cat:'Calorías', tier:'Baron of Hell',name:'Plasma Furnace',     desc:'20,000 cal totales quemadas.',                              ico:'flame',    col:'#ff6b1a', done:t.cal>=20000,               prog:Math.min(t.cal,20000),               goal:20000},
   {cat:'Pasos',    tier:'Baron of Hell',name:'200K Steps',         desc:'200,000 pasos totales.',                                    ico:'activity', col:'#ff6b1a', done:t.steps>=200000,            prog:Math.min(t.steps,200000),            goal:200000},
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // TIER 6 — ARCH-VILE (niveles 26-30)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  {cat:'Sesiones', tier:'Arch-Vile',   name:'Arch Veteran',        desc:'75 sesiones completadas.',                                  ico:'dumbbell', col:'#ff4040', done:sessions.length>=75,        prog:Math.min(sessions.length,75),        goal:75},
+  {cat:'Sesiones', tier:'Arch-Vile',   name:'Arch Veteran',        desc:'75 sesiones completadas.',                                  ico:'dumbbell', col:'#ff4040', done:totalIndivSessions>=75,   prog:Math.min(totalIndivSessions,75),   goal:75},
   {cat:'Distancia',tier:'Arch-Vile',   name:'Plutonia Endurance',  desc:'300 km totales acumulados.',                                ico:'crown',    col:'#ff4040', done:t.dist>=300,                prog:Math.min(t.dist,300),                goal:300},
-  {cat:'Constancia',tier:'Arch-Vile',  name:'Doom II Streak',      desc:'60 días seguidos de entrenamiento.',                        ico:'skull',    col:'#ff4040', done:streak.max>=60,             prog:Math.min(streak.max,60),             goal:60},
-  {cat:'Inclinación',tier:'Arch-Vile', name:'Dis Tower',           desc:'Inclinación del 10% en una sesión.',                        ico:'mountain', col:'#ff4040', done:maxIncl>=10,                prog:Math.min(maxIncl,10),                goal:10},
-  {cat:'Remo',     tier:'Arch-Vile',   name:'Phlegethon',          desc:'20 sesiones de remo completadas.',                          ico:'trophy',   col:'#ff4040', done:rSess.length>=20,           prog:Math.min(rSess.length,20),           goal:20},
-  {cat:'Remo',     tier:'Arch-Vile',   name:'5K Hell Strokes',     desc:'5,000 paladas de remo acumuladas.',                         ico:'zap',      col:'#ff4040', done:totalRows>=5000,            prog:Math.min(totalRows,5000),            goal:5000},
-  {cat:'Duración', tier:'Arch-Vile',   name:'90 Min Beast',        desc:'90 minutos en una sesión.',                                 ico:'clock',    col:'#ff4040', done:maxDur>=90,                 prog:Math.min(maxDur,90),                 goal:90},
-  {cat:'Tiempo',   tier:'Arch-Vile',   name:'100 Hours Inferno',   desc:'100 horas totales de entrenamiento.',                       ico:'trophy',   col:'#ff4040', done:t.dur>=6000,                prog:Math.min(t.dur,6000),                goal:6000},
-  {cat:'Peso',     tier:'Arch-Vile',   name:'Demon Mass Purge',    desc:'-15 kg desde el inicio.',                                   ico:'crown',    col:'#ff4040', done:lost>=15,                   prog:Math.min(lost,15),                   goal:15},
+  {cat:'Distancia',tier:'Arch-Vile',   name:'Vile Run',       desc:'8 km en una sola sesión.',  ico:'bolt',     col:'#ff4040', done:maxDist>=8,  prog:Math.min(maxDist,8),  goal:8},
+  {cat:'Constancia',tier:'Arch-Vile',  name:'Doom II Streak',      desc:'65 días activos de entrenamiento.',                        ico:'skull',    col:'#ff4040', done:totalActiveDays>=65, prog:Math.min(totalActiveDays,65), goal:65},
+  {cat:'Inclinación',tier:'Arch-Vile', name:'Dis Tower',           desc:'10 sesiones con inclinación 6%.',                        ico:'mountain', col:'#ff4040', done:sessI6>=10, prog:Math.min(sessI6,10), goal:10},
+  {cat:'Remo',     tier:'Arch-Vile',   name:'Phlegethon',          desc:'10 sesiones de remo con resistencia 8.',                          ico:'trophy',   col:'#ff4040', done:resR8>=10, prog:Math.min(resR8,10), goal:10},
+  {cat:'Remo',     tier:'Arch-Vile',   name:'5K Hell Strokes',     desc:'3,500 paladas de remo acumuladas.',                         ico:'zap',      col:'#ff4040', done:totalRows>=3500,            prog:Math.min(totalRows,3500),            goal:3500},
+  {cat:'Duración', tier:'Arch-Vile',   name:'3H Beast',        desc:'180 minutos en una sola sesión.',                                 ico:'clock',    col:'#ff4040', done:maxDur>=180,                 prog:Math.min(maxDur,180),                 goal:180},
+  {cat:'Tiempo',   tier:'Arch-Vile',   name:'100 Hours Inferno',   desc:'100 horas totales de entrenamiento.',                       ico:'trophy',   col:'#ff4040', done:totalDurAll>=6000, prog:Math.round(totalDurAll/60*10)/10, goal:100},
+  {cat:'Peso',     tier:'Arch-Vile',   name:'Demon Mass Purge',    desc:'-15 kg desde el inicio.',                                   ico:'crown',    col:'#ff4040', done:lost>=15, prog:lost, goal:15},
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // TIER 7 — KHAN MAYKR (niveles 31-35)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  {cat:'Sesiones', tier:'Khan Maykr',  name:'Maykr Count',         desc:'100 sesiones completadas.',                                 ico:'crown',    col:'#ffd700', done:sessions.length>=100,       prog:Math.min(sessions.length,100),       goal:100},
+  {cat:'Sesiones', tier:'Khan Maykr',  name:'Maykr Count',         desc:'100 sesiones completadas.',                                 ico:'crown',    col:'#ffd700', done:totalIndivSessions>=100,  prog:Math.min(totalIndivSessions,100),  goal:100},
   {cat:'Distancia',tier:'Khan Maykr',  name:'Slayer Mile-Stone',   desc:'500 km totales acumulados.',                                ico:'crown',    col:'#ffd700', done:t.dist>=500,                prog:Math.min(t.dist,500),                goal:500},
+  {cat:'Distancia',tier:'Khan Maykr',  name:'Maykr Run',      desc:'9 km en una sola sesión.', ico:'bolt',     col:'#ffd700', done:maxDist>=9,  prog:Math.min(maxDist,9),  goal:9},
   {cat:'Distancia',tier:'Khan Maykr',  name:'Exterior Elite',      desc:'20 caminatas exteriores completadas.',                      ico:'map',      col:'#ffd700', done:eSess.length>=20,           prog:Math.min(eSess.length,20),           goal:20},
-  {cat:'Constancia',tier:'Khan Maykr', name:'Eternal Flame',       desc:'100 días seguidos de entrenamiento.',                       ico:'infinity', col:'#ffd700', done:streak.max>=100,            prog:Math.min(streak.max,100),            goal:100},
-  {cat:'Inclinación',tier:'Khan Maykr',name:'Maykr Ascension',     desc:'Inclinación del 12% en una sesión.',                        ico:'mountain', col:'#ffd700', done:maxIncl>=12,                prog:Math.min(maxIncl,12),                goal:12},
-  {cat:'Remo',     tier:'Khan Maykr',  name:'10K Hell Strokes',    desc:'10,000 paladas de remo acumuladas.',                        ico:'crown',    col:'#ffd700', done:totalRows>=10000,           prog:Math.min(totalRows,10000),           goal:10000},
-  {cat:'Peso',     tier:'Khan Maykr',  name:'Inferno Gate H3',     desc:'Hito 3 alcanzado — 85 kg o menos.',                         ico:'target',   col:'#ffd700', done:cw<=85,                     prog:Math.max(0,Math.min(1,sw>0?(sw-cw)/(sw-85):0)), goal:1},
+  {cat:'Constancia',tier:'Khan Maykr', name:'Eternal Flame',       desc:'100 días seguidos de entrenamiento.',                       ico:'infinity', col:'#ffd700', done:totalActiveDays>=100, prog:Math.min(totalActiveDays,100), goal:100},
+  {cat:'Inclinación',tier:'Khan Maykr',name:'Maykr Ascension',     desc:'10 sesiones de simulación con inclinación 7%.',                        ico:'mountain', col:'#ffd700', done:simI7>=10, prog:Math.min(simI7,10), goal:10},
+  {cat:'Remo',     tier:'Khan Maykr',  name:'6K Hell Strokes',    desc:'6,000 paladas de remo acumuladas.',                        ico:'crown',    col:'#ffd700', done:totalRows>=6000, prog:Math.min(totalRows,6000), goal:6000},
+  {cat:'Peso',     tier:'Khan Maykr',  name:'Inferno Gate H3',     desc:'Hito 3 completado - 85 kg alcanzados.',                         ico:'target',   col:'#ffd700', done:cw<=85, prog:Math.max(0,Math.round((sw-cw)*10)/10), goal:Math.round((sw-85)*10)/10},
   {cat:'Calorías', tier:'Khan Maykr',  name:'BFG9000 Output',      desc:'30,000 cal totales quemadas.',                              ico:'star',     col:'#ffd700', done:t.cal>=30000,               prog:Math.min(t.cal,30000),               goal:30000},
   {cat:'Pasos',    tier:'Khan Maykr',  name:'500K Steps',          desc:'500,000 pasos totales.',                                    ico:'mountain', col:'#ffd700', done:t.steps>=500000,            prog:Math.min(t.steps,500000),            goal:500000},
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // TIER 8 — ICON OF SIN (niveles 36-40)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  {cat:'Sesiones', tier:'Icon of Sin', name:'Icon Count',          desc:'150 sesiones completadas.',                                 ico:'skull',    col:'#cc1100', done:sessions.length>=150,       prog:Math.min(sessions.length,150),       goal:150},
-  {cat:'Distancia',tier:'Icon of Sin', name:'Icon Marathon',       desc:'21 km en una sola sesión.',                                 ico:'infinity', col:'#cc1100', done:maxDist>=21,                prog:Math.min(maxDist,21),                goal:21},
-  {cat:'Distancia',tier:'Icon of Sin', name:'Hell Map Complete',   desc:'750 km totales acumulados.',                                ico:'skull',    col:'#cc1100', done:t.dist>=750,                prog:Math.min(t.dist,750),                goal:750},
-  {cat:'Constancia',tier:'Icon of Sin',name:'Icon Streak',         desc:'150 días activos totales.',                                 ico:'skull',    col:'#cc1100', done:totalActiveDays>=150,       prog:Math.min(totalActiveDays,150),       goal:150},
-  {cat:'Inclinación',tier:'Icon of Sin',name:'Icon Climb',         desc:'Inclinación del 15% en una sesión.',                        ico:'mountain', col:'#cc1100', done:maxIncl>=15,                prog:Math.min(maxIncl,15),                goal:15},
-  {cat:'Remo',     tier:'Icon of Sin', name:'Styx Master',         desc:'50 sesiones de remo completadas.',                          ico:'crown',    col:'#cc1100', done:rSess.length>=50,           prog:Math.min(rSess.length,50),           goal:50},
-  {cat:'Tiempo',   tier:'Icon of Sin', name:'200 Hours Doom',      desc:'200 horas totales de entrenamiento.',                       ico:'skull',    col:'#cc1100', done:t.dur>=12000,               prog:Math.min(t.dur,12000),               goal:12000},
-  {cat:'Peso',     tier:'Icon of Sin', name:'Soul Sphere Weight',  desc:'-20 kg desde el inicio.',                                   ico:'skull',    col:'#cc1100', done:lost>=20,                   prog:Math.min(lost,20),                   goal:20},
-  {cat:'Duración', tier:'Icon of Sin', name:'25 Sessions 90min',   desc:'25 sesiones de 90+ minutos.',                               ico:'clock',    col:'#cc1100', done:totalSessMin90>=25,         prog:Math.min(totalSessMin90,25),         goal:25},
+  {cat:'Sesiones', tier:'Icon of Sin', name:'Icon Count',          desc:'130 sesiones completadas.',                                 ico:'skull',    col:'#cc1100', done:totalIndivSessions>=130,  prog:Math.min(totalIndivSessions,130),  goal:130},
+  {cat:'Distancia',tier:'Icon of Sin', name:'Icon Marathon',       desc:'10 km en una sola sesión.',                                 ico:'infinity', col:'#cc1100', done:maxDist>=10,                prog:Math.min(maxDist,10),                goal:10},
+  {cat:'Distancia',tier:'Icon of Sin', name:'Hell Map 650',   desc:'650 km totales acumulados.',                                ico:'skull',    col:'#cc1100', done:t.dist>=650, prog:Math.min(t.dist,650), goal:650},
+  {cat:'Constancia',tier:'Icon of Sin',name:'Icon Streak',         desc:'125 días activos de entrenamiento.',                                 ico:'skull',    col:'#cc1100', done:totalActiveDays>=150,       prog:Math.min(totalActiveDays,150),       goal:150},
+  {cat:'Inclinación',tier:'Icon of Sin',name:'Icon Climb',         desc:'10 sesiones de simulación con inclinación 8%.',      ico:'mountain', col:'#cc1100', done:simI8>=10, prog:Math.min(simI8,10), goal:10},
+  {cat:'Remo',     tier:'Icon of Sin', name:'Styx Master',         desc:'10 sesiones de remo con resistencia 9.',                          ico:'crown',    col:'#cc1100', done:resR9>=10, prog:Math.min(resR9,10), goal:10},
+  {cat:'Tiempo',   tier:'Icon of Sin', name:'200 Hours Doom',      desc:'200 horas totales de entrenamiento.',                       ico:'skull',    col:'#cc1100', done:totalDurAll>=12000, prog:Math.round(totalDurAll/60*10)/10, goal:200},
+  {cat:'Peso',     tier:'Icon of Sin', name:'Soul Sphere Weight',  desc:'-20 kg desde el inicio.',                                   ico:'skull',    col:'#cc1100', done:lost>=20, prog:lost, goal:20},
+  {cat:'Duración', tier:'Icon of Sin', name:'50 Sessions 90min',   desc:'50 sesiones de 90+ minutos.',                               ico:'clock',    col:'#cc1100', done:totalSessMin90>=50,         prog:Math.min(totalSessMin90,50),         goal:50},
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // TIER 9 — DOOM SLAYER (niveles 41-45)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  {cat:'Sesiones', tier:'Doom Slayer', name:'Slayer Count',        desc:'200 sesiones completadas.',                                 ico:'sword',    col:'#ff6b1a', done:sessions.length>=200,       prog:Math.min(sessions.length,200),       goal:200},
-  {cat:'Distancia',tier:'Doom Slayer', name:'Slayer Distance',     desc:'1,000 km totales acumulados.',                              ico:'skull',    col:'#ff6b1a', done:t.dist>=1000,               prog:Math.min(t.dist,1000),               goal:1000},
-  {cat:'Constancia',tier:'Doom Slayer',name:'Slayer Eternal',      desc:'200 días activos totales.',                                 ico:'infinity', col:'#ff6b1a', done:totalActiveDays>=200,       prog:Math.min(totalActiveDays,200),       goal:200},
-  {cat:'Remo',     tier:'Doom Slayer', name:'20K Strokes',         desc:'20,000 paladas de remo acumuladas.',                        ico:'crown',    col:'#ff6b1a', done:totalRows>=20000,           prog:Math.min(totalRows,20000),           goal:20000},
-  {cat:'Remo',     tier:'Doom Slayer', name:'Remo Elite',          desc:'50 km remados en total.',                                   ico:'rocket',   col:'#ff6b1a', done:totalRKm>=50,               prog:Math.min(totalRKm,50),               goal:50},
-  {cat:'Tiempo',   tier:'Doom Slayer', name:'300 Hours Eternal',   desc:'300 horas totales de entrenamiento.',                       ico:'infinity', col:'#ff6b1a', done:t.dur>=18000,               prog:Math.min(t.dur,18000),               goal:18000},
-  {cat:'Calorías', tier:'Doom Slayer', name:'50K Cal Inferno',     desc:'50,000 cal totales quemadas.',                              ico:'flame',    col:'#ff6b1a', done:t.cal>=50000,               prog:Math.min(t.cal,50000),               goal:50000},
-  {cat:'Peso',     tier:'Doom Slayer', name:'Slayer Body',         desc:'-25 kg desde el inicio.',                                   ico:'trophy',   col:'#ff6b1a', done:lost>=25,                   prog:Math.min(lost,25),                   goal:25},
-  {cat:'Duración', tier:'Doom Slayer', name:'50 Sessions 90min',   desc:'50 sesiones de 90+ minutos.',                               ico:'clock',    col:'#ff6b1a', done:totalSessMin90>=50,         prog:Math.min(totalSessMin90,50),         goal:50},
+  {cat:'Distancia',tier:'Doom Slayer', name:'Slayer Run',    desc:'11 km en una sola sesión.',  ico:'bolt',     col:'#ff6b1a', done:maxDist>=11, prog:Math.min(maxDist,11), goal:11},
+  {cat:'Inclinación',tier:'Doom Slayer',name:'Slayer Ascent',desc:'10 sesiones de simulación con inclinación 10%.',ico:'mountain',col:'#ff6b1a',done:simI10>=10, prog:Math.min(simI10,10), goal:10},
+  {cat:'Sesiones', tier:'Doom Slayer', name:'Slayer Count',        desc:'160 sesiones completadas.',                                 ico:'sword',    col:'#ff6b1a', done:totalIndivSessions>=160, prog:Math.min(totalIndivSessions,160), goal:160},
+  {cat:'Distancia',tier:'Doom Slayer', name:'Slayer Distance',     desc:'750 km totales acumulados.',                              ico:'skull',    col:'#ff6b1a', done:t.dist>=750, prog:Math.min(t.dist,750), goal:750},
+  {cat:'Constancia',tier:'Doom Slayer',name:'Slayer Eternal',      desc:'150 días activos de entrenamiento.',                                 ico:'infinity', col:'#ff6b1a', done:totalActiveDays>=150,       prog:Math.min(totalActiveDays,150),       goal:150},
+  {cat:'Remo',     tier:'Doom Slayer', name:'9K Strokes',         desc:'9,000 paladas de remo acumuladas.',                        ico:'crown',    col:'#ff6b1a', done:totalRows>=9000, prog:Math.min(totalRows,9000), goal:9000},
+  {cat:'Remo',     tier:'Doom Slayer', name:'Remo Elite',          desc:'90 km remados en total.',                                   ico:'rocket',   col:'#ff6b1a', done:totalRKm>=90, prog:Math.min(totalRKm,90), goal:90},
+  {cat:'Tiempo',   tier:'Doom Slayer', name:'300 Hours Eternal',   desc:'300 horas totales de entrenamiento.',                       ico:'infinity', col:'#ff6b1a', done:totalDurAll>=18000, prog:Math.round(totalDurAll/60*10)/10, goal:300},
+  {cat:'Calorías', tier:'Doom Slayer', name:'40K Cal Inferno',     desc:'40,000 cal totales quemadas.',                              ico:'flame',    col:'#ff6b1a', done:t.cal>=50000,               prog:Math.min(t.cal,50000),               goal:50000},
+  {cat:'Peso',     tier:'Doom Slayer', name:'Slayer Body',         desc:'Peso objetivo: 80 kg o menos.',                                   ico:'trophy',   col:'#ff6b1a', done:cw<=80, prog:cw, goal:80},
+  {cat:'Duración', tier:'Doom Slayer', name:'80 Sessions 90min',   desc:'80 sesiones de 90+ minutos.',                               ico:'clock',    col:'#ff6b1a', done:totalSessMin90>=50,         prog:Math.min(totalSessMin90,50),         goal:80},
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // TIER 10 — FATHER (niveles 46-50)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  {cat:'Sesiones', tier:'Father',      name:'The Father Count',    desc:'300 sesiones completadas.',                                 ico:'crown',    col:'#ffffff', done:sessions.length>=300,       prog:Math.min(sessions.length,300),       goal:300},
-  {cat:'Distancia',tier:'Father',      name:'Father Distance',     desc:'1,500 km totales acumulados.',                              ico:'infinity', col:'#ffffff', done:t.dist>=1500,               prog:Math.min(t.dist,1500),               goal:1500},
-  {cat:'Tiempo',   tier:'Father',      name:'500 Hours IDDQD',     desc:'500 horas totales de entrenamiento.',                       ico:'skull',    col:'#ffffff', done:t.dur>=30000,               prog:Math.min(t.dur,30000),               goal:30000},
-  {cat:'Constancia',tier:'Father',     name:'Father Flame',        desc:'365 días activos totales.',                                 ico:'infinity', col:'#ffffff', done:totalActiveDays>=365,       prog:Math.min(totalActiveDays,365),       goal:365},
-  {cat:'Remo',     tier:'Father',      name:'Remo God',            desc:'100 sesiones de remo completadas.',                         ico:'trophy',   col:'#ffffff', done:rSess.length>=100,          prog:Math.min(rSess.length,100),          goal:100},
-  {cat:'Calorías', tier:'Father',      name:'100K Cal God',        desc:'100,000 cal totales quemadas.',                             ico:'flame',    col:'#ffffff', done:t.cal>=100000,              prog:Math.min(t.cal,100000),              goal:100000},
+  {cat:'Distancia',tier:'Father',      name:'Father Run',    desc:'12 km en una sola sesión.',  ico:'bolt',     col:'#ffffff', done:maxDist>=12, prog:Math.min(maxDist,12), goal:12},
+  {cat:'Inclinación',tier:'Father',name:'Father Climb',desc:'10 sesiones de simulación con inclinación 10%.',ico:'mountain',col:'#ffffff',done:simI10>=10, prog:Math.min(simI10,10), goal:10},
+  {cat:'Sesiones', tier:'Father',      name:'The Father 200',    desc:'200 sesiones completadas.',                                 ico:'crown',    col:'#ffffff', done:totalIndivSessions>=200, prog:Math.min(totalIndivSessions,200), goal:200},
+  {cat:'Distancia',tier:'Father',      name:'Father Distance',     desc:'900 km totales acumulados.',                              ico:'infinity', col:'#ffffff', done:t.dist>=1500,               prog:Math.min(t.dist,1500),               goal:1500},
+  {cat:'Tiempo',   tier:'Father',      name:'500 Hours IDDQD',     desc:'500 horas totales de entrenamiento.',                       ico:'skull',    col:'#ffffff', done:totalDurAll>=30000, prog:Math.round(totalDurAll/60*10)/10, goal:500},
+  {cat:'Constancia',tier:'Father',     name:'Father Flame',        desc:'225 días activos de entrenamiento.',                                 ico:'infinity', col:'#ffffff', done:totalActiveDays>=365,       prog:Math.min(totalActiveDays,365),       goal:365},
+  {cat:'Remo',     tier:'Father',      name:'Remo God',            desc:'10 sesiones de remo con resistencia 12.',                         ico:'trophy',   col:'#ffffff', done:resR12>=10, prog:Math.min(resR12,10), goal:10},
+  {cat:'Calorías', tier:'Father',      name:'50K Cal God',        desc:'50,000 cal totales quemadas.',                             ico:'flame',    col:'#ffffff', done:t.cal>=100000,              prog:Math.min(t.cal,100000),              goal:100000},
   {cat:'Pasos',    tier:'Father',      name:'1M Steps Father',     desc:'1,000,000 pasos totales.',                                  ico:'mountain', col:'#ffffff', done:t.steps>=1000000,           prog:Math.min(t.steps,1000000),           goal:1000000},
-  {cat:'Peso',     tier:'Father',      name:'Father Body',         desc:'-30 kg desde el inicio.',                                   ico:'crown',    col:'#ffffff', done:lost>=30,                   prog:Math.min(lost,30),                   goal:30},
+  {cat:'Peso',     tier:'Father',      name:'Father Body',         desc:'Mantén 80 kg o menos por 30 días.',                                   ico:'crown',    col:'#ffffff', done:cw<=80&&streak.current>=30, prog:(cw<=80?Math.min(streak.current,30):Math.max(0,Math.round((sw-cw)*10)/10)), goal:(cw<=80?30:Math.round((sw-80)*10)/10)},
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // TIER 11 — DARK LORD (nivel 51+)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  {cat:'Sesiones', tier:'Dark Lord',   name:'Infinite Runs',       desc:'500 sesiones completadas.',                                 ico:'skull',    col:'#ff0000', done:sessions.length>=500,       prog:Math.min(sessions.length,500),       goal:500},
+  {cat:'Sesiones', tier:'Dark Lord',   name:'Infinite Runs',       desc:'350 sesiones desde Apr 7.',                                 ico:'skull',    col:'#ff0000', done:totalIndivSessions>=350, prog:Math.min(totalIndivSessions,350), goal:350},
+  {cat:'Distancia',tier:'Dark Lord',   name:'Dark Run',      desc:'13 km en una sola sesión. Máximo absoluto.',  ico:'infinity', col:'#ff0000', done:maxDist>=13, prog:Math.min(maxDist,13), goal:13},
   {cat:'Distancia',tier:'Dark Lord',   name:'Dark Lord Distance',  desc:'2,000 km totales acumulados.',                              ico:'skull',    col:'#ff0000', done:t.dist>=2000,               prog:Math.min(t.dist,2000),               goal:2000},
-  {cat:'Tiempo',   tier:'Dark Lord',   name:'1000 Hours: IDDQD',   desc:'1,000 horas totales de entrenamiento.',                     ico:'infinity', col:'#ff0000', done:t.dur>=60000,               prog:Math.min(t.dur,60000),               goal:60000},
-  {cat:'Remo',     tier:'Dark Lord',   name:'Dark Lord Remo',      desc:'50,000 paladas de remo acumuladas.',                        ico:'skull',    col:'#ff0000', done:totalRows>=50000,           prog:Math.min(totalRows,50000),           goal:50000},
-  {cat:'Calorías', tier:'Dark Lord',   name:'Dark Fire',           desc:'200,000 cal totales quemadas.',                             ico:'flame',    col:'#ff0000', done:t.cal>=200000,              prog:Math.min(t.cal,200000),              goal:200000},
-  {cat:'Constancia',tier:'Dark Lord',  name:'Never Stops',         desc:'500 días activos totales.',                                 ico:'infinity', col:'#ff0000', done:totalActiveDays>=500,       prog:Math.min(totalActiveDays,500),       goal:500},
-  {cat:'Peso',     tier:'Dark Lord',   name:'Dark Transformation', desc:'-35 kg desde el inicio.',                                   ico:'crown',    col:'#ff0000', done:lost>=35,                   prog:Math.min(lost,35),                   goal:35},
+  {cat:'Tiempo',   tier:'Dark Lord',   name:'1000 Hours: IDDQD',   desc:'1,000 horas totales de entrenamiento.',                     ico:'infinity', col:'#ff0000', done:totalDurAll>=60000, prog:Math.round(totalDurAll/60*10)/10, goal:1000},
+  {cat:'Inclinación',tier:'Dark Lord',name:'Apex Climber',desc:'10 sesiones de simulación con inclinación 15%.',ico:'mountain',col:'#ff0000',done:simI15>=10,prog:Math.min(simI15,10),goal:10},
+  {cat:'Remo',     tier:'Dark Lord',   name:'Dark Lord Remo',      desc:'10 sesiones de remo con resistencia 14. Máximo absoluto.',                        ico:'skull',    col:'#ff0000', done:rSessByRes(14)>=10, prog:Math.min(rSessByRes(14),10), goal:10},
+  {cat:'Calorías', tier:'Dark Lord',   name:'Dark Fire',           desc:'100,000 cal totales quemadas.',                             ico:'flame',    col:'#ff0000', done:t.cal>=100000, prog:Math.min(t.cal,100000), goal:100000},
+  {cat:'Constancia',tier:'Dark Lord',  name:'Never Stops',         desc:'250 días activos de entrenamiento.',                                 ico:'infinity', col:'#ff0000', done:totalActiveDays>=250, prog:Math.min(totalActiveDays,250), goal:250},
+  {cat:'Peso',     tier:'Dark Lord',   name:'Dark Transformation', desc:'Mantén 80 kg o menos por 90 días.',                                   ico:'crown',    col:'#ff0000', done:cw<=80&&streak.current>=90, prog:(cw<=80?Math.min(streak.current,90):Math.max(0,Math.round((sw-cw)*10)/10)), goal:(cw<=80?90:Math.round((sw-80)*10)/10)},
 
   // ── MISSING TO COMPLETE 110 ──────────────────────────────────
   // UAC Recruit SL4 (+1)
-  {cat:'Duración',  tier:'UAC Recruit',   sublevel:4, name:'UAC Endurance',      desc:'30 minutos en una sola sesión.',                          ico:'clock',    col:'#aaaaaa', done:maxDur>=30,                prog:Math.min(maxDur,30),                goal:30},
+  {cat:'Duración',  tier:'UAC Recruit',   sublevel:4, name:'UAC Endurance',      desc:'45 minutos en una sola sesión.',                          ico:'clock',    col:'#39ff6e', done:maxDur>=45,                prog:Math.min(maxDur,45),                goal:45},
   // UAC Recruit SL5 (+2)
-  {cat:'Pasos',     tier:'UAC Recruit',   sublevel:5, name:'UAC Step Init',       desc:'10,000 pasos en una sola sesión.',                        ico:'activity', col:'#aaaaaa', done:maxSteps>=10000,           prog:Math.min(maxSteps,10000),           goal:10000},
-  {cat:'Sesiones',  tier:'UAC Recruit',   sublevel:5, name:'UAC Veteran',         desc:'Semana activa: 3 sesiones en 7 días.',                    ico:'shield',   col:'#aaaaaa', done:sessions.length>=3,        prog:Math.min(sessions.length,3),        goal:3},
+  {cat:'Pasos',     tier:'UAC Recruit',   sublevel:5, name:'UAC Step Init',       desc:'10,000 pasos en una sola sesión.',                        ico:'activity', col:'#39ff6e', done:maxSteps>=10000,           prog:Math.min(maxSteps,10000),           goal:10000},
+  {cat:'Sesiones',  tier:'UAC Recruit',   sublevel:5, name:'UAC Veteran',         desc:'5 sesiones completadas.',                    ico:'shield',   col:'#39ff6e', done:totalIndivSessions>=5, prog:Math.min(totalIndivSessions,5), goal:5},
   // Phobos Marine SL5 (+1)
   {cat:'Pasos',     tier:'Phobos Marine', name:'Phobos Steps',        desc:'50,000 pasos totales acumulados.',                        ico:'activity', col:'#64b4ff', done:t.steps>=50000,            prog:Math.min(t.steps,50000),            goal:50000},
   // Father SL5 (+2)
   {cat:'Duración',  tier:'Father',        sublevel:5, name:'100 Sessions 60min',  desc:'100 sesiones de 60 minutos o más.',                       ico:'clock',    col:'#ffffff', done:totalSessMin60>=100,       prog:Math.min(totalSessMin60,100),       goal:100},
-  {cat:'Remo',      tier:'Father',        sublevel:5, name:'Father Strokes',      desc:'30,000 paladas de remo acumuladas.',                      ico:'zap',      col:'#ffffff', done:totalRows>=30000,          prog:Math.min(totalRows,30000),          goal:30000},
+  {cat:'Remo',      tier:'Father',        sublevel:5, name:'Father Strokes',      desc:'18,000 paladas de remo acumuladas.',                      ico:'zap',      col:'#ffffff', done:totalRows>=18000,          prog:Math.min(totalRows,18000),          goal:30000},
   // Dark Lord SL4 (+1)
   {cat:'Pasos',     tier:'Dark Lord',     sublevel:4, name:'1M Steps Slayer',     desc:'1,000,000 pasos totales. El Slayer nunca para.',          ico:'mountain', col:'#ff0000', done:t.steps>=1000000,          prog:Math.min(t.steps,1000000),          goal:1000000},
   // Dark Lord SL5 (+2)
-  {cat:'Duración',  tier:'Dark Lord',     sublevel:5, name:'Dark Marathon',       desc:'200 sesiones de 60+ minutos. Infinito.',                  ico:'infinity', col:'#ff0000', done:totalSessMin60>=200,       prog:Math.min(totalSessMin60,200),       goal:200},
-  {cat:'Tiempo',    tier:'Dark Lord',     sublevel:5, name:'Beyond All',          desc:'Más allá de todo límite conocido.',                       ico:'skull',    col:'#ff0000', done:totalDurAll>=120000,       prog:Math.min(totalDurAll,120000),       goal:120000},
+  {cat:'Duración',  tier:'Dark Lord',     sublevel:5, name:'Dark Marathon',       desc:'120 sesiones de 90+ minutos.',                  ico:'infinity', col:'#ff0000', done:totalSessMin90>=120,       prog:Math.min(totalSessMin90,120),       goal:120},
+  {cat:'Tiempo',    tier:'Dark Lord',     sublevel:5, name:'Beyond All',          desc:'Más allá de todo límite conocido.',                       ico:'skull',    col:'#ff0000', done:totalDurAll>=120000, prog:Math.round(totalDurAll/60*10)/10, goal:2000},
 
   // ── COMPLETING TIERS TO 10 EACH ─────────────────────────────
-  {cat:'Calorías', tier:'Hell Knight', name:'Hell Inferno', desc:'10,000 cal totales quemadas.', ico:'flame', col:'#ffa020', done:totalCalAll>=10000, prog:Math.min(totalCalAll,10000), goal:10000},
-  {cat:'Tiempo', tier:'Baron of Hell', name:'Baron 42h', desc:'42 horas totales de entrenamiento.', ico:'clock', col:'#ff6b1a', done:totalDurAll>=2520, prog:Math.min(totalDurAll,2520), goal:2520},
+  {cat:'Calorías', tier:'Hell Knight', name:'Hell Inferno', desc:'5 sesiones de simulación.', ico:'flame', col:'#ffa020', done:totalCalAll>=10000, prog:Math.min(totalCalAll,10000), goal:10000},
+  {cat:'Tiempo', tier:'Baron of Hell', name:'Grand Baron', desc:'60 horas totales de entrenamiento.', ico:'clock', col:'#ff6b1a', done:totalDurAll>=3600, prog:Math.round(totalDurAll/60*10)/10, goal:60},
   {cat:'Pasos', tier:'Arch-Vile', name:'Vile Steps', desc:'300,000 pasos totales.', ico:'activity', col:'#ff4040', done:t.steps>=300000, prog:Math.min(t.steps,300000), goal:300000},
   {cat:'Duración', tier:'Khan Maykr', name:'Maykr Endurance', desc:'30 sesiones de 90+ minutos.', ico:'clock', col:'#ffd700', done:totalSessMin90>=30, prog:Math.min(totalSessMin90,30), goal:30},
-  {cat:'Remo', tier:'Icon of Sin', name:'Icon Rower', desc:'30 sesiones de remo completadas.', ico:'award', col:'#cc1100', done:rSess.length>=30, prog:Math.min(rSess.length,30), goal:30},
+  {cat:'Remo', tier:'Icon of Sin', name:'Icon Rower', desc:'10 sesiones de remo con resistencia 10.', ico:'award', col:'#cc1100', done:resR10>=10, prog:Math.min(resR10,10), goal:10},
   {cat:'Pasos', tier:'Doom Slayer', name:'Slayer Steps', desc:'750,000 pasos totales.', ico:'activity', col:'#ff6b1a', done:t.steps>=750000, prog:Math.min(t.steps,750000), goal:750000},
   ];
+  achs.forEach(function(a){if(a.done)a.completedOn=achCompletedOn(a,sessions,weights,rSess);});
+  return achs;
 }
 
 
@@ -3009,7 +3119,8 @@ function buildTierPanel(tier, achs, cur) {
       + '<div style="flex:1">'
       + '<div style="font-family:var(--fh);font-size:13px;font-weight:700;color:'+(a.done?'#e8e8e8':'#666')+'">'+a.name+'</div>'
       + '<div style="font-family:var(--fm);font-size:7.5px;color:#777;margin-top:1px">'+a.desc+'</div>'
-      + (!a.done && a.goal > 1 ? '<div style="background:#111;border-radius:2px;height:2px;margin-top:4px;overflow:hidden"><div style="width:'+p+'%;height:100%;background:'+a.col+'88"></div></div>' : '')
+      + (a.done && a.completedOn ? '<div style="font-family:var(--fm);font-size:7px;color:'+a.col+'88;margin-top:2px"> '+a.completedOn+'</div>' : '')
+      + (!a.done && a.goal > 1 ? '<div style="display:flex;align-items:center;gap:5px;margin-top:4px"><div style="flex:1;background:#111;border-radius:2px;height:2px;overflow:hidden"><div style="width:'+p+'%;height:100%;background:'+a.col+'88"></div></div><div style="font-family:var(--fm);font-size:7px;color:'+a.col+'99;white-space:nowrap">'+(typeof a.prog==='number'?Math.round(a.prog*10)/10:a.prog)+'/'+a.goal+'</div></div>' : '')
       + '</div>'
       + (a.done
           ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#39ff6e" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>'
