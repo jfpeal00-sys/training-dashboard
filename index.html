@@ -1,15 +1,13 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
+<html lang="es"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Train and Sweat... Until It's Done!</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&amp;family=Barlow:wght@400;500;600&amp;family=DM+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
 
 
-</head>
 <style>
 @font-face { font-family: 'DoomRight2'; src: url('https://raw.githubusercontent.com/jfpeal00-sys/training-dashboard/main/DoomRight2.ttf') format('truetype'); }
 :root {
@@ -169,7 +167,7 @@ input:focus{border-color:var(--a1)}
   100%{bottom:480px;opacity:0; transform:translateX(0px)  scaleY(0);}
 }
 #header{position:relative;}
-/*    Hellfire title animation    */
+/* �� Hellfire title animation �� */
 @keyframes hellfire-glow{
   0%  {filter:drop-shadow(0 0 10px rgba(255,107,26,.85)) drop-shadow(0 0 22px rgba(255,69,0,.55)) drop-shadow(0 0 40px rgba(255,0,0,.2));}
   33% {filter:drop-shadow(0 0 16px rgba(255,140,20,1))   drop-shadow(0 0 32px rgba(255,80,0,.7))  drop-shadow(0 0 60px rgba(255,30,0,.35)) drop-shadow(0 2px 8px rgba(255,200,50,.15));}
@@ -571,20 +569,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--fh);height:100vh;o
 /* Ajuste: wizard dentro del content-body, no full-screen */
 #wz{position:absolute;inset:0;z-index:50;display:flex;flex-direction:column;background:var(--bg);}
 .pk-ov{position:fixed;}
-</style>
+</style></head>
+
 <body>
 
-<div id="splash">
+<div id="splash" class="closing" style="display: none;">
   <div id="splash-bg" style="background-image:url('https://raw.githubusercontent.com/jfpeal00-sys/training-dashboard/main/bg.jpg')"></div>
   <div class="sp-particles">
-    <div class="sp-particle"      style="--x:10%;--dur:3.4s;--delay:0s"></div>
-    <div class="sp-particle big"  style="--x:22%;--dur:3.8s;--delay:.7s"></div>
+    <div class="sp-particle" style="--x:10%;--dur:3.4s;--delay:0s"></div>
+    <div class="sp-particle big" style="--x:22%;--dur:3.8s;--delay:.7s"></div>
     <div class="sp-particle tiny" style="--x:35%;--dur:3.1s;--delay:1.2s"></div>
-    <div class="sp-particle big"  style="--x:48%;--dur:3.6s;--delay:.3s"></div>
-    <div class="sp-particle"      style="--x:60%;--dur:3.9s;--delay:1.6s"></div>
+    <div class="sp-particle big" style="--x:48%;--dur:3.6s;--delay:.3s"></div>
+    <div class="sp-particle" style="--x:60%;--dur:3.9s;--delay:1.6s"></div>
     <div class="sp-particle tiny" style="--x:72%;--dur:3.2s;--delay:.9s"></div>
-    <div class="sp-particle big"  style="--x:83%;--dur:3.5s;--delay:.4s"></div>
-    <div class="sp-particle"      style="--x:28%;--dur:4.0s;--delay:1.9s"></div>
+    <div class="sp-particle big" style="--x:83%;--dur:3.5s;--delay:.4s"></div>
+    <div class="sp-particle" style="--x:28%;--dur:4.0s;--delay:1.9s"></div>
     <div class="sp-particle tiny" style="--x:90%;--dur:3.3s;--delay:.6s"></div>
   </div>
   <div id="splash-ring"></div>
@@ -603,13 +602,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--fh);height:100vh;o
 </div>
 <div id="crt-overlay"></div>
 <div id="crt-sweep"></div>
-<audio id="bg-audio" loop preload="auto">
+<audio id="bg-audio" loop="" preload="auto">
   <source src="https://jfpeal00-sys.github.io/training-dashboard/music.mp3" type="audio/mpeg">
 </audio>
 <img id="bg-img" src="https://raw.githubusercontent.com/jfpeal00-sys/training-dashboard/main/bg.jpg" alt="">
 <div id="app" style="display:flex;height:100vh;overflow:hidden;align-items:stretch">
   <div id="sidebar-col" style="display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:width .22s cubic-bezier(.4,0,.2,1);background:var(--bg2);border-right:1px solid var(--border);">
-    <div id="sidebar-nav"></div>
+    <div id="sidebar-nav"><div class="sb-toggle" onclick="sbToggle()"><svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></div><div class="sb-items"><div class="sb-group-lbl">DATOS</div><button class="sb-btn" data-tip="Review" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18M9 21V9"></path></svg></div><span class="sb-txt">Review</span></button><button class="sb-btn" data-tip="Historial" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div><span class="sb-txt">Historial</span></button><button class="sb-btn" data-tip="Peso" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg></div><span class="sb-txt">Peso</span></button><div class="sb-group-lbl">PLAN</div><button class="sb-btn" data-tip="Calendario" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div><span class="sb-txt">Calendario</span></button><button class="sb-btn end-tab" data-tip="Endurance" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div><span class="sb-txt">Endurance</span></button><button class="sb-btn" data-tip="Simulacion" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon></svg></div><span class="sb-txt">Simulacion</span></button><button class="sb-btn" data-tip="Comida" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path><path d="M7 2v20"></path><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"></path></svg></div><span class="sb-txt">Comida</span></button><div class="sb-group-lbl">ANALISIS</div><button class="sb-btn" data-tip="Progreso" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div><span class="sb-txt">Progreso</span></button><div class="sb-group-lbl">LOGROS</div><button class="sb-btn" data-tip="Achievements" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6m12 0h1.5a2.5 2.5 0 0 1 0 5H18M3 9h18M12 20v-7m-4 7h8"></path></svg></div><span class="sb-txt">Achievements</span></button><button class="sb-btn" data-tip="Records" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path></svg></div><span class="sb-txt">Records</span></button><div class="sb-group-lbl">REGISTRAR</div><button class="sb-btn on ab" data-tip="Registrar" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></div><span class="sb-txt">Registrar</span></button></div></div>
   </div>
   <div id="content" style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;">
     <div id="topbar">
@@ -623,20 +622,30 @@ body{background:var(--bg);color:var(--text);font-family:var(--fh);height:100vh;o
   <p class="top-sub">Samsung Health · Registro Personal</p>
   <div id="hdr-tl">
     <div id="hdr-tl-hitos">
-      <div class="hdr-tl-track" id="hdr-tl-fill-wrap">
-        <div class="hdr-tl-fill" id="hdr-tl-fill"></div>
-      </div>
+      <div class="hdr-tl-track" id="hdr-tl-fill-wrap"><div class="hdr-tl-fill" id="hdr-tl-fill" style="width:67.9%"></div><div class="hdr-tl-node" style="left:0%">
+    <div class="hdr-tl-dot" style="background:#333;"></div>
+    <div class="hdr-tl-lbl" style="color:#333">102kg</div>
+  </div><div class="hdr-tl-node" style="left:41.7%">
+      <div class="hdr-tl-dot" style="background:#39ff6e;animation:glow-h1 1.8s ease-in-out infinite alternate;"></div>
+      <div class="hdr-tl-lbl" style="color:#39ff6e">95kg</div>
+    </div><div class="hdr-tl-node" style="left:70.8%">
+      <div class="hdr-tl-dot" style="background:rgba(255,255,255,.15);opacity:.4;"></div>
+      <div class="hdr-tl-lbl" style="color:#444">90kg</div>
+    </div><div class="hdr-tl-node" style="left:100.0%">
+      <div class="hdr-tl-dot" style="background:rgba(255,255,255,.15);opacity:.4;"></div>
+      <div class="hdr-tl-lbl" style="color:#444">85kg</div>
+    </div></div>
     </div>
     <div id="hdr-tl-cursor">
       <div class="hdr-cursor-track"></div>
-      <div class="hdr-cursor" id="hdr-cursor">
+      <div class="hdr-cursor" id="hdr-cursor" style="left: 67.9%;">
         <div class="hdr-cursor-arrow"></div>
-        <div class="hdr-cursor-body" id="hdr-cursor-body">-- kg</div>
+        <div class="hdr-cursor-body" id="hdr-cursor-body">▶ 90.5 kg</div>
       </div>
     </div>
   </div>
 </div>
-    <div id="content-body" style="flex:1;overflow-y:auto;"></div>
+    <div id="content-body" style="flex:1;overflow-y:auto;"><div id="wz-mount" style="position:relative;height:100%;min-height:500px;"></div></div>
   </div>
 </div>
 <div id="toast">✅ Guardado</div>
@@ -700,7 +709,7 @@ const SS=[
   {"id":"s48","date":"2026-05-09","type":"TM","duration":75,"distance":4.78,"speedAvg":3.8,"speedMax":3.8,"hrAvg":116,"hrMax":138,"calories":429,"steps":6292,"totalCalories":2697},
   {"id":"s49","date":"2026-05-09","type":"Exterior","duration":39,"distance":2.47,"speedAvg":3.7,"speedMax":3.7,"hrAvg":115,"hrMax":137,"calories":300,"steps":3303,"totalCalories":2697,"elevGain":1,"elevLow":2571,"elevHigh":2721,"note":"Caminata exterior"},
   {"id":"s50","date":"2026-05-10","duration":60,"distance":3.84,"speedAvg":3.8,"speedMax":3.8,"hrAvg":113,"hrMax":123,"calories":348,"totalCalories":2323,"steps":5125,"incline":3,"calMET":429},
-  {"id":"s51","date":"2026-05-11","duration":60.05,"distance":3.81,"speedAvg":3.8,"speedMax":3.8,"hrAvg":118,"hrMax":137,"calories":340,"steps":5935,"totalCalories":2390,"incline":4,"calMET":453,"rower":{"duration":15.5333,"rowerDist":2.44,"resistance":6,"rows":262,"hrAvg":118,"calories":126,"calMET":105}}
+  {"id":"s51","date":"2026-05-11","duration":60.05,"distance":3.81,"speedAvg":3.8,"speedMax":3.8,"hrAvg":118,"hrMax":137,"calories":340,"steps":5935,"totalCalories":2390,"incline":4,"calMET":453,"rower":{"duration":15.5833,"rowerDist":2.44,"resistance":6,"rows":262,"hrAvg":116,"calories":126,"calMET":106}}
 ];
 const SW=[
   {"date":"2026-03-20","weight":102.15},
@@ -822,21 +831,26 @@ function loadS(){
 function saveS(){}
 
 function downloadUpdatedIndex(){
-  // Leer el source original del archivo via XMLHttpRequest
-  // para no tocar el DOM activo
-  let xhr = new XMLHttpRequest();
-  xhr.open('GET', window.location.href, true);
-  xhr.onload = function(){
-    if(xhr.status !== 200 && xhr.status !== 0) {
-      // Fallback: usar outerHTML si no se puede hacer fetch
-      _downloadFromDOM();
-      return;
-    }
-    _downloadWithSource(xhr.responseText);
-  };
-  xhr.onerror = function(){ _downloadFromDOM(); };
-  try { xhr.send(); } catch(e){ _downloadFromDOM(); }
+  try {
+    // Remover temporalmente el wizard del DOM para no incluirlo en el HTML guardado
+    let wz = document.getElementById('wz');
+    let wzParent = wz ? wz.parentNode : null;
+    let wzNext = wz ? wz.nextSibling : null;
+    if(wz) wz.remove();
+
+    let html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    html = _injectData(html);
+
+    // Restaurar el wizard
+    if(wz && wzParent) wzParent.insertBefore(wz, wzNext);
+
+    _triggerDownload(html);
+  } catch(e) {
+    console.error('Download error:', e);
+    toast('⚠️ Error al descargar');
+  }
 }
+
 
 function _serializeData(){
   let nl = '\n';
@@ -4364,8 +4378,12 @@ function wzFc(field,label,val,unit,green){
 function wzFmtV(v,u){
   if(u==='km'&&v) return parseFloat(v).toFixed(2);
   if(u==='km/h'&&v) return parseFloat(v).toFixed(1);
+  if(u==='min'&&v){
+    // Duración en decimal → mostrar como "60m 30s"
+    let n = parseFloat(v);
+    return (!isNaN(n) && String(v).includes('.')) ? fd(n) : v+'';
+  }
   if(u===''&&v){
-    // Si es decimal de duración (tiene parte decimal), mostrar con fd()
     let n = parseFloat(v);
     if(!isNaN(n) && n > 0 && n < 400 && String(v).includes('.')){
       return fd(n);
@@ -4795,15 +4813,15 @@ const WZ_PRESETS={
   incline: {lbl:'Inclinación',unit:'%',desc:'0 – 20 %',cols:[{l:'%',it:rng(0,21)}],init:[3],fn:v=>[v[0],'%']},
   fcAvg:   {lbl:'FC promedio',unit:'bpm',desc:'50 – 200 bpm',cols:[{l:'BPM',it:rng(50,201)}],init:[63],fn:v=>[v[0],'bpm']},
   fcMax:   {lbl:'FC máxima',unit:'bpm',desc:'50 – 200 bpm',cols:[{l:'BPM',it:rng(50,201)}],init:[73],fn:v=>[v[0],'bpm']},
-  cal:     {lbl:'Cal. workout',unit:'kcal',desc:'0 – 10,000 kcal (pasos de 5)',cols:[{l:'KCAL',it:rng(0,2001).map(i=>i*5)}],init:[70],fn:v=>[v[0],'kcal']},
-  calTotal:{lbl:'Cal. día total',unit:'kcal',desc:'0 – 10,000 kcal (pasos de 5)',cols:[{l:'KCAL',it:rng(0,2001).map(i=>i*5)}],init:[465],fn:v=>[v[0],'kcal']},
-  steps:   {lbl:'Pasos workout',unit:'',desc:'0 – 20,000',cols:[{l:'10K',it:rng(0,3)},{l:'1K',it:rng(0,10)},{l:'100',it:rng(0,10)},{l:'10',it:rng(0,10)},{l:'1',it:rng(0,10)}],init:[0,5,1,2,5],fn:v=>[v[0]*10000+v[1]*1000+v[2]*100+v[3]*10+v[4],'']},
+  cal:     {lbl:'Cal. workout',unit:'kcal',desc:'0 – 9,999 kcal',cols:[{l:'1000',it:rng(0,10)},{l:'100',it:rng(0,10)},{l:'10',it:rng(0,10)},{l:'1',it:rng(0,10)}],init:[0,3,5,0],fn:v=>[v[0]*1000+v[1]*100+v[2]*10+v[3],'kcal']},
+  calTotal:{lbl:'Cal. día total',unit:'kcal',desc:'0 – 9,999 kcal',cols:[{l:'1000',it:rng(0,10)},{l:'100',it:rng(0,10)},{l:'10',it:rng(0,10)},{l:'1',it:rng(0,10)}],init:[0,2,3,0],fn:v=>[v[0]*1000+v[1]*100+v[2]*10+v[3],'kcal']},
+  steps:   {lbl:'Pasos workout',unit:'',desc:'0 – 29,999 pasos',cols:[{l:'10K',it:rng(0,3)},{l:'1K',it:rng(0,10)},{l:'100',it:rng(0,10)},{l:'10',it:rng(0,10)},{l:'1',it:rng(0,10)}],init:[0,5,0,0,0],fn:v=>[v[0]*10000+v[1]*1000+v[2]*100+v[3]*10+v[4],'']},
   rowDur:  {lbl:'Duración Rower',unit:'',desc:'0 – 120 min y seg',cols:[{l:'MIN',it:rng(0,121)},{l:'SEG',it:rng(0,60)}],init:[20,0],fn:v=>[+(v[0]+(v[1]/60)).toFixed(4),v[0]+'m'+(v[1]>0?' '+v[1]+'s':'')]},
   rowDist: {lbl:'Distancia Rower',unit:'km',desc:'0 – 10 km',cols:[{l:'KM',it:rng(0,11)},{l:'.',it:['.']},{l:'1ª',it:rng(0,10)},{l:'2ª',it:rng(0,10)}],init:[3,0,5,0],fn:v=>[parseFloat(v[0]+'.'+v[2]+v[3]).toFixed(2),'km']},
   rowRes:  {lbl:'Resistencia',unit:'niv.',desc:'Niveles 1 – 20',cols:[{l:'NIV',it:rng(1,21)}],init:[6],fn:v=>[v[0],'niv.']},
   rowRows: {lbl:'Paladas',unit:'',desc:'0 – 5,000 paladas',cols:[{l:'1K',it:rng(0,6)},{l:'100',it:rng(0,10)},{l:'10',it:rng(0,10)},{l:'1',it:rng(0,10)}],init:[1,5,0,0],fn:v=>[v[0]*1000+v[1]*100+v[2]*10+v[3],'']},
   rowFc:   {lbl:'FC Rower',unit:'bpm',desc:'50 – 200 bpm',cols:[{l:'BPM',it:rng(50,201)}],init:[30],fn:v=>[v[0],'bpm']},
-  rowCal:  {lbl:'Cal. Rower',unit:'kcal',desc:'0 – 2,000 kcal',cols:[{l:'KCAL',it:rng(0,2001)}],init:[200],fn:v=>[v[0],'kcal']},
+  rowCal:  {lbl:'Cal. Rower',unit:'kcal',desc:'0 – 9,999 kcal',cols:[{l:'1000',it:rng(0,10)},{l:'100',it:rng(0,10)},{l:'10',it:rng(0,10)},{l:'1',it:rng(0,10)}],init:[0,2,0,0],fn:v=>[v[0]*1000+v[1]*100+v[2]*10+v[3],'kcal']},
   extDur:   {lbl:'Duración Exterior',unit:'',desc:'0 – 300 min y seg',cols:[{l:'MIN',it:rng(0,301)},{l:'SEG',it:rng(0,60)}],init:[45,0],fn:v=>[+(v[0]+(v[1]/60)).toFixed(4),v[0]+'m'+(v[1]>0?' '+v[1]+'s':'')]},
   extDist:  {lbl:'Distancia Exterior',unit:'km',desc:'0 – 22 km',cols:[{l:'KM',it:rng(0,23)},{l:'.',it:['.']},{l:'1ª',it:rng(0,10)},{l:'2ª',it:rng(0,10)}],init:[3,0,0,0],fn:v=>[parseFloat(v[0]+'.'+v[2]+v[3]).toFixed(2),'km']},
   extVelAvg:{lbl:'Vel. promedio Ext.',unit:'km/h',desc:'1 – 15 km/h',cols:[{l:'KM/H',it:rng(1,16)},{l:'.',it:['.']},{l:'DEC',it:rng(0,10)}],init:[2,0,5],fn:v=>[parseFloat(v[0]+'.'+v[2]).toFixed(1),'km/h']},
@@ -4811,9 +4829,9 @@ const WZ_PRESETS={
   extFcAvg: {lbl:'FC promedio Ext.',unit:'bpm',desc:'50 – 200 bpm',cols:[{l:'BPM',it:rng(50,201)}],init:[63],fn:v=>[v[0],'bpm']},
   extFcMax: {lbl:'FC máxima Ext.',unit:'bpm',desc:'50 – 200 bpm',cols:[{l:'BPM',it:rng(50,201)}],init:[73],fn:v=>[v[0],'bpm']},
   extCal:   {lbl:'Cal. Exterior',unit:'kcal',desc:'0 – 2,000 kcal',cols:[{l:'KCAL',it:rng(0,2001)}],init:[60],fn:v=>[v[0],'kcal']},
-  extSteps: {lbl:'Pasos Exterior',unit:'',desc:'0 – 20,000',cols:[{l:'10K',it:rng(0,3)},{l:'1K',it:rng(0,10)},{l:'100',it:rng(0,10)},{l:'10',it:rng(0,10)},{l:'1',it:rng(0,10)}],init:[0,3,0,0,0],fn:v=>[v[0]*10000+v[1]*1000+v[2]*100+v[3]*10+v[4],'']},
+  extSteps: {lbl:'Pasos Exterior',unit:'',desc:'0 – 29,999 pasos',cols:[{l:'10K',it:rng(0,3)},{l:'1K',it:rng(0,10)},{l:'100',it:rng(0,10)},{l:'10',it:rng(0,10)},{l:'1',it:rng(0,10)}],init:[0,3,0,0,0],fn:v=>[v[0]*10000+v[1]*1000+v[2]*100+v[3]*10+v[4],'']},
   extElevGain:{lbl:'Ganancia elevación',unit:'m',desc:'0 – 2,000 m',cols:[{l:'M',it:rng(0,2001)}],init:[50],fn:v=>[v[0],'m']},
-  calReloj: {lbl:'Cal. reloj',unit:'kcal',desc:'Calorías según Samsung Health (referencia)',cols:[{l:'KCAL',it:rng(0,1501)}],init:[70],fn:v=>[v[0],'kcal']},
+  calReloj: {lbl:'Cal. reloj',unit:'kcal',desc:'Calorías según Samsung Health',cols:[{l:'1000',it:rng(0,10)},{l:'100',it:rng(0,10)},{l:'10',it:rng(0,10)},{l:'1',it:rng(0,10)}],init:[0,3,4,0],fn:v=>[v[0]*1000+v[1]*100+v[2]*10+v[3],'kcal']},
   peso:    {lbl:'Peso del día',unit:'kg',desc:'60 – 150 kg',cols:[{l:'KG',it:rng(60,151)},{l:'.',it:['.']},{l:'DEC',it:rng(0,10)}],init:[30,0,5],fn:v=>[parseFloat(v[0]+'.'+v[2]).toFixed(1),'kg']},
   // Tramos de simulación — se usan con índice: tramoDesde_0, tramoHasta_0, tramoPct_0, etc.
   tramoKm: {lbl:'Kilómetro',unit:'km',desc:'0 – 22 km',cols:[{l:'KM',it:rng(0,23)},{l:'.',it:['.']},{l:'DEC',it:rng(0,10)},{l:'',it:rng(0,10)}],init:[0,0,0,0],fn:v=>[parseFloat(v[0]+'.'+v[2]+v[3]).toFixed(2),'km']},
@@ -4842,6 +4860,9 @@ function wzBuildDrums(){
       const s=document.createElement('div');s.className='dsep';s.textContent='.';c.appendChild(s);return;
     }
     const colEl=document.createElement('div');colEl.className='dc';
+    // Ancho proporcional: cols con pocos items (0-9) más estrechas
+    if(col.it.length<=10) colEl.style.maxWidth='72px';
+    else if(col.it.length<=21) colEl.style.maxWidth='90px';
     const lbl=document.createElement('div');lbl.className='dc-lbl';lbl.textContent=col.l;colEl.appendChild(lbl);
     const win=document.createElement('div');win.className='dw';
 
@@ -5099,14 +5120,14 @@ function wzOvClick(e){if(e.target===document.getElementById('pkOv'))wzConfirmPk(
 })();
 </script>
 
-<div id="pr-overlay" onclick="closePR()">
+<div id="pr-overlay" onclick="closePR()" class="on">
   <div class="pr-tint"></div>
   <div class="pr-glow"></div>
   <div class="pr-scan"></div>
   <img class="pr-doomguy" src="https://raw.githubusercontent.com/jfpeal00-sys/training-dashboard/main/doomguy.gif" alt="">
   <div class="pr-banner">
     <div class="pr-title">¡NUEVO<br>RÉCORD!</div>
-    <div class="pr-sub" id="pr-sub-text"></div>
+    <div class="pr-sub" id="pr-sub-text">¡H1 alcanzado: 95 kg!</div>
   </div>
   <div class="pr-dismiss">TOCA PARA CERRAR</div>
 </div>
@@ -5133,12 +5154,12 @@ function wzOvClick(e){if(e.target===document.getElementById('pkOv'))wzConfirmPk(
 <div class="pk-ov" id="pkOv" onclick="wzOvClick(event)">
   <div class="pk-sheet">
     <div class="pk-hdr">
-      <div class="pk-ttl" id="pkTtl">—</div>
+      <div class="pk-ttl" id="pkTtl">Peso del día</div>
       <button class="pk-done" onclick="wzConfirmPk()">Listo ✓</button>
     </div>
-    <div class="pk-live" id="pkLive">—</div>
-    <div class="pk-drums" id="pkDrums"></div>
-    <div class="pk-desc" id="pkDesc"></div>
+    <div class="pk-live" id="pkLive">90.5 <span class="plu">kg</span></div>
+    <div class="pk-drums" id="pkDrums"><div class="dc"><div class="dc-lbl">KG</div><div class="dw"><div class="dscroll" data-ci="0" style="transform: translateY(-5736px);"><div class="di">60</div><div class="di">61</div><div class="di">62</div><div class="di">63</div><div class="di">64</div><div class="di">65</div><div class="di">66</div><div class="di">67</div><div class="di">68</div><div class="di">69</div><div class="di">70</div><div class="di">71</div><div class="di">72</div><div class="di">73</div><div class="di">74</div><div class="di">75</div><div class="di">76</div><div class="di">77</div><div class="di">78</div><div class="di">79</div><div class="di">80</div><div class="di">81</div><div class="di">82</div><div class="di">83</div><div class="di">84</div><div class="di">85</div><div class="di">86</div><div class="di">87</div><div class="di">88</div><div class="di">89</div><div class="di">90</div><div class="di">91</div><div class="di">92</div><div class="di">93</div><div class="di">94</div><div class="di">95</div><div class="di">96</div><div class="di">97</div><div class="di">98</div><div class="di">99</div><div class="di">100</div><div class="di">101</div><div class="di">102</div><div class="di">103</div><div class="di">104</div><div class="di">105</div><div class="di">106</div><div class="di">107</div><div class="di">108</div><div class="di">109</div><div class="di">110</div><div class="di">111</div><div class="di">112</div><div class="di">113</div><div class="di">114</div><div class="di">115</div><div class="di">116</div><div class="di">117</div><div class="di">118</div><div class="di">119</div><div class="di">120</div><div class="di">121</div><div class="di">122</div><div class="di">123</div><div class="di">124</div><div class="di">125</div><div class="di">126</div><div class="di">127</div><div class="di">128</div><div class="di">129</div><div class="di">130</div><div class="di">131</div><div class="di">132</div><div class="di">133</div><div class="di">134</div><div class="di">135</div><div class="di">136</div><div class="di">137</div><div class="di">138</div><div class="di">139</div><div class="di">140</div><div class="di">141</div><div class="di">142</div><div class="di">143</div><div class="di">144</div><div class="di">145</div><div class="di">146</div><div class="di">147</div><div class="di">148</div><div class="di">149</div><div class="di">150</div><div class="di">60</div><div class="di">61</div><div class="di">62</div><div class="di">63</div><div class="di">64</div><div class="di">65</div><div class="di">66</div><div class="di">67</div><div class="di">68</div><div class="di">69</div><div class="di">70</div><div class="di">71</div><div class="di">72</div><div class="di">73</div><div class="di">74</div><div class="di">75</div><div class="di">76</div><div class="di">77</div><div class="di">78</div><div class="di">79</div><div class="di">80</div><div class="di">81</div><div class="di">82</div><div class="di">83</div><div class="di">84</div><div class="di">85</div><div class="di">86</div><div class="di">87</div><div class="di">88</div><div class="di nr">89</div><div class="di sl">90</div><div class="di nr">91</div><div class="di">92</div><div class="di">93</div><div class="di">94</div><div class="di">95</div><div class="di">96</div><div class="di">97</div><div class="di">98</div><div class="di">99</div><div class="di">100</div><div class="di">101</div><div class="di">102</div><div class="di">103</div><div class="di">104</div><div class="di">105</div><div class="di">106</div><div class="di">107</div><div class="di">108</div><div class="di">109</div><div class="di">110</div><div class="di">111</div><div class="di">112</div><div class="di">113</div><div class="di">114</div><div class="di">115</div><div class="di">116</div><div class="di">117</div><div class="di">118</div><div class="di">119</div><div class="di">120</div><div class="di">121</div><div class="di">122</div><div class="di">123</div><div class="di">124</div><div class="di">125</div><div class="di">126</div><div class="di">127</div><div class="di">128</div><div class="di">129</div><div class="di">130</div><div class="di">131</div><div class="di">132</div><div class="di">133</div><div class="di">134</div><div class="di">135</div><div class="di">136</div><div class="di">137</div><div class="di">138</div><div class="di">139</div><div class="di">140</div><div class="di">141</div><div class="di">142</div><div class="di">143</div><div class="di">144</div><div class="di">145</div><div class="di">146</div><div class="di">147</div><div class="di">148</div><div class="di">149</div><div class="di">150</div><div class="di">60</div><div class="di">61</div><div class="di">62</div><div class="di">63</div><div class="di">64</div><div class="di">65</div><div class="di">66</div><div class="di">67</div><div class="di">68</div><div class="di">69</div><div class="di">70</div><div class="di">71</div><div class="di">72</div><div class="di">73</div><div class="di">74</div><div class="di">75</div><div class="di">76</div><div class="di">77</div><div class="di">78</div><div class="di">79</div><div class="di">80</div><div class="di">81</div><div class="di">82</div><div class="di">83</div><div class="di">84</div><div class="di">85</div><div class="di">86</div><div class="di">87</div><div class="di">88</div><div class="di">89</div><div class="di">90</div><div class="di">91</div><div class="di">92</div><div class="di">93</div><div class="di">94</div><div class="di">95</div><div class="di">96</div><div class="di">97</div><div class="di">98</div><div class="di">99</div><div class="di">100</div><div class="di">101</div><div class="di">102</div><div class="di">103</div><div class="di">104</div><div class="di">105</div><div class="di">106</div><div class="di">107</div><div class="di">108</div><div class="di">109</div><div class="di">110</div><div class="di">111</div><div class="di">112</div><div class="di">113</div><div class="di">114</div><div class="di">115</div><div class="di">116</div><div class="di">117</div><div class="di">118</div><div class="di">119</div><div class="di">120</div><div class="di">121</div><div class="di">122</div><div class="di">123</div><div class="di">124</div><div class="di">125</div><div class="di">126</div><div class="di">127</div><div class="di">128</div><div class="di">129</div><div class="di">130</div><div class="di">131</div><div class="di">132</div><div class="di">133</div><div class="di">134</div><div class="di">135</div><div class="di">136</div><div class="di">137</div><div class="di">138</div><div class="di">139</div><div class="di">140</div><div class="di">141</div><div class="di">142</div><div class="di">143</div><div class="di">144</div><div class="di">145</div><div class="di">146</div><div class="di">147</div><div class="di">148</div><div class="di">149</div><div class="di">150</div></div></div></div><div class="dsep">.</div><div class="dc" style="max-width: 72px;"><div class="dc-lbl">DEC</div><div class="dw"><div class="dscroll" data-ci="2" style="transform: translateY(-648px);"><div class="di">0</div><div class="di">1</div><div class="di">2</div><div class="di">3</div><div class="di">4</div><div class="di">5</div><div class="di">6</div><div class="di">7</div><div class="di">8</div><div class="di">9</div><div class="di">0</div><div class="di">1</div><div class="di">2</div><div class="di">3</div><div class="di nr">4</div><div class="di sl">5</div><div class="di nr">6</div><div class="di">7</div><div class="di">8</div><div class="di">9</div><div class="di">0</div><div class="di">1</div><div class="di">2</div><div class="di">3</div><div class="di">4</div><div class="di">5</div><div class="di">6</div><div class="di">7</div><div class="di">8</div><div class="di">9</div></div></div></div></div>
+    <div class="pk-desc" id="pkDesc">60 – 150 kg</div>
   </div>
 </div>
 </body></html>
