@@ -711,7 +711,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fh);height:100vh;o
 <img id="bg-img" src="https://raw.githubusercontent.com/jfpeal00-sys/training-dashboard/main/bg.jpg" alt="" onerror="this.style.display='none'">
 <div id="app" style="display:flex;height:100vh;overflow:hidden;align-items:stretch">
   <div id="sidebar-col" style="display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:width .22s cubic-bezier(.4,0,.2,1);background:var(--bg2);border-right:1px solid var(--border);">
-    <div id="sidebar-nav"><div class="sb-toggle" onclick="sbToggle()"><svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></div><div class="sb-items"><div class="sb-group-lbl">DATOS</div><button class="sb-btn on ab" data-tip="Review" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18M9 21V9"></path></svg></div><span class="sb-txt">Review</span></button><button class="sb-btn" data-tip="Historial" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div><span class="sb-txt">Historial</span></button><button class="sb-btn" data-tip="Peso" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg></div><span class="sb-txt">Peso</span></button><div class="sb-group-lbl">PLAN</div><button class="sb-btn" data-tip="Calendario" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div><span class="sb-txt">Calendario</span></button><button class="sb-btn end-tab" data-tip="Endurance" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div><span class="sb-txt">Endurance</span></button><button class="sb-btn" data-tip="Simulacion" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon></svg></div><span class="sb-txt">Simulacion</span></button><button class="sb-btn" data-tip="Comida" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path><path d="M7 2v20"></path><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"></path></svg></div><span class="sb-txt">Comida</span></button><div class="sb-group-lbl">ANALISIS</div><button class="sb-btn" data-tip="Progreso" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div><span class="sb-txt">Progreso</span></button><div class="sb-group-lbl">LOGROS</div><button class="sb-btn" data-tip="Achievements" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6m12 0h1.5a2.5 2.5 0 0 1 0 5H18M3 9h18M12 20v-7m-4 7h8"></path></svg></div><span class="sb-txt">Achievements</span></button><button class="sb-btn" data-tip="Records" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path></svg></div><span class="sb-txt">Records</span></button><div class="sb-group-lbl">REGISTRAR</div><button class="sb-btn" data-tip="Registrar" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></div><span class="sb-txt">Registrar</span></button></div></div>
+    <div id="sidebar-nav"><div class="sb-toggle" onclick="sbToggle()"><svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></div><div class="sb-items"><div class="sb-group-lbl">DATOS</div><button class="sb-btn" data-tip="Review" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18M9 21V9"></path></svg></div><span class="sb-txt">Review</span></button><button class="sb-btn on ab" data-tip="Historial" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div><span class="sb-txt">Historial</span></button><button class="sb-btn" data-tip="Peso" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg></div><span class="sb-txt">Peso</span></button><div class="sb-group-lbl">PLAN</div><button class="sb-btn" data-tip="Calendario" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div><span class="sb-txt">Calendario</span></button><button class="sb-btn end-tab" data-tip="Endurance" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div><span class="sb-txt">Endurance</span></button><button class="sb-btn" data-tip="Simulacion" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon></svg></div><span class="sb-txt">Simulacion</span></button><button class="sb-btn" data-tip="Comida" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path><path d="M7 2v20"></path><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"></path></svg></div><span class="sb-txt">Comida</span></button><div class="sb-group-lbl">ANALISIS</div><button class="sb-btn" data-tip="Progreso" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div><span class="sb-txt">Progreso</span></button><div class="sb-group-lbl">LOGROS</div><button class="sb-btn" data-tip="Achievements" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6m12 0h1.5a2.5 2.5 0 0 1 0 5H18M3 9h18M12 20v-7m-4 7h8"></path></svg></div><span class="sb-txt">Achievements</span></button><button class="sb-btn" data-tip="Records" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path></svg></div><span class="sb-txt">Records</span></button><div class="sb-group-lbl">REGISTRAR</div><button class="sb-btn" data-tip="Registrar" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></div><span class="sb-txt">Registrar</span></button></div></div>
   </div>
   <div id="content" style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;">
     <div id="topbar">
@@ -728,15 +728,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--fh);height:100vh;o
   <p class="top-sub">Samsung Health · Registro Personal</p>
   <div id="hdr-tl">
     <div id="hdr-tl-hitos">
-      <div class="hdr-tl-track" id="hdr-tl-fill-wrap"><div class="hdr-tl-fill" id="hdr-tl-fill" style="width:69.1%"></div><div class="hdr-tl-node" style="left:0%">
+      <div class="hdr-tl-track" id="hdr-tl-fill-wrap"><div class="hdr-tl-fill" id="hdr-tl-fill" style="width:72.6%"></div><div class="hdr-tl-node" style="left:0%">
     <div class="hdr-tl-dot" style="background:#333;"></div>
     <div class="hdr-tl-lbl" style="color:#333">102kg</div>
   </div><div class="hdr-tl-node" style="left:41.7%">
       <div class="hdr-tl-dot" style="background:#39ff6e;animation:glow-h1 1.8s ease-in-out infinite alternate;"></div>
       <div class="hdr-tl-lbl" style="color:#39ff6e">95kg</div>
     </div><div class="hdr-tl-node" style="left:70.8%">
-      <div class="hdr-tl-dot" style="background:rgba(255,255,255,.15);opacity:.4;"></div>
-      <div class="hdr-tl-lbl" style="color:#444">90kg</div>
+      <div class="hdr-tl-dot" style="background:#ffa020;animation:glow-h2 1.8s ease-in-out infinite alternate;"></div>
+      <div class="hdr-tl-lbl" style="color:#ffa020">90kg</div>
     </div><div class="hdr-tl-node" style="left:100.0%">
       <div class="hdr-tl-dot" style="background:rgba(255,255,255,.15);opacity:.4;"></div>
       <div class="hdr-tl-lbl" style="color:#444">85kg</div>
@@ -744,9 +744,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--fh);height:100vh;o
     </div>
     <div id="hdr-tl-cursor">
       <div class="hdr-cursor-track"></div>
-      <div class="hdr-cursor" id="hdr-cursor" style="left: 69.1%;">
+      <div class="hdr-cursor" id="hdr-cursor" style="left: 72.6%;">
         <div class="hdr-cursor-arrow"></div>
-        <div class="hdr-cursor-body" id="hdr-cursor-body">▶ 90.3 kg</div>
+        <div class="hdr-cursor-body" id="hdr-cursor-body">▶ 89.7 kg</div>
       </div>
     </div>
   </div>
@@ -816,7 +816,8 @@ const SS=[
   {"id":"s49","date":"2026-05-09","type":"Exterior","duration":39,"distance":2.47,"speedAvg":3.7,"speedMax":3.7,"hrAvg":115,"hrMax":137,"calories":300,"steps":3303,"totalCalories":2697,"elevGain":1,"elevLow":2571,"elevHigh":2721,"note":"Caminata exterior"},
   {"id":"s50","date":"2026-05-10","duration":60,"distance":3.84,"speedAvg":3.8,"speedMax":3.8,"hrAvg":113,"hrMax":123,"calories":348,"totalCalories":2323,"steps":5125,"incline":3,"calMET":429},
   {"id":"s51","date":"2026-05-11","duration":60.05,"distance":3.81,"speedAvg":3.8,"speedMax":3.8,"hrAvg":118,"hrMax":137,"calories":340,"steps":5935,"totalCalories":2390,"incline":4,"calMET":453,"rower":{"duration":15.5833,"rowerDist":2.44,"resistance":6,"rows":262,"hrAvg":116,"calories":126,"calMET":106}},
-  {"id":"s52","date":"2026-05-12","steps":2695,"totalCalories":2278,"note":"Caminata exterior","duration":34.2667,"distance":2.04,"speedAvg":3.5,"speedMax":3.5,"hrAvg":96,"hrMax":115,"calories":219}
+  {"id":"s52","date":"2026-05-12","steps":2695,"totalCalories":2278,"note":"Caminata exterior","duration":34.2667,"distance":2.04,"speedAvg":3.5,"speedMax":3.5,"hrAvg":96,"hrMax":115,"calories":219},
+  {"id":"s53","date":"2026-05-13","duration":61.4333,"distance":3.91,"speedAvg":3.8,"speedMax":3.8,"hrAvg":116,"hrMax":132,"calories":346,"steps":7048,"totalCalories":2422,"incline":4,"calMET":462,"rower":{"duration":16.3667,"rowerDist":2.6,"resistance":7,"rows":278,"hrAvg":117,"calories":126,"calMET":111},"plank":{"duration":0.65}}
 ];
 const SW=[
   {"date":"2026-03-20","weight":102.15},
@@ -844,7 +845,8 @@ const SW=[
   {"date":"2026-05-07","weight":91.35},
   {"date":"2026-05-10","weight":90.5},
   {"date":"2026-05-11","weight":90.5},
-  {"date":"2026-05-12","weight":90.3}
+  {"date":"2026-05-12","weight":90.3},
+  {"date":"2026-05-13","weight":89.7}
 ];
 // Calorías consumidas por día — actualizado manualmente
 const KCAL_RECORDS={
@@ -870,11 +872,12 @@ const KCAL_RECORDS={
   "2026-04-19":{"kcal":826,"prot":114,"carbs":27,"fat":27,"selections":[{"emoji":"🍚","name":"Arroz integral 50g","qty":1,"kcal":60,"prot":1,"carbs":13,"fat":0},{"emoji":"🍟","name":"Papas Rústicas (5 uds)","qty":1,"kcal":32,"prot":1,"carbs":5,"fat":1},{"emoji":"🍄","name":"Pollo en Salsa de Champiñones","qty":1,"kcal":500,"prot":84,"carbs":8,"fat":19},{"emoji":"🥩","name":"Filete de Res","qty":1,"kcal":210,"prot":28,"carbs":0,"fat":7},{"emoji":"🥓","name":"Jamón Sánduche Zenú","qty":1,"kcal":24,"prot":4,"carbs":1,"fat":1}]},
   "2026-05-08":{"kcal":2409,"prot":168.8,"carbs":178.7,"fat":97.3,"fiber":8.9,"selections":[{"emoji":"🍳","name":"Huevo Revuelto Guiso","qty":1,"kcal":100,"prot":8,"carbs":2,"fat":7},{"emoji":"🥩","name":"Filete de Res","qty":1,"kcal":210,"prot":28,"carbs":0,"fat":7},{"emoji":"🫓","name":"Arepa","qty":2,"kcal":354,"prot":8,"carbs":72,"fat":4},{"emoji":"🥪","name":"Jamon Sanduche Zenu","qty":1,"kcal":24,"prot":4,"carbs":1,"fat":1},{"emoji":"🍕","name":"Pizza Vendetta","qty":2,"kcal":374,"prot":20,"carbs":48,"fat":12},{"emoji":"🍗","name":"Lasana Pollo Champinones","qty":1,"kcal":800,"prot":60,"carbs":80,"fat":30},{"emoji":"🍳","name":"Huevo Revuelto Guiso","qty":4,"kcal":400,"prot":32,"carbs":8,"fat":28},{"emoji":"🌭","name":"Salchicha Ranchera","qty":1,"kcal":84,"prot":4,"carbs":2,"fat":7},{"emoji":"🥪","name":"Jamon Sanduche Zenu x2","qty":2,"kcal":48,"prot":8,"carbs":2,"fat":2},{"emoji":"🫧","name":"Clight","qty":15,"kcal":15,"prot":0,"carbs":1,"fat":0}]},
   "2026-05-11":{"kcal":1673,"prot":140.6,"carbs":184.8,"fat":43.8},
-  "2026-05-12":{"kcal":1841,"prot":144,"carbs":229,"fat":33}
+  "2026-05-12":{"kcal":1841,"prot":144,"carbs":229,"fat":33},
+  "2026-05-13":{"kcal":1311,"prot":112,"carbs":98,"fat":45}
 };
-const ACH_SEEN=[];
-const ACH_LVL=0;
-const ACH_TIERS_SEEN=[];
+const ACH_SEEN=["E1M1: Hangar","Boot Camp","First Steps","Knee-Deep Run","Berserk Pack","Armor Adjusted","Phobos Day 3","Phobos Veteran","Shores of Phobos","Recon Run","Plasma Burn","UAC Furnace","Deimos Week","First Stroke","Phobos Gate","Iron Hour","Sentinel Vet","Inferno Runner","Exterior Warrior","Sentinel Run","Inferno Fortnight","UAC Ramp","First Stroke","1K Demon Strokes","Hell Furnace","90 Min Warrior","UAC Step Counter","Hell Veteran","Hell Expressway","Hell Run","Acheron Rower","River Styx","Berserk Calorie Pack","Hito 1 Complete","42 Hours: The Answer","Baron Count","Baron Run","Deimos Gate H2","Plasma Furnace","200K Steps","UAC Endurance","UAC Step Init","UAC Veteran","Phobos Steps","Hell Inferno"];
+const ACH_LVL=21;
+const ACH_TIERS_SEEN=["UAC Recruit","Phobos Marine","Sentinel"];
 // ═══════════════════════════════════════════════════
 // ZONA 2: UTILIDADES — Formateo, cálculos, helpers
 // ═══════════════════════════════════════════════════
@@ -930,7 +933,8 @@ const DAILY_STEPS=[
   {"date":"2026-05-09","steps":14277,"calBurned":2697,"calMET":2574},
   {"date":"2026-05-10","steps":7177,"calBurned":2323},
   {"date":"2026-05-11","steps":5935},
-  {"date":"2026-05-12","steps":8902}
+  {"date":"2026-05-12","steps":8902},
+  {"date":"2026-05-13","steps":7048}
 ];
 
 // STATE
@@ -1262,13 +1266,7 @@ let _achActive=false, _prActive=false;
 let _pendingDownload=false;
 
 function checkWeightHito(newWeight){
-  let prs=[];
-  USER_HITOS.forEach(function(h){
-    let prev=weights.filter(function(w){return parseFloat(w.weight)>h.target;});
-    let reached=newWeight<=h.target;
-    if(reached&&prev.length>0) prs.push('¡'+h.label+' alcanzado: '+h.target+' kg!');
-  });
-  if(prs.length>0) showPR(prs);
+  // Detectar hitos de peso — sin popup, solo actualizar caché
   setTimeout(checkAchievementUnlocks, 300);
 }
 
@@ -2107,6 +2105,8 @@ function rDayCard(date, daySessions){
   let showTM    = (hSub==='General'||hSub==='Treadmill'||isSim) && tmNoSim.length>0;
   let showExt   = (hSub==='General'||hSub==='Exterior') && extSessions.length>0;
   let showRower = (hSub==='General'||hSub==='Rower'||isSim) && !!rowerSession;
+  let plankSession = daySessions.find(function(s){ return !!s.plank; });
+  let showPlank = (hSub==='General'||hSub==='Plank') && !!plankSession;
   let showSim   = isSim && simSessions.length>0;
   let showTotal = (hSub==='General');
 
@@ -2131,7 +2131,8 @@ function rDayCard(date, daySessions){
     if(!!s.inclineProfile) badges+='<span style="display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 8px;font-family:var(--fm);font-size:8px;border:1px solid rgba(251,146,60,.3);background:rgba(251,146,60,.08);color:#fb923c">Simulación</span>';
     if(s.type==='endurance') badges+='<span style="display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 8px;font-family:var(--fm);font-size:8px;border:1px solid rgba(255,107,26,.3);background:rgba(255,107,26,.08);color:var(--a1)">Endurance</span>';
   });
-  if(rowerSession) badges+='<span style="display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 8px;font-family:var(--fm);font-size:8px;border:1px solid rgba(34,197,94,.35);background:rgba(34,197,94,.1);color:#22c55e"><svg class="ico-sm" viewBox="0 0 24 24"><path d="M3 17l4-8 4 4 4-4 4 8"/><circle cx="12" cy="5" r="2"/></svg> Rower</span>';
+  if(rowerSession) badges+='<span style="display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 8px;font-family:var(--fm);font-size:8px;border:1px solid rgba(34,197,94,.35);background:rgba(34,197,94,.1);color:#22c55e"><svg class="ico-sm" viewBox="0 0 24 24"><path d="M3 17l4-8 4 4 4-4 4 8"/><circle cx="12" cy="5" r="2"/></svg> Rower</span>'
+    +'<span style="display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 8px;font-family:var(--fm);font-size:8px;border:1px solid rgba(168,85,247,.35);background:rgba(168,85,247,.1);color:#a855f7">🧘 Plank</span>';
 
   let banner='<div style="background:linear-gradient(135deg,rgba(255,107,26,.14),rgba(255,69,0,.05));padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.05)">'
     +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">'
@@ -2149,6 +2150,7 @@ function rDayCard(date, daySessions){
   // Sim: solo mostrar en sub-tab Simulacion (en General ya están incluidas en tmSessions)
   if(isSim)     leftBlocks += simSessions.map(function(s){return rSessionBlock(s);}).join('');
   if(showRower) leftBlocks += rRowerBlock(rowerSession,w);
+  if(showPlank) leftBlocks += rPlankBlock(plankSession);
   if(showTotal) rightBlocks += _dayTotals(date, daySessions, totalDurAll, totalCalAll);
 
   let bodyStyle = (leftBlocks&&rightBlocks)
@@ -2324,6 +2326,18 @@ function rSessionBlock(s){
   return html;
 }
 
+function rPlankBlock(s){
+  if(!s||!s.plank) return '';
+  let p = s.plank;
+  let mm = Math.floor(p.duration||0);
+  let ss = Math.round(((p.duration||0)-mm)*60);
+  let durStr = mm>0 ? mm+'m'+(ss>0?' '+ss+'s':'') : ss+'s';
+  return '<div style="background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.25);border-radius:13px;padding:12px 13px;margin-top:8px">'
+    +'<div style="font-family:var(--fm);font-size:8px;color:#a855f7;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:9px;opacity:.9">🧘 Plank</div>'
+    +_dayRow('Duración', durStr, '', '#a855f7')
+    +'</div>';
+}
+
 function rRowerBlock(s){
   if(!s||!s.rower) return '';
   let r=s.rower;
@@ -2372,7 +2386,7 @@ function rStepsMeta(){
   </div>`;
 }
 function rProg(){
-  let PROG_TABS = ['General','Treadmill','Exterior','Endurance','Simulacion','Rower'];
+  let PROG_TABS = ['General','Treadmill','Exterior','Endurance','Simulacion','Rower','Plank'];
   let PROG_ICONS = {
     General:    '<svg class="ico-sm" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
     Treadmill:  '<svg class="ico-sm" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
@@ -2380,6 +2394,7 @@ function rProg(){
     Endurance:  '<svg class="ico-sm" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
     Simulacion: '<svg class="ico-sm" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/></svg>',
     Rower:      '<svg class="ico-sm" viewBox="0 0 24 24"><path d="M3 17l4-8 4 4 4-4 4 8"/><circle cx="12" cy="5" r="2"/></svg>',
+    Plank:      '<svg class="ico-sm" viewBox="0 0 24 24"><path d="M4 12h16M7 8V6M17 8V6"/><rect x="4" y="11" width="16" height="4" rx="1"/></svg>',
   };
   let PROG_LABELS = {
     General:'General', Treadmill:'Treadmill', Exterior:'Exterior',
@@ -2886,6 +2901,7 @@ function rCal(){
     smap[s.date].push(!!s.inclineProfile?'sim':isExt(s)?'e':'t');
   });
   let rowerset= new Set(sessions.filter(function(s){return !!s.rower;}).map(function(s){return s.date;}));
+  let plankset = new Set(sessions.filter(function(s){return !!s.plank;}).map(function(s){return s.date;}));
   let eset    = new Set(sessions.filter(function(s){return s.type==='endurance';}).map(function(s){return s.date;}));
   let simset  = new Set(sessions.filter(function(s){return !!s.inclineProfile;}).map(function(s){return s.date;}));
   let wset    = new Set(weights.map(function(w){return w.date;}));
@@ -2898,10 +2914,10 @@ function rCal(){
     let ds=cY+'-'+String(cM+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
     let types=smap[ds]||[];
     let hasTm=types.includes('t'), hasE=types.includes('e');
-    let hasSim=simset.has(ds), hasW=wset.has(ds), hasEnd=eset.has(ds), hasRow=rowerset.has(ds);
+    let hasSim=simset.has(ds), hasW=wset.has(ds), hasEnd=eset.has(ds), hasRow=rowerset.has(ds), hasPlankDot=plankset.has(ds);
     let isTod=today.getFullYear()===cY&&today.getMonth()===cM&&today.getDate()===day;
     let isSel=selDay===ds;
-    let hasAny=types.length||hasW||hasEnd||hasSim||hasRow;
+    let hasAny=types.length||hasW||hasEnd||hasSim||hasRow||hasPlankDot;
     return '<div class="cal-c'+(hasAny?' hs2':'')+(isSel?' sel':'')+'" '
       +'style="'+(isTod&&!isSel?'border-color:rgba(255,107,26,.4);background:rgba(255,107,26,.08);':'')+'" '
       +'onclick="'+(hasAny?'tDay(\''+ds+'\')':'')+'">'
@@ -2912,6 +2928,7 @@ function rCal(){
         +(hasW?'<div style="width:8px;height:8px;border-radius:50%;background:var(--wt)"></div>':'')
         +(hasEnd?'<div style="width:8px;height:8px;border-radius:50%;background:var(--a1)"></div>':'')
         +(hasRow?'<div style="width:8px;height:8px;border-radius:50%;background:#3b82f6"></div>':'')
+        +(hasPlankDot?'<div style="width:8px;height:8px;border-radius:50%;background:#a855f7"></div>':'')
       +'</div>'
       +'<div class="cal-num" style="color:'+(hasAny?'#e8f0fe':'#4a5568')+';font-weight:'+(hasAny?700:400)+'">'+day+'</div>'
       +(types.length>1?'<div class="cal-cnt">'+types.length+' ses.</div>':'')
@@ -4721,7 +4738,7 @@ function wzGetSteps(){
   s.push('resumen');
   return s;
 }
-const TITLES={fecha:'¿Cuándo?',tipo:'¿Qué hiciste?',detalle_tm:'Treadmill',detalle_ext:'Exterior',detalle_row:'Rower',totales_dia:'Totales del día',resumen:'Resumen'};
+const TITLES={fecha:'¿Cuándo?',tipo:'¿Qué hiciste?',detalle_tm:'Treadmill',detalle_ext:'Exterior',detalle_row:'Rower',detalle_plank:'Plank',totales_dia:'Totales del día',resumen:'Resumen'};
 
 // ── RENDER ───────────────────────────────────────────────────────
 function wzRender(){
@@ -4742,8 +4759,9 @@ function wzRender(){
   else if(sid==='tipo') wzRTipo(body);
   else if(sid==='detalle_tm') wzRTM(body);
   else if(sid==='detalle_ext') wzRExt(body);
-  else if(sid==='detalle_row') wzRRow(body);
-  else if(sid==='totales_dia') wzRTotalesDia(body);
+  else if(sid==='detalle_row')   wzRRow(body);
+  else if(sid==='detalle_plank') wzRDetallePlank(body);
+  else if(sid==='totales_dia')   wzRTotalesDia(body);
   else wzRResumen(body);
 }
 function wzNextStep(){
@@ -5094,6 +5112,14 @@ function wzRResumen(body){
     WZ_STATE.rowFc!==null?['Rower FC',WZ_STATE.rowFc,'bpm']:null,
     WZ_STATE.rowCal!==null?['Rower cal.',WZ_STATE.rowCal,'kcal']:null,
   ].filter(Boolean);
+  const plankDurFmt=(function(){
+    if(WZ_STATE.plankDur===null) return null;
+    let tot=WZ_STATE.plankDur, mm=Math.floor(tot), ss=Math.round((tot-mm)*60);
+    return mm+'m'+(ss>0?' '+ss+'s':'');
+  })();
+  const plank=[
+    plankDurFmt!==null?['🧘 Plank duración',plankDurFmt,'']:null,
+  ].filter(Boolean);
   body.innerHTML=`
     <div class="s-title">RESUMEN</div>
     <div class="s-sub">REVISA Y CONFIRMA</div>
@@ -5125,6 +5151,11 @@ function wzRResumen(body){
       ${rower.map(([k,v,u])=>`<div class="sum-row"><span class="sum-k">${k}</span>
         <span class="sum-v rv">${v}${u?`<span class="sum-u">${u}</span>`:''}</span></div>`).join('')}
     </div>`:''}
+    ${plank.length?`<div class="sum-blk" style="border-color:rgba(168,85,247,.2)">
+      <div style="font-family:var(--fm);font-size:7px;color:#a855f7;letter-spacing:2px;text-transform:uppercase;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.04);margin-bottom:8px">🧘 PLANK</div>
+      ${plank.map(([k,v,u])=>`<div class="sum-row"><span class="sum-k">${k}</span>
+        <span class="sum-v rv">${v}${u?`<span class="sum-u">${u}</span>`:''}</span></div>`).join('')}
+    </div>`:''}
     ${(WZ_STATE.kcalComida!==null||WZ_STATE.prot!==null||WZ_STATE.carbs!==null||WZ_STATE.fat!==null)?`<div class="sum-blk" style="border-color:rgba(192,132,252,.2)">
       <div style="font-family:var(--fm);font-size:7px;color:#c084fc;letter-spacing:2px;text-transform:uppercase;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.04);margin-bottom:8px">🍽️ COMIDA DEL DÍA</div>
       ${WZ_STATE.kcalComida!==null?`<div class="sum-row"><span class="sum-k">Cal. ingeridas</span><span class="sum-v" style="color:#c084fc">${WZ_STATE.kcalComida}<span class="sum-u">kcal</span></span></div>`:``}
@@ -5138,13 +5169,10 @@ function wzRResumen(body){
 function wzRDetallePlank(body){
   body.innerHTML=`
     <div class="s-title">🧘 PLANK</div>
-    <div class="s-sub">DURACIÓN DE LA SESIÓN</div>
-    <div style="margin-top:16px">
-      <div class="wz-lbl">Duración (minutos)</div>
-      <div class="pk-row" onclick="wzOpenPk('plankDur')">
-        <span class="pk-val">${WZ_STATE.plankDur??'—'}</span>
-        <span class="pk-unit">min</span>
-      </div>
+    <div class="s-sub">TOCA EL CAMPO PARA INGRESAR</div>
+    <div class="fg">
+      <div class="fg-ttl">⏱ DURACIÓN</div>
+      <div class="frow">${wzFc('plankDur','Duración',WZ_STATE.plankDur,'min')}</div>
     </div>`;
 }
 
@@ -5351,7 +5379,7 @@ const WZ_PRESETS={
   // Tramos de simulación — se usan con índice: tramoDesde_0, tramoHasta_0, tramoPct_0, etc.
   tramoKm: {lbl:'Kilómetro',unit:'km',desc:'0 – 22 km',cols:[{l:'KM',it:rng(0,23)},{l:'.',it:['.']},{l:'DEC',it:rng(0,10)},{l:'',it:rng(0,10)}],init:[0,0,0,0],fn:v=>[parseFloat(v[0]+'.'+v[2]+v[3]).toFixed(2),'km']},
   tramoPct: {lbl:'Inclinación',unit:'%',desc:'0 – 20 %',cols:[{l:'%',it:rng(0,21)}],init:[5],fn:v=>[v[0],'%']},
-  plankDur: {lbl:'Plank',unit:'',desc:'1 – 120 min',cols:[{l:'MIN',it:rng(1,121)}],init:[1],fn:v=>[v[0],v[0]+'m']},
+  plankDur: {lbl:'Plank',unit:'',desc:'0 – 30 min',cols:[{l:'MIN',it:rng(0,31)},{l:'SEG',it:rng(0,60)}],init:[2,0],fn:v=>[+(v[0]+(v[1]/60)).toFixed(4),v[0]+'m'+(v[1]>0?v[1]+'s':'')]},
 };
 
 function wzOpenPk(field){
