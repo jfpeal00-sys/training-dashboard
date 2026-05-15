@@ -711,7 +711,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fh);height:100vh;o
 <img id="bg-img" src="https://raw.githubusercontent.com/jfpeal00-sys/training-dashboard/main/bg.jpg" alt="" onerror="this.style.display='none'">
 <div id="app" style="display:flex;height:100vh;overflow:hidden;align-items:stretch">
   <div id="sidebar-col" style="display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:width .22s cubic-bezier(.4,0,.2,1);background:var(--bg2);border-right:1px solid var(--border);">
-    <div id="sidebar-nav"><div class="sb-toggle" onclick="sbToggle()"><svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></div><div class="sb-items"><div class="sb-group-lbl">DATOS</div><button class="sb-btn on ab" data-tip="Review" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18M9 21V9"></path></svg></div><span class="sb-txt">Review</span></button><button class="sb-btn" data-tip="Historial" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div><span class="sb-txt">Historial</span></button><button class="sb-btn" data-tip="Peso" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg></div><span class="sb-txt">Peso</span></button><div class="sb-group-lbl">PLAN</div><button class="sb-btn" data-tip="Calendario" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div><span class="sb-txt">Calendario</span></button><button class="sb-btn end-tab" data-tip="Endurance" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div><span class="sb-txt">Endurance</span></button><button class="sb-btn" data-tip="Simulacion" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon></svg></div><span class="sb-txt">Simulacion</span></button><button class="sb-btn" data-tip="Comida" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path><path d="M7 2v20"></path><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"></path></svg></div><span class="sb-txt">Comida</span></button><div class="sb-group-lbl">ANALISIS</div><button class="sb-btn" data-tip="Progreso" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div><span class="sb-txt">Progreso</span></button><div class="sb-group-lbl">LOGROS</div><button class="sb-btn" data-tip="Achievements" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6m12 0h1.5a2.5 2.5 0 0 1 0 5H18M3 9h18M12 20v-7m-4 7h8"></path></svg></div><span class="sb-txt">Achievements</span></button><button class="sb-btn" data-tip="Records" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path></svg></div><span class="sb-txt">Records</span></button><div class="sb-group-lbl">REGISTRAR</div><button class="sb-btn" data-tip="Registrar" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></div><span class="sb-txt">Registrar</span></button></div></div>
+    <div id="sidebar-nav"><div class="sb-toggle" onclick="sbToggle()"><svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></div><div class="sb-items"><div class="sb-group-lbl">DATOS</div><button class="sb-btn" data-tip="Review" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18M9 21V9"></path></svg></div><span class="sb-txt">Review</span></button><button class="sb-btn on ab" data-tip="Historial" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div><span class="sb-txt">Historial</span></button><button class="sb-btn" data-tip="Peso" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg></div><span class="sb-txt">Peso</span></button><div class="sb-group-lbl">PLAN</div><button class="sb-btn" data-tip="Calendario" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div><span class="sb-txt">Calendario</span></button><button class="sb-btn end-tab" data-tip="Endurance" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div><span class="sb-txt">Endurance</span></button><button class="sb-btn" data-tip="Simulacion" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon></svg></div><span class="sb-txt">Simulacion</span></button><button class="sb-btn" data-tip="Comida" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path><path d="M7 2v20"></path><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"></path></svg></div><span class="sb-txt">Comida</span></button><div class="sb-group-lbl">ANALISIS</div><button class="sb-btn" data-tip="Progreso" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div><span class="sb-txt">Progreso</span></button><div class="sb-group-lbl">LOGROS</div><button class="sb-btn" data-tip="Achievements" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6m12 0h1.5a2.5 2.5 0 0 1 0 5H18M3 9h18M12 20v-7m-4 7h8"></path></svg></div><span class="sb-txt">Achievements</span></button><button class="sb-btn" data-tip="Records" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path></svg></div><span class="sb-txt">Records</span></button><div class="sb-group-lbl">REGISTRAR</div><button class="sb-btn" data-tip="Registrar" onclick="switchTab(this.dataset.tip)"><div class="sb-ico"><svg class="tb-icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></div><span class="sb-txt">Registrar</span></button></div></div>
   </div>
   <div id="content" style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;">
     <div id="topbar">
@@ -728,25 +728,28 @@ body{background:var(--bg);color:var(--text);font-family:var(--fh);height:100vh;o
   <p class="top-sub">Samsung Health · Registro Personal</p>
   <div id="hdr-tl">
     <div id="hdr-tl-hitos">
-      <div class="hdr-tl-track" id="hdr-tl-fill-wrap"><div class="hdr-tl-fill" id="hdr-tl-fill" style="width:72.6%"></div><div class="hdr-tl-node" style="left:0%">
+      <div class="hdr-tl-track" id="hdr-tl-fill-wrap"><div class="hdr-tl-fill" id="hdr-tl-fill" style="width:57.6%"></div><div class="hdr-tl-node" style="left:0%">
     <div class="hdr-tl-dot" style="background:#333;"></div>
     <div class="hdr-tl-lbl" style="color:#333">102kg</div>
-  </div><div class="hdr-tl-node" style="left:41.7%">
+  </div><div class="hdr-tl-node" style="left:32.3%">
       <div class="hdr-tl-dot" style="background:#39ff6e;animation:glow-h1 1.8s ease-in-out infinite alternate;"></div>
       <div class="hdr-tl-lbl" style="color:#39ff6e">95kg</div>
-    </div><div class="hdr-tl-node" style="left:70.8%">
+    </div><div class="hdr-tl-node" style="left:54.9%">
       <div class="hdr-tl-dot" style="background:#ffa020;animation:glow-h2 1.8s ease-in-out infinite alternate;"></div>
       <div class="hdr-tl-lbl" style="color:#ffa020">90kg</div>
-    </div><div class="hdr-tl-node" style="left:100.0%">
+    </div><div class="hdr-tl-node" style="left:77.4%">
       <div class="hdr-tl-dot" style="background:rgba(255,255,255,.15);opacity:.4;"></div>
       <div class="hdr-tl-lbl" style="color:#444">85kg</div>
+    </div><div class="hdr-tl-node" style="left:100.0%">
+      <div class="hdr-tl-dot" style="background:rgba(255,255,255,.15);opacity:.4;"></div>
+      <div class="hdr-tl-lbl" style="color:#444">80kg</div>
     </div></div>
     </div>
     <div id="hdr-tl-cursor">
       <div class="hdr-cursor-track"></div>
-      <div class="hdr-cursor" id="hdr-cursor" style="left: 72.6%;">
+      <div class="hdr-cursor" id="hdr-cursor" style="left: 57.6%;">
         <div class="hdr-cursor-arrow"></div>
-        <div class="hdr-cursor-body" id="hdr-cursor-body">▶ 89.7 kg</div>
+        <div class="hdr-cursor-body" id="hdr-cursor-body">▶ 89.4 kg</div>
       </div>
     </div>
   </div>
@@ -754,7 +757,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fh);height:100vh;o
     <div id="content-body" style="flex:1;overflow-y:auto;"></div>
   </div>
 </div>
-<div id="toast">✅ Guardado</div>
+<div id="toast" class="">✅ Sesión guardada</div>
 <script>
 // ═══════════════════════════════════════════════════
 // ZONA 1: DATOS — Sessions, Weights, KCAL, Steps
@@ -817,7 +820,8 @@ const SS=[
   {"id":"s50","date":"2026-05-10","duration":60,"distance":3.84,"speedAvg":3.8,"speedMax":3.8,"hrAvg":113,"hrMax":123,"calories":348,"totalCalories":2323,"steps":5125,"incline":3,"calMET":429},
   {"id":"s51","date":"2026-05-11","duration":60.05,"distance":3.81,"speedAvg":3.8,"speedMax":3.8,"hrAvg":118,"hrMax":137,"calories":340,"steps":5935,"totalCalories":2390,"incline":4,"calMET":453,"rower":{"duration":15.5833,"rowerDist":2.44,"resistance":6,"rows":262,"hrAvg":116,"calories":126,"calMET":106}},
   {"id":"s52","date":"2026-05-12","steps":2695,"totalCalories":2278,"note":"Caminata exterior","duration":34.2667,"distance":2.04,"speedAvg":3.5,"speedMax":3.5,"hrAvg":96,"hrMax":115,"calories":219},
-  {"id":"s53","date":"2026-05-13","duration":61.4333,"distance":3.91,"speedAvg":3.8,"speedMax":3.8,"hrAvg":116,"hrMax":132,"calories":346,"steps":7048,"totalCalories":2422,"incline":4,"calMET":462,"rower":{"duration":16.3667,"rowerDist":2.6,"resistance":7,"rows":278,"hrAvg":117,"calories":126,"calMET":111},"plank":{"duration":0.65}}
+  {"id":"s53","date":"2026-05-13","duration":61.4333,"distance":3.91,"speedAvg":3.8,"speedMax":3.8,"hrAvg":116,"hrMax":132,"calories":346,"steps":7048,"totalCalories":2422,"incline":4,"calMET":462,"rower":{"duration":16.3667,"rowerDist":2.6,"resistance":7,"rows":278,"hrAvg":117,"calories":126,"calMET":111},"plank":{"duration":0.65}},
+  {"id":"s54","date":"2026-05-14","duration":60.95,"distance":3.87,"speedAvg":3.8,"speedMax":3.8,"hrAvg":120,"hrMax":143,"calories":348,"steps":6045,"totalCalories":2400,"incline":4,"calMET":456,"rower":{"duration":15.1167,"rowerDist":2.51,"resistance":7,"rows":269,"hrAvg":125,"calories":135,"calMET":102},"plank":{"duration":0.75}}
 ];
 const SW=[
   {"date":"2026-03-20","weight":102.15},
@@ -846,7 +850,8 @@ const SW=[
   {"date":"2026-05-10","weight":90.5},
   {"date":"2026-05-11","weight":90.5},
   {"date":"2026-05-12","weight":90.3},
-  {"date":"2026-05-13","weight":89.7}
+  {"date":"2026-05-13","weight":89.7},
+  {"date":"2026-05-14","weight":89.4}
 ];
 // Calorías consumidas por día — actualizado manualmente
 const KCAL_RECORDS={
@@ -873,7 +878,8 @@ const KCAL_RECORDS={
   "2026-05-08":{"kcal":2409,"prot":168.8,"carbs":178.7,"fat":97.3,"fiber":8.9,"selections":[{"emoji":"🍳","name":"Huevo Revuelto Guiso","qty":1,"kcal":100,"prot":8,"carbs":2,"fat":7},{"emoji":"🥩","name":"Filete de Res","qty":1,"kcal":210,"prot":28,"carbs":0,"fat":7},{"emoji":"🫓","name":"Arepa","qty":2,"kcal":354,"prot":8,"carbs":72,"fat":4},{"emoji":"🥪","name":"Jamon Sanduche Zenu","qty":1,"kcal":24,"prot":4,"carbs":1,"fat":1},{"emoji":"🍕","name":"Pizza Vendetta","qty":2,"kcal":374,"prot":20,"carbs":48,"fat":12},{"emoji":"🍗","name":"Lasana Pollo Champinones","qty":1,"kcal":800,"prot":60,"carbs":80,"fat":30},{"emoji":"🍳","name":"Huevo Revuelto Guiso","qty":4,"kcal":400,"prot":32,"carbs":8,"fat":28},{"emoji":"🌭","name":"Salchicha Ranchera","qty":1,"kcal":84,"prot":4,"carbs":2,"fat":7},{"emoji":"🥪","name":"Jamon Sanduche Zenu x2","qty":2,"kcal":48,"prot":8,"carbs":2,"fat":2},{"emoji":"🫧","name":"Clight","qty":15,"kcal":15,"prot":0,"carbs":1,"fat":0}]},
   "2026-05-11":{"kcal":1673,"prot":140.6,"carbs":184.8,"fat":43.8},
   "2026-05-12":{"kcal":1841,"prot":144,"carbs":229,"fat":33},
-  "2026-05-13":{"kcal":1311,"prot":112,"carbs":98,"fat":45}
+  "2026-05-13":{"kcal":1311,"prot":112,"carbs":98,"fat":45},
+  "2026-05-14":{"kcal":1314,"prot":112,"carbs":98,"fat":45}
 };
 const ACH_SEEN=["E1M1: Hangar","Boot Camp","First Steps","Knee-Deep Run","Berserk Pack","Armor Adjusted","Phobos Day 3","Phobos Veteran","Shores of Phobos","Recon Run","Plasma Burn","UAC Furnace","Deimos Week","First Stroke","Phobos Gate","Iron Hour","Sentinel Vet","Inferno Runner","Exterior Warrior","Sentinel Run","Inferno Fortnight","UAC Ramp","First Stroke","1K Demon Strokes","Hell Furnace","90 Min Warrior","UAC Step Counter","Hell Veteran","Hell Expressway","Hell Run","Acheron Rower","River Styx","Berserk Calorie Pack","Hito 1 Complete","42 Hours: The Answer","Baron Count","Baron Run","Deimos Gate H2","Plasma Furnace","200K Steps","UAC Endurance","UAC Step Init","UAC Veteran","Phobos Steps","Hell Inferno"];
 const ACH_LVL=21;
@@ -934,7 +940,8 @@ const DAILY_STEPS=[
   {"date":"2026-05-10","steps":7177,"calBurned":2323},
   {"date":"2026-05-11","steps":5935},
   {"date":"2026-05-12","steps":8902},
-  {"date":"2026-05-13","steps":7048}
+  {"date":"2026-05-13","steps":7048},
+  {"date":"2026-05-14","steps":6045}
 ];
 
 // STATE
