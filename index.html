@@ -728,7 +728,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fh);height:100vh;o
   <p class="top-sub">Samsung Health · Registro Personal</p>
   <div id="hdr-tl">
     <div id="hdr-tl-hitos">
-      <div class="hdr-tl-track" id="hdr-tl-fill-wrap"><div class="hdr-tl-fill" id="hdr-tl-fill" style="width:57.6%"></div><div class="hdr-tl-node" style="left:0%">
+      <div class="hdr-tl-track" id="hdr-tl-fill-wrap"><div class="hdr-tl-fill" id="hdr-tl-fill" style="width:56.2%"></div><div class="hdr-tl-node" style="left:0%">
     <div class="hdr-tl-dot" style="background:#333;"></div>
     <div class="hdr-tl-lbl" style="color:#333">102kg</div>
   </div><div class="hdr-tl-node" style="left:32.3%">
@@ -747,9 +747,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--fh);height:100vh;o
     </div>
     <div id="hdr-tl-cursor">
       <div class="hdr-cursor-track"></div>
-      <div class="hdr-cursor" id="hdr-cursor" style="left: 57.6%;">
+      <div class="hdr-cursor" id="hdr-cursor" style="left: 56.2%;">
         <div class="hdr-cursor-arrow"></div>
-        <div class="hdr-cursor-body" id="hdr-cursor-body">▶ 89.4 kg</div>
+        <div class="hdr-cursor-body" id="hdr-cursor-body">▶ 89.7 kg</div>
       </div>
     </div>
   </div>
@@ -757,7 +757,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fh);height:100vh;o
     <div id="content-body" style="flex:1;overflow-y:auto;"></div>
   </div>
 </div>
-<div id="toast" class="">✅ Sesión guardada</div>
+<div id="toast" class="">✅ index.html descargado</div>
 <script>
 // ═══════════════════════════════════════════════════
 // ZONA 1: DATOS — Sessions, Weights, KCAL, Steps
@@ -821,7 +821,8 @@ const SS=[
   {"id":"s51","date":"2026-05-11","duration":60.05,"distance":3.81,"speedAvg":3.8,"speedMax":3.8,"hrAvg":118,"hrMax":137,"calories":340,"steps":5935,"totalCalories":2390,"incline":4,"calMET":453,"rower":{"duration":15.5833,"rowerDist":2.44,"resistance":6,"rows":262,"hrAvg":116,"calories":126,"calMET":106}},
   {"id":"s52","date":"2026-05-12","steps":2695,"totalCalories":2278,"note":"Caminata exterior","duration":34.2667,"distance":2.04,"speedAvg":3.5,"speedMax":3.5,"hrAvg":96,"hrMax":115,"calories":219},
   {"id":"s53","date":"2026-05-13","duration":61.4333,"distance":3.91,"speedAvg":3.8,"speedMax":3.8,"hrAvg":116,"hrMax":132,"calories":346,"steps":7048,"totalCalories":2422,"incline":4,"calMET":462,"rower":{"duration":16.3667,"rowerDist":2.6,"resistance":7,"rows":278,"hrAvg":117,"calories":126,"calMET":111},"plank":{"duration":0.65}},
-  {"id":"s54","date":"2026-05-14","duration":60.95,"distance":3.87,"speedAvg":3.8,"speedMax":3.8,"hrAvg":120,"hrMax":143,"calories":348,"steps":6045,"totalCalories":2400,"incline":4,"calMET":456,"rower":{"duration":15.1167,"rowerDist":2.51,"resistance":7,"rows":269,"hrAvg":125,"calories":135,"calMET":102},"plank":{"duration":0.75}}
+  {"id":"s54","date":"2026-05-14","duration":60.95,"distance":3.87,"speedAvg":3.8,"speedMax":3.8,"hrAvg":120,"hrMax":143,"calories":348,"steps":6045,"totalCalories":2400,"incline":4,"calMET":456,"rower":{"duration":15.1167,"rowerDist":2.51,"resistance":7,"rows":269,"hrAvg":125,"calories":135,"calMET":102},"plank":{"duration":0.75}},
+  {"id":"s55","date":"2026-05-16","steps":6795,"totalCalories":2495,"note":"Caminata exterior","duration":75.0167,"distance":5.25,"speedAvg":4.2,"speedMax":4.5,"hrAvg":109,"hrMax":127,"calories":456,"elevGain":19}
 ];
 const SW=[
   {"date":"2026-03-20","weight":102.15},
@@ -851,7 +852,8 @@ const SW=[
   {"date":"2026-05-11","weight":90.5},
   {"date":"2026-05-12","weight":90.3},
   {"date":"2026-05-13","weight":89.7},
-  {"date":"2026-05-14","weight":89.4}
+  {"date":"2026-05-14","weight":89.4},
+  {"date":"2026-05-16","weight":89.7}
 ];
 // Calorías consumidas por día — actualizado manualmente
 const KCAL_RECORDS={
@@ -879,9 +881,10 @@ const KCAL_RECORDS={
   "2026-05-11":{"kcal":1673,"prot":140.6,"carbs":184.8,"fat":43.8},
   "2026-05-12":{"kcal":1841,"prot":144,"carbs":229,"fat":33},
   "2026-05-13":{"kcal":1311,"prot":112,"carbs":98,"fat":45},
-  "2026-05-14":{"kcal":1314,"prot":112,"carbs":98,"fat":45}
+  "2026-05-14":{"kcal":1314,"prot":112,"carbs":98,"fat":45},
+  "2026-05-16":{"kcal":2150}
 };
-const ACH_SEEN=["E1M1: Hangar","Boot Camp","First Steps","Knee-Deep Run","Berserk Pack","Armor Adjusted","Phobos Day 3","Phobos Veteran","Shores of Phobos","Recon Run","Plasma Burn","UAC Furnace","Deimos Week","First Stroke","Phobos Gate","Iron Hour","Sentinel Vet","Inferno Runner","Exterior Warrior","Sentinel Run","Inferno Fortnight","UAC Ramp","First Stroke","1K Demon Strokes","Hell Furnace","90 Min Warrior","UAC Step Counter","Hell Veteran","Hell Expressway","Hell Run","Acheron Rower","River Styx","Berserk Calorie Pack","Hito 1 Complete","42 Hours: The Answer","Baron Count","Baron Run","Deimos Gate H2","Plasma Furnace","200K Steps","UAC Endurance","UAC Step Init","UAC Veteran","Phobos Steps","Hell Inferno"];
+const ACH_SEEN=["E1M1: Hangar","Boot Camp","First Steps","Knee-Deep Run","Berserk Pack","Armor Adjusted","Phobos Day 3","Phobos Veteran","Shores of Phobos","Recon Run","Plasma Burn","UAC Furnace","Deimos Week","First Stroke","Phobos Gate","Iron Hour","Sentinel Vet","Inferno Runner","Exterior Warrior","Sentinel Run","Inferno Fortnight","UAC Ramp","First Stroke","1K Demon Strokes","Hell Furnace","90 Min Warrior","UAC Step Counter","Hell Veteran","Hell Expressway","Hell Run","Acheron Rower","River Styx","Berserk Calorie Pack","Hito 1 Complete","42 Hours: The Answer","Baron Count","Doom II Marathon","Baron Run","Hell March","Deimos Gate H2","Plasma Furnace","200K Steps","UAC Endurance","UAC Step Init","UAC Veteran","Phobos Steps","Hell Inferno"];
 const ACH_LVL=21;
 const ACH_TIERS_SEEN=["UAC Recruit","Phobos Marine","Sentinel"];
 // ═══════════════════════════════════════════════════
@@ -941,7 +944,8 @@ const DAILY_STEPS=[
   {"date":"2026-05-11","steps":5935},
   {"date":"2026-05-12","steps":8902},
   {"date":"2026-05-13","steps":7048},
-  {"date":"2026-05-14","steps":6045}
+  {"date":"2026-05-14","steps":6045},
+  {"date":"2026-05-16","steps":17967}
 ];
 
 // STATE
